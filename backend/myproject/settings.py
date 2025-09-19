@@ -178,11 +178,25 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Additional locations of static files
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR.parent, 'frontend', 'dist', 'spa'),
-]
+STATICFILES_DIRS = []
+
+# Only add frontend static files if they exist (for local development)
+frontend_static_path = os.path.join(BASE_DIR.parent, 'frontend', 'dist', 'spa')
+if os.path.exists(frontend_static_path):
+    STATICFILES_DIRS.append(frontend_static_path)
 
 # WhiteNoise configuration
+# Use the newer STORAGES setting for Django 4.2+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+# Fallback for older Django versions
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (User uploads)

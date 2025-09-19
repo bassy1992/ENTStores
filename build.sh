@@ -3,17 +3,23 @@
 
 set -o errexit  # exit on error
 
-# Install Python dependencies from backend directory
+echo "Installing Python dependencies..."
 pip install -r backend/requirements.txt
 
-# Navigate to backend directory for Django commands
+echo "Navigating to backend directory..."
 cd backend
 
-# Collect static files
-python manage.py collectstatic --no-input
+echo "Creating staticfiles directory..."
+mkdir -p staticfiles
 
-# Run database migrations
+echo "Collecting static files..."
+python manage.py collectstatic --no-input --clear
+
+echo "Running database migrations..."
 python manage.py migrate
 
-# Go back to root for deployment
+echo "Listing static files..."
+ls -la staticfiles/
+
+echo "Build completed successfully!"
 cd ..
