@@ -26,7 +26,25 @@ from django.views.generic import TemplateView
 from shop import payment_views
 
 def health_check(request):
-    return JsonResponse({"status": "ok", "message": "ENTstore API is running", "cors_enabled": True, "timestamp": "2025-09-18-23:35"})
+    return JsonResponse({"status": "ok", "message": "ENTstore API is running", "cors_enabled": True, "timestamp": "2025-09-19-23:30"})
+
+def root_view(request):
+    """Root endpoint showing available API endpoints"""
+    return JsonResponse({
+        "message": "ENTstore API is running successfully on Render!",
+        "status": "ok",
+        "available_endpoints": {
+            "health": "/api/health/",
+            "admin": "/admin/",
+            "shop_api": "/api/shop/",
+            "payments": "/api/payments/",
+            "cors_test": "/api/cors-test/",
+            "csrf_test": "/api/csrf-test/",
+            "debug_media": "/api/debug-media/"
+        },
+        "deployment": "render",
+        "timestamp": "2025-09-19"
+    })
 
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
@@ -77,6 +95,8 @@ def debug_media(request):
     })
 
 urlpatterns = [
+    # Root endpoint
+    path('', root_view, name='root'),
     # API endpoints
     path('api/health/', health_check, name='health-check'),
     path('api/csrf-test/', csrf_test, name='csrf-test'),
