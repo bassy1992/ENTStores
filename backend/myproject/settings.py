@@ -125,7 +125,9 @@ DATABASES = {
 
 # Railway PostgreSQL Database (Postgres-kz93)
 DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
+USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
+
+if DATABASE_URL and not USE_SQLITE:
     try:
         import dj_database_url
         DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
