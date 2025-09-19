@@ -40,7 +40,8 @@ def root_view(request):
             "payments": "/api/payments/",
             "cors_test": "/api/cors-test/",
             "csrf_test": "/api/csrf-test/",
-            "debug_media": "/api/debug-media/"
+            "debug_media": "/api/debug-media/",
+            "debug_static": "/api/debug-static/"
         },
         "deployment": "render",
         "timestamp": "2025-09-19"
@@ -94,6 +95,36 @@ def debug_media(request):
         "message": "Media configuration debug"
     })
 
+def debug_static(request):
+    """Debug endpoint to check static files configuration"""
+    from django.conf import settings
+    import os
+    
+    static_files = []
+    if os.path.exists(settings.STATIC_ROOT):
+        for root, dirs, files in os.walk(settings.STATIC_ROOT):
+            for file in files[:10]:  # Limit to first 10 files
+                full_path = os.path.join(root, file)
+                rel_path = os.path.relpath(full_path, settings.STATIC_ROOT)
+                static_files.append({
+                    'file': rel_path,
+                    'exists': os.path.exists(full_path),
+                    'size': os.path.getsize(full_path) if os.path.exists(full_path) else 0
+                })
+    
+    return JsonResponse({
+        "debug": settings.DEBUG,
+        "static_root": settings.STATIC_ROOT,
+        "static_url": settings.STATIC_URL,
+        "static_root_exists": os.path.exists(settings.STATIC_ROOT),
+        "staticfiles_dirs": getattr(settings, 'STATICFILES_DIRS', []),
+        "staticfiles_storage": getattr(settings, 'STATICFILES_STORAGE', 'Not set'),
+        "whitenoise_middleware": 'whitenoise.middleware.WhiteNoiseMiddleware' in settings.MIDDLEWARE,
+        "static_files_sample": static_files,
+        "admin_static_exists": os.path.exists(os.path.join(settings.STATIC_ROOT, 'admin')) if os.path.exists(settings.STATIC_ROOT) else False,
+        "message": "Static files configuration debug"
+    })
+
 urlpatterns = [
     # Root endpoint
     path('', root_view, name='root'),
@@ -102,6 +133,7 @@ urlpatterns = [
     path('api/csrf-test/', csrf_test, name='csrf-test'),
     path('api/cors-test/', cors_test, name='cors-test'),
     path('api/debug-media/', debug_media, name='debug-media'),
+    path('api/debug-static/', debug_static, name='debug-static'),
     path('admin/', admin.site.urls),
     path('api/shop/', include('shop.urls')),
     path('api/payments/', include('shop.payment_urls')),
