@@ -1,61 +1,48 @@
 # Render Deployment Guide
 
 ## Overview
-Deploy your ENTstore application to Render with PostgreSQL database.
+Deploy your ENTstore Django backend to Render with PostgreSQL database.
 
 ## Prerequisites
 1. Render account (render.com)
 2. GitHub repository connected to Render
 
-## Deployment Options
+## Manual Deployment Steps
 
-### Option 1: Using render.yaml (Recommended)
-The `render.yaml` file in the root directory contains the complete configuration.
+### Step 1: Create PostgreSQL Database
+1. Go to Render Dashboard → "New" → "PostgreSQL"
+2. Name: `entstore-db`
+3. Database Name: `entstore`
+4. User: `entstore_user`
+5. Plan: Free
+6. Click "Create Database"
+7. **Save the DATABASE_URL** from the database info page
 
-1. **Connect Repository to Render**
-   - Go to render.com dashboard
-   - Click "New" → "Blueprint"
+### Step 2: Deploy Backend
+1. **Create Web Service**
+   - Go to Dashboard → "New" → "Web Service"
    - Connect your GitHub repository
-   - Render will automatically detect the `render.yaml` file
+   - Name: `entstore-backend`
+   - Environment: `Python 3`
+   - Build Command: `./build.sh`
+   - Start Command: `cd backend && gunicorn myproject.wsgi:application --host 0.0.0.0 --port $PORT`
 
 2. **Set Environment Variables**
-   After deployment, set these environment variables in Render dashboard:
-
-   **Backend Service:**
+   In the service settings, add these environment variables:
    ```
-   STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key_here
-   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_here
+   DEBUG=false
+   DJANGO_SECRET_KEY=your_generated_secret_key_here
+   DATABASE_URL=postgresql://... (from Step 1)
+   STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
    STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
-   EMAIL_HOST_USER=your_email@smtp-brevo.com
+   EMAIL_HOST_USER=your_email_user@smtp-brevo.com
    EMAIL_HOST_PASSWORD=your_email_password_here
    ```
 
-   **Frontend Service:**
-   ```
-   VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key_here
-   ```
-
-### Option 2: Manual Setup
-
-#### Backend Setup
-1. **Create Web Service**
-   - Service Type: Web Service
-   - Environment: Python 3
-   - Build Command: `./build.sh`
-   - Start Command: `cd backend && gunicorn myproject.wsgi:application`
-
-2. **Create PostgreSQL Database**
-   - Go to Dashboard → New → PostgreSQL
-   - Note the connection details
-
-3. **Environment Variables**
-   Set the same variables as listed in Option 1.
-
-#### Frontend Setup
-1. **Create Static Site**
-   - Service Type: Static Site
-   - Build Command: `cd frontend && npm ci && npm run build`
-   - Publish Directory: `frontend/dist`
+3. **Deploy**
+   - Click "Create Web Service"
+   - Render will automatically deploy from your GitHub repository
 
 ## Post-Deployment Steps
 
