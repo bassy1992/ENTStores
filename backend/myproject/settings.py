@@ -41,11 +41,12 @@ RAILWAY_PUBLIC_DOMAIN = os.getenv('RAILWAY_PUBLIC_DOMAIN')
 if RAILWAY_PUBLIC_DOMAIN:
     ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
 
-# Add known Railway domains
+# Add known Railway and Render domains
 ALLOWED_HOSTS.extend([
     'enontino-production.up.railway.app',
     '*.railway.app',
     '*.up.railway.app',
+    '*.onrender.com',
     'testserver'  # For testing
 ])
 
@@ -238,12 +239,15 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# CSRF settings for Railway
+# CSRF settings for Railway and Render
 CSRF_TRUSTED_ORIGINS = [
     "https://enontino-production.up.railway.app",
     "https://enintino.vercel.app",  # Main production frontend
     "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
     "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
+    # Add Render domains (update with your actual service names)
+    "https://entstore-backend.onrender.com",
+    "https://entstore-frontend.onrender.com",
 ]
 
 # Add frontend domain to CSRF trusted origins
