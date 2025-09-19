@@ -1,0 +1,20 @@
+[
+{
+  "model": "auth.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$qQX309PPmlz3y10lmw0CWJ$OGcDq8zVO89G4/C/fbsplH185BFJwjiNEh5UmXJEtu4=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "enontino",
+    "first_name": "",
+    "last_name": "",
+    "email": "enontinoclothing@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-09-18T17:38:16.550Z",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

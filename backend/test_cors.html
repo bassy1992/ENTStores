@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - ENNC Shop API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; max-height: 300px; }
+        .endpoint { margin: 20px 0; padding: 15px; border: 1px solid #dee2e6; border-radius: 4px; }
+        .endpoint h3 { margin-top: 0; color: #495057; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 CORS Test - ENNC Shop API</h1>
+        <p>Testing CORS configuration for API requests from <strong>http://localhost:8080</strong></p>
+        
+        <div class="endpoint">
+            <h3>🏷️ Categories Test</h3>
+            <button onclick="testCategories()">Test Categories API</button>
+            <div id="categories-status"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3>📦 Products Test</h3>
+            <button onclick="testProducts()">Test Products API</button>
+            <div id="products-status"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3>⭐ Featured Products Test</h3>
+            <button onclick="testFeaturedProducts()">Test Featured Products API</button>
+            <div id="featured-status"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3>🔍 Search Test</h3>
+            <button onclick="testSearch()">Test Search API</button>
+            <div id="search-status"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3>📊 Stats Test</h3>
+            <button onclick="testStats()">Test Stats API</button>
+            <div id="stats-status"></div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 4px;">
+            <h4>🔧 Troubleshooting</h4>
+            <ul>
+                <li>Make sure Django server is running: <code>python manage.py runserver 8000</code></li>
+                <li>Check that CORS is configured for <code>http://localhost:8080</code></li>
+                <li>Verify API endpoints work directly: <a href="http://localhost:8000/api/shop/products/" target="_blank">http://localhost:8000/api/shop/products/</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/shop';
+
+        async function testEndpoint(url, statusId, description) {
+            const statusDiv = document.getElementById(statusId);
+            statusDiv.innerHTML = `<div class="status loading">🔄 Testing ${description}...</div>`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const count = Array.isArray(data) ? data.length : (data.results ? data.results.length : 'N/A');
+                    statusDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ <strong>SUCCESS!</strong> ${description} working properly<br>
+                            Status: ${response.status} | Items: ${count}
+                        </div>
+                        <pre>${JSON.stringify(data, null, 2).substring(0, 500)}${JSON.stringify(data, null, 2).length > 500 ? '...' : ''}</pre>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ <strong>API ERROR:</strong> ${response.status} - ${response.statusText}
+                        </div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                if (error.message.includes('CORS')) {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            🚫 <strong>CORS ERROR:</strong> ${error.message}<br>
+                            <strong>Solution:</strong> Make sure Django server includes 'http://localhost:8080' in CORS_ALLOWED_ORIGINS
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">
+                            🔌 <strong>CONNECTION ERROR:</strong> ${error.message}<br>
+                            <strong>Check:</strong> Is Django server running on port 8000?
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function testCategories() {
+            testEndpoint(`${API_BASE}/categories/`, 'categories-status', 'Categories API');
+        }
+
+        function testProducts() {
+            testEndpoint(`${API_BASE}/products/`, 'products-status', 'Products API');
+        }
+
+        function testFeaturedProducts() {
+            testEndpoint(`${API_BASE}/products/featured/`, 'featured-status', 'Featured Products API');
+        }
+
+        function testSearch() {
+            testEndpoint(`${API_BASE}/search/?q=jacket`, 'search-status', 'Search API');
+        }
+
+        function testStats() {
+            testEndpoint(`${API_BASE}/stats/`, 'stats-status', 'Stats API');
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            console.log('🧪 Starting CORS tests...');
+            testCategories();
+            setTimeout(testProducts, 500);
+            setTimeout(testStats, 1000);
+        };
+    </script>
+</body>
+</html>

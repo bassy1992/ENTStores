@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENNC Shop API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .endpoint { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .endpoint h3 { margin-top: 0; color: #333; }
+        .result { background: #f5f5f5; padding: 10px; border-radius: 3px; margin-top: 10px; }
+        .error { background: #ffe6e6; color: #d00; }
+        .success { background: #e6ffe6; color: #060; }
+        button { padding: 8px 16px; background: #007cba; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        pre { white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>ENNC Shop API Test</h1>
+    <p>Testing API endpoints at <code>http://localhost:8000/api/shop/</code></p>
+
+    <div class="endpoint">
+        <h3>Categories</h3>
+        <button onclick="testEndpoint('/categories/', 'categories-result')">Test Categories</button>
+        <div id="categories-result" class="result"></div>
+    </div>
+
+    <div class="endpoint">
+        <h3>Featured Categories</h3>
+        <button onclick="testEndpoint('/categories/featured/', 'featured-categories-result')">Test Featured Categories</button>
+        <div id="featured-categories-result" class="result"></div>
+    </div>
+
+    <div class="endpoint">
+        <h3>Products</h3>
+        <button onclick="testEndpoint('/products/', 'products-result')">Test Products</button>
+        <div id="products-result" class="result"></div>
+    </div>
+
+    <div class="endpoint">
+        <h3>Featured Products</h3>
+        <button onclick="testEndpoint('/products/featured/', 'featured-products-result')">Test Featured Products</button>
+        <div id="featured-products-result" class="result"></div>
+    </div>
+
+    <div class="endpoint">
+        <h3>Shop Stats</h3>
+        <button onclick="testEndpoint('/stats/', 'stats-result')">Test Stats</button>
+        <div id="stats-result" class="result"></div>
+    </div>
+
+    <div class="endpoint">
+        <h3>Search</h3>
+        <button onclick="testEndpoint('/search/?q=jacket', 'search-result')">Search for "jacket"</button>
+        <div id="search-result" class="result"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8000/api/shop';
+
+        async function testEndpoint(endpoint, resultId) {
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.innerHTML = 'Loading...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(BASE_URL + endpoint);
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>Status:</strong> ${response.status} OK<br>
+                        <strong>Data:</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <strong>Error:</strong> ${response.status}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>Network Error:</strong> ${error.message}`;
+            }
+        }
+
+        // Test all endpoints on page load
+        window.onload = function() {
+            console.log('Testing all API endpoints...');
+            testEndpoint('/categories/', 'categories-result');
+            setTimeout(() => testEndpoint('/products/', 'products-result'), 500);
+            setTimeout(() => testEndpoint('/stats/', 'stats-result'), 1000);
+        };
+    </script>
+</body>
+</html>

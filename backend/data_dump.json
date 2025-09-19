@@ -1,0 +1,192 @@
+[
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$qQX309PPmlz3y10lmw0CWJ$OGcDq8zVO89G4/C/fbsplH185BFJwjiNEh5UmXJEtu4=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "enontino",
+    "first_name": "",
+    "last_name": "",
+    "email": "enontinoclothing@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-09-18T17:38:16.550Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "gsejkw5q54qy8ih6ffu7n6nhj06jwquy",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hCGUgou3XsGMsMMUjVtUtqV8e7apAvd_vfef6mE21rT1mRJI6uzAnX63QjzQ6Yd8B2n26zzPK3LSHpX9EGbvs4sz8vh_h1UbPVbWzJFLBQTAzsK5IPr-1LQe3Ems1gfxA4GIiKw7TK7aAEIBuq6jCar9wfm4Dfp:1uyt0L:2k1bXXgTLTrS3aFxAP-U-QZILwrOvXOWSrJSNkZsNXk",
+    "expire_date": "2025-10-01T14:19:29.638Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "mqs4wa9cxd5wh1bzd0tx9jcl98g8ybcm",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hCGUgou3XsGMsMMUjVtUtqV8e7apAvd_vfef6mE21rT1mRJI6uzAnX63QjzQ6Yd8B2n26zzPK3LSHpX9EGbvs4sz8vh_h1UbPVbWzJFLBQTAzsK5IPr-1LQe3Ems1gfxA4GIiKw7TK7aAEIBuq6jCar9wfm4Dfp:1uyowY:4q3nW0BOhkeG5cmUgOpXfNVJpQAC9VaUXAXydnlu5fk",
+    "expire_date": "2025-10-01T09:59:18.821Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "t6kovym8uovbxmsl7iepusp17av2imh4",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hCGUgou3XsGMsMMUjVtUtqV8e7apAvd_vfef6mE21rT1mRJI6uzAnX63QjzQ6Yd8B2n26zzPK3LSHpX9EGbvs4sz8vh_h1UbPVbWzJFLBQTAzsK5IPr-1LQe3Ems1gfxA4GIiKw7TK7aAEIBuq6jCar9wfm4Dfp:1uyyW6:Oq3CZl-u7tgwK9y-oGOkYUKknQ4ygBMnGOVdOmVbops",
+    "expire_date": "2025-10-01T20:12:38.977Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 1,
+  "fields": {
+    "key": "t-shirts",
+    "label": "T-Shirts",
+    "description": "Premium cotton tees with signature designs and comfortable fits",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2Fa03929e1731e4efcadc34cef66af98ba?format=webp&width=600",
+    "featured": true,
+    "product_count": 3,
+    "created_at": "2025-09-17T09:55:58.899Z",
+    "updated_at": "2025-09-17T09:55:58.899Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 2,
+  "fields": {
+    "key": "polos",
+    "label": "Polos",
+    "description": "Classic polo shirts for smart-casual occasions",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2Ff6d93005cb0342e0ae5980da9f131c00?format=webp&width=600",
+    "featured": false,
+    "product_count": 1,
+    "created_at": "2025-09-17T09:55:58.901Z",
+    "updated_at": "2025-09-17T09:55:58.901Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 3,
+  "fields": {
+    "key": "hoodies",
+    "label": "Hoodies / Crewnecks",
+    "description": "Cozy hoodies and crewnecks for everyday comfort",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2F65c976a3ea2e4593b4d1a27829d0f390?format=webp&width=600",
+    "featured": true,
+    "product_count": 1,
+    "created_at": "2025-09-17T09:55:58.903Z",
+    "updated_at": "2025-09-17T09:55:58.903Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 4,
+  "fields": {
+    "key": "sweatshirts",
+    "label": "Sweatshirts",
+    "description": "Warm and stylish sweatshirts for cooler days",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2F7e980c238ab54fb5893ffdd1999f2c37?format=webp&width=600",
+    "featured": false,
+    "product_count": 1,
+    "created_at": "2025-09-17T09:55:58.904Z",
+    "updated_at": "2025-09-17T09:55:58.904Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 5,
+  "fields": {
+    "key": "tracksuits",
+    "label": "Tracksuits",
+    "description": "Athletic tracksuits for sport and street style",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2F690488dfe67548ada8fe07090b86601f?format=webp&width=600",
+    "featured": true,
+    "product_count": 2,
+    "created_at": "2025-09-17T09:55:58.904Z",
+    "updated_at": "2025-09-17T09:55:58.904Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 6,
+  "fields": {
+    "key": "jackets",
+    "label": "Jackets",
+    "description": "Versatile jackets for all seasons and occasions",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2F0c4ab9be3dd740618a71b6809f4d5f28?format=webp&width=600",
+    "featured": false,
+    "product_count": 1,
+    "created_at": "2025-09-17T09:55:58.905Z",
+    "updated_at": "2025-09-17T09:55:58.905Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 7,
+  "fields": {
+    "key": "shorts",
+    "label": "Shorts",
+    "description": "Comfortable shorts for active lifestyles",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2Fa03929e1731e4efcadc34cef66af98ba?format=webp&width=600",
+    "featured": false,
+    "product_count": 1,
+    "created_at": "2025-09-17T09:55:58.906Z",
+    "updated_at": "2025-09-17T09:55:58.906Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 8,
+  "fields": {
+    "key": "headwear",
+    "label": "Headwear",
+    "description": "Caps, beanies, and hats to complete your look",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2Fde3830a62f2e4e32b3e515795bd471cf?format=webp&width=600",
+    "featured": true,
+    "product_count": 2,
+    "created_at": "2025-09-17T09:55:58.906Z",
+    "updated_at": "2025-09-17T09:55:58.906Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 9,
+  "fields": {
+    "key": "accessories",
+    "label": "Accessories",
+    "description": "Bags, socks, and essential accessories",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2F7e980c238ab54fb5893ffdd1999f2c37?format=webp&width=600",
+    "featured": false,
+    "product_count": 2,
+    "created_at": "2025-09-17T09:55:58.907Z",
+    "updated_at": "2025-09-17T09:55:58.907Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "beanie-wool",
+  "fields": {
+    "title": "Wool Beanie — Charcoal",
+    "slug": "wool-beanie-charcoal",
+    "price": 2400,
+    "description": "Soft merino wool beanie with fold-over cuff and embroidered logo patch.",
+    "image": "https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2Fde3830a62f2e4e32b3e515795bd471cf?format=webp&width=800",
+    "category": "headwear",
+    "stock_quantity": 50,
+    "is_active": true,
+    "created_at": "2025-09-17T09:55:58.944Z",
+    "updated_at": "2025-09-17T09:55:58.944Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "cap-snapback",
+  "fields": {
+    "title": "Heritage Snapback Cap",
+    "slug": "heritage-snapback-cap",
+    "price": 3200,
+    "description": 
