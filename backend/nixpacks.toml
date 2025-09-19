@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python311", "python311Packages.pip", "postgresql", "libpq"]
+nixPkgs = ["python311", "python311Packages.pip", "postgresql"]
 
 [phases.install]
 cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
@@ -9,6 +9,3 @@ cmds = ["python manage.py collectstatic --noinput"]
 
 [start]
 cmd = "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn myproject.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
-
-[variables]
-PORT = "8000"
