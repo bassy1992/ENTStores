@@ -212,6 +212,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 if os.getenv('RAILWAY_ENVIRONMENT'):
     MEDIA_ROOT = '/app/data/media'
 
+# For Render deployment, use persistent disk for media files
+if os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
+    MEDIA_ROOT = '/opt/render/project/data/media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
