@@ -258,15 +258,17 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# CSRF settings for Railway and Render
+# CSRF settings for Railway, Render, and Vercel
 CSRF_TRUSTED_ORIGINS = [
     "https://enontino-production.up.railway.app",
     "https://enintino.vercel.app",  # Main production frontend
     "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
     "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
-    # Add Render domains (update with your actual service names)
+    # Add Render domains
     "https://entstore-backend.onrender.com",
     "https://entstore-frontend.onrender.com",
+    # Add Vercel domains (will be updated with actual domain)
+    "https://*.vercel.app",
 ]
 
 # Add frontend domain to CSRF trusted origins
