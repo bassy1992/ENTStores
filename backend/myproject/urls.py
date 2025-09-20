@@ -41,7 +41,8 @@ def root_view(request):
             "cors_test": "/api/cors-test/",
             "csrf_test": "/api/csrf-test/",
             "debug_media": "/api/debug-media/",
-            "debug_static": "/api/debug-static/"
+            "debug_static": "/api/debug-static/",
+            "debug_env": "/api/debug-env/"
         },
         "deployment": "render",
         "timestamp": "2025-09-19"
@@ -125,6 +126,26 @@ def debug_static(request):
         "message": "Static files configuration debug"
     })
 
+def debug_env(request):
+    """Debug endpoint to check environment variables"""
+    import os
+    from django.conf import settings
+    
+    return JsonResponse({
+        "environment_variables": {
+            "DATABASE_URL": os.environ.get('DATABASE_URL', 'Not set')[:50] + "..." if os.environ.get('DATABASE_URL') else 'Not set',
+            "USE_SQLITE": os.environ.get('USE_SQLITE', 'Not set'),
+            "DEBUG": os.environ.get('DEBUG', 'Not set'),
+            "DJANGO_SECRET_KEY": "Set" if os.environ.get('DJANGO_SECRET_KEY') else 'Not set',
+        },
+        "django_settings": {
+            "DEBUG": settings.DEBUG,
+            "DATABASE_ENGINE": settings.DATABASES['default']['ENGINE'],
+            "DATABASE_NAME": settings.DATABASES['default']['NAME'],
+        },
+        "message": "Environment variables debug"
+    })
+
 urlpatterns = [
     # Root endpoint
     path('', root_view, name='root'),
@@ -134,6 +155,7 @@ urlpatterns = [
     path('api/cors-test/', cors_test, name='cors-test'),
     path('api/debug-media/', debug_media, name='debug-media'),
     path('api/debug-static/', debug_static, name='debug-static'),
+    path('api/debug-env/', debug_env, name='debug-env'),
     path('admin/', admin.site.urls),
     path('api/shop/', include('shop.urls')),
     path('api/payments/', include('shop.payment_urls')),
