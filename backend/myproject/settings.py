@@ -136,9 +136,9 @@ USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
 
 # Force PostgreSQL on Render (temporary fix)
 if 'RENDER' in os.environ or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
-    DATABASE_URL = "postgresql://entstore_db_user:m3we2cxnqRNZSMc6B5RK0vDsnku7QAXa@dpg-d36utrmmcj7s73e0q0dg-a.oregon-postgres.render.com/entstore_db"
+    DATABASE_URL = "postgresql://entstore_db_user:m3we2cxnqRNZSMc6B5RK0vDsnku7QAXa@dpg-d36utrmmcj7s73e0q0dg-a/entstore_db"
     USE_SQLITE = False
-    print("Render deployment detected - forcing PostgreSQL")
+    print("Render deployment detected - forcing PostgreSQL with internal URL")
 
 if DATABASE_URL and not USE_SQLITE:
     try:
