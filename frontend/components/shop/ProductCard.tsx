@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../../data/products';
 import { formatPrice } from '../../data/products';
 import { useCart } from '../../context/cart';
+import { getProductImageUrl } from '../../lib/media';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
@@ -19,7 +20,7 @@ export default function ProductCard({ product }: { product: Product }) {
     >
       <div className="aspect-square overflow-hidden bg-muted">
         <img
-          src={product.image}
+          src={getProductImageUrl(product.image)}
           alt={product.title}
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
           loading="lazy"
