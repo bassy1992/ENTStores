@@ -143,11 +143,18 @@ def debug_env(request):
             "USE_SQLITE": os.environ.get('USE_SQLITE', 'Not set'),
             "DEBUG": os.environ.get('DEBUG', 'Not set'),
             "DJANGO_SECRET_KEY": "Set" if os.environ.get('DJANGO_SECRET_KEY') else 'Not set',
+            "EMAIL_HOST_USER": os.environ.get('EMAIL_HOST_USER', 'Not set'),
+            "EMAIL_HOST_PASSWORD": "Set" if os.environ.get('EMAIL_HOST_PASSWORD') else 'Not set',
         },
         "django_settings": {
             "DEBUG": settings.DEBUG,
             "DATABASE_ENGINE": settings.DATABASES['default']['ENGINE'],
             "DATABASE_NAME": settings.DATABASES['default']['NAME'],
+            "EMAIL_BACKEND": settings.EMAIL_BACKEND,
+            "EMAIL_HOST": settings.EMAIL_HOST,
+            "EMAIL_PORT": settings.EMAIL_PORT,
+            "EMAIL_USE_TLS": settings.EMAIL_USE_TLS,
+            "DEFAULT_FROM_EMAIL": settings.DEFAULT_FROM_EMAIL,
         },
         "message": "Environment variables debug"
     })
