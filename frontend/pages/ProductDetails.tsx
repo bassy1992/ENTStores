@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { apiService, convertApiProduct } from '../services/api';
 import PageTransition from '../components/ui/PageTransition';
 import { motion } from 'framer-motion';
+import { getProductImageUrl } from '../lib/media';
 
 export default function ProductDetails() {
   const { slug } = useParams();
@@ -77,7 +78,7 @@ export default function ProductDetails() {
           <div className="aspect-square rounded-xl border overflow-hidden bg-gray-100 flex items-center justify-center">
             {product.image ? (
               <img 
-                src={product.image} 
+                src={getProductImageUrl(product.image)} 
                 alt={product.title} 
                 className="w-full h-full object-cover"
                 onLoad={() => console.log('Image loaded successfully:', product.image)}
