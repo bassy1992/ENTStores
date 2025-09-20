@@ -94,6 +94,11 @@ def debug_media(request):
         "media_url": settings.MEDIA_URL,
         "media_root_exists": os.path.exists(settings.MEDIA_ROOT),
         "media_files": media_files,
+        "media_files_count": len(media_files),
+        "alternative_paths": {
+            "persistent_disk": os.path.exists('/opt/render/project/data/media'),
+            "backend_media": os.path.exists('/opt/render/project/src/backend/media'),
+        },
         "message": "Media configuration debug"
     })
 
