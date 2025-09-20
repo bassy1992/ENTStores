@@ -47,12 +47,18 @@ ALLOWED_HOSTS.extend([
     '*.railway.app',
     '*.up.railway.app',
     '*.onrender.com',
+    'entstores.onrender.com',  # Specific Render domain
     'testserver'  # For testing
 ])
 
-# Allow all hosts in production (Railway will handle the routing)
+# Allow all hosts in production (Railway and Render will handle the routing)
 if not DEBUG:
     ALLOWED_HOSTS = ['*']
+
+# Ensure Render domain is always allowed
+RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Security settings for production
 if not DEBUG:
