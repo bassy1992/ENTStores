@@ -2,7 +2,7 @@
 // Use explicit VITE_SHOP_API_BASE_URL when provided. During local development
 // use relative URLs to leverage Vite proxy. In production use the full URL.
 const _env = (import.meta as any).env;
-const API_BASE_URL = _env.VITE_SHOP_API_BASE_URL || (_env.DEV ? '/api/shop' : 'https://enontino-production.up.railway.app/api/shop');
+const API_BASE_URL = _env.VITE_SHOP_API_BASE_URL || (_env.DEV ? '/api/shop' : 'https://entstores.onrender.com/api/shop');
 
 // Helper function to process image URLs for development
 function processImageUrl(imageUrl: string): string {

@@ -4,7 +4,7 @@ const isDevelopment = _env.DEV;
 
 export const API_BASE_URL = isDevelopment
   ? 'http://localhost:8000'
-  : _env.VITE_API_URL || 'https://enontino-production.up.railway.app';
+  : _env.VITE_API_URL || 'https://entstores.onrender.com';
 
 export const API_ENDPOINTS = {
   // Payment endpoints

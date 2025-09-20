@@ -42,7 +42,8 @@ def root_view(request):
             "csrf_test": "/api/csrf-test/",
             "debug_media": "/api/debug-media/",
             "debug_static": "/api/debug-static/",
-            "debug_env": "/api/debug-env/"
+            "debug_env": "/api/debug-env/",
+            "debug_media": "/api/debug-media/"
         },
         "deployment": "render",
         "timestamp": "2025-09-19"

@@ -267,8 +267,9 @@ CSRF_TRUSTED_ORIGINS = [
     # Add Render domains
     "https://entstore-backend.onrender.com",
     "https://entstore-frontend.onrender.com",
-    # Add Vercel domains (will be updated with actual domain)
+    # Add Vercel domains
     "https://*.vercel.app",
+    "https://ent-stores.vercel.app",
 ]
 
 # Add frontend domain to CSRF trusted origins
