@@ -179,16 +179,17 @@ urlpatterns = [
     path('api/momo/status/<str:reference>/', payment_views.check_momo_status, name='legacy-momo-status'),
 ]
 
-# Serve media files during development and production
+# Force media serving even if DEBUG = False (required for Render Web Services)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Serve frontend assets
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     # Serve frontend assets (but not catch-all root path that conflicts with admin)
     urlpatterns += static('/assets/', document_root=os.path.join(settings.BASE_DIR.parent, 'frontend', 'dist', 'spa', 'assets'))
     # Remove the catch-all static serving that conflicts with admin
     # urlpatterns += static('/', document_root=os.path.join(settings.BASE_DIR.parent, 'frontend', 'public'))
 else:
-    # For production, serve media files through Django (Railway doesn't have a separate media server)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # For production, serve frontend assets
     urlpatterns += static('/assets/', document_root=os.path.join(settings.BASE_DIR.parent, 'frontend', 'dist', 'spa', 'assets'))
 
 # Serve React app for all other routes (must be last)
