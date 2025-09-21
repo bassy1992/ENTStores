@@ -110,12 +110,7 @@ export default function ProductDetails() {
             <p className="mt-2 text-2xl font-semibold text-gray-900">{formatPrice(product.price)}</p>
             <p className="mt-4 text-gray-600 leading-relaxed">{product.description}</p>
             
-            {/* Debug info */}
-            <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">
-              <p><strong>Image URL:</strong> {product.image}</p>
-              <p><strong>Category:</strong> {product.category}</p>
-              <p><strong>Slug:</strong> {product.slug}</p>
-            </div>
+
             
             {/* Action Buttons */}
             <div className="mt-6 flex gap-3">
