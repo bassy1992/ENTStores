@@ -55,7 +55,17 @@ class EmailService:
             )
             
             # Render email templates
-            html_content = render_to_string('emails/order_confirmation.html', context)
+            try:
+                html_content = render_to_string('emails/order_confirmation.html', context)
+            except Exception as template_error:
+                logger.warning(f"Email template error: {template_error}, using fallback")
+                html_content = f"""
+                <h2>Order Confirmation - {order.id}</h2>
+                <p>Thank you for your order!</p>
+                <p>Order ID: {order.id}</p>
+                <p>Customer: {order.customer_name}</p>
+                <p>Total: ${order.total_amount}</p>
+                """
             
             # Create email
             email = EmailMultiAlternatives(
