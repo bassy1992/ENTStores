@@ -44,11 +44,15 @@ class ProductSerializer(serializers.ModelSerializer):
     
     def get_image(self, obj):
         if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
-        return None
+            try:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.image.url)
+                return obj.image.url
+            except:
+                # If image file doesn't exist, return placeholder
+                return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+        return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
