@@ -214,7 +214,7 @@ if os.getenv('RAILWAY_ENVIRONMENT'):
 
 # For Render deployment, use persistent disk for media files
 if os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
-    MEDIA_ROOT = '/opt/render/project/data/media'
+    MEDIA_ROOT = '/var/media'
     # Ensure the media directory exists
     os.makedirs(MEDIA_ROOT, exist_ok=True)
 
