@@ -44,7 +44,7 @@ def root_view(request):
             "debug_media": "/api/debug-media/",
             "debug_static": "/api/debug-static/",
             "debug_env": "/api/debug-env/",
-            "debug_media": "/api/debug-media/"
+            "test_email": "/api/test-email/"
         },
         "deployment": "render",
         "timestamp": "2025-09-19"
@@ -160,6 +160,58 @@ def debug_env(request):
         "message": "Environment variables debug"
     })
 
+def test_email(request):
+    """Test email functionality"""
+    from shop.email_service import EmailService
+    from django.utils import timezone
+    
+    # Create a mock order for testing
+    class MockOrder:
+        def __init__(self):
+            self.id = 'TEST-EMAIL-' + str(int(timezone.now().timestamp()))
+            self.customer_name = 'Test Customer'
+            self.customer_email = 'commey120jo@gmail.com'
+            self.total = 2500  # $25.00 in cents
+            self.status = 'confirmed'
+            self.created_at = timezone.now()
+    
+    mock_order = MockOrder()
+    mock_items = [
+        {
+            'name': 'Test Product',
+            'quantity': 1,
+            'price': '$25.00',
+            'total': '$25.00'
+        }
+    ]
+    
+    try:
+        # Test basic email configuration
+        basic_test = EmailService.test_email_configuration()
+        
+        # Test order confirmation email
+        confirmation_test = EmailService.send_order_confirmation(mock_order, mock_items)
+        
+        # Test admin notification
+        admin_test = EmailService.send_admin_notification(mock_order, mock_items)
+        
+        return JsonResponse({
+            "email_tests": {
+                "basic_configuration": basic_test,
+                "order_confirmation": confirmation_test,
+                "admin_notification": admin_test,
+            },
+            "test_order_id": mock_order.id,
+            "test_email": mock_order.customer_email,
+            "message": "Email tests completed"
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e),
+            "message": "Email test failed"
+        }, status=500)
+
 urlpatterns = [
     # Root endpoint
     path('', root_view, name='root'),
@@ -170,6 +222,7 @@ urlpatterns = [
     path('api/debug-media/', debug_media, name='debug-media'),
     path('api/debug-static/', debug_static, name='debug-static'),
     path('api/debug-env/', debug_env, name='debug-env'),
+    path('api/test-email/', test_email, name='test-email'),
     path('admin/', admin.site.urls),
     path('api/shop/', include('shop.urls')),
     path('api/payments/', include('shop.payment_urls')),
