@@ -27,9 +27,13 @@ class EmailService:
         
         if order:
             # Handle both total_amount (mock orders) and total (real orders)
-            total = getattr(order, 'total_amount', None) or getattr(order, 'total', 0)
-            if hasattr(order, 'total') and order.total:
-                total = order.total / 100  # Convert from cents to dollars
+            total = 0
+            if hasattr(order, 'total_amount') and order.total_amount:
+                # Mock order for testing
+                total = order.total_amount
+            elif hasattr(order, 'total') and order.total:
+                # Real order - convert from cents to dollars
+                total = order.total / 100
             
             context.update({
                 'order_id': order.id,
@@ -59,12 +63,19 @@ class EmailService:
                 html_content = render_to_string('emails/order_confirmation.html', context)
             except Exception as template_error:
                 logger.warning(f"Email template error: {template_error}, using fallback")
+                # Calculate total for fallback
+                total = 0
+                if hasattr(order, 'total_amount') and order.total_amount:
+                    total = order.total_amount
+                elif hasattr(order, 'total') and order.total:
+                    total = order.total / 100
+                
                 html_content = f"""
                 <h2>Order Confirmation - {order.id}</h2>
                 <p>Thank you for your order!</p>
                 <p>Order ID: {order.id}</p>
                 <p>Customer: {order.customer_name}</p>
-                <p>Total: ${order.total_amount}</p>
+                <p>Total: ${total:.2f}</p>
                 """
             
             # Create email
@@ -90,7 +101,11 @@ class EmailService:
         """Send new order notification to admin."""
         try:
             # Determine if this is a high-value order
-            total = getattr(order, 'total_amount', None) or (getattr(order, 'total', 0) / 100)
+            total = 0
+            if hasattr(order, 'total_amount') and order.total_amount:
+                total = order.total_amount
+            elif hasattr(order, 'total') and order.total:
+                total = order.total / 100
             is_high_value = total > 500  # Adjust threshold as needed
             
             context = EmailService.get_email_context(
