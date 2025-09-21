@@ -16,13 +16,14 @@ Including another URLconf
 """
 import os
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from django.views.static import serve
 from shop import payment_views
 
 def health_check(request):
@@ -179,8 +180,10 @@ urlpatterns = [
     path('api/momo/status/<str:reference>/', payment_views.check_momo_status, name='legacy-momo-status'),
 ]
 
-# Force media serving even if DEBUG = False (required for Render Web Services)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files even when DEBUG=False (required for Render Web Services)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
 
 # Serve frontend assets
 if settings.DEBUG:
