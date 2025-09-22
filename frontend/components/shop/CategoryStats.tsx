@@ -1,9 +1,31 @@
-import { categoryModels } from '../../data/products';
+import { CategoryModel } from '../../data/products';
 import { Package, Star, Truck, Shield } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { apiService, convertApiCategory } from '../../services/api';
 
 export default function CategoryStats() {
-  const totalProducts = categoryModels.reduce((sum, cat) => sum + (cat.productCount || 0), 0);
-  const featuredCategories = categoryModels.filter(cat => cat.featured).length;
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const apiCategories = await apiService.getCategories();
+        const convertedCategories = apiCategories.map(convertApiCategory);
+        setCategories(convertedCategories);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const totalProducts = categories.reduce((sum, cat) => sum + (cat.productCount || 0), 0);
+  const featuredCategories = categories.filter(cat => cat.featured).length;
 
   const stats = [
     {
@@ -66,25 +88,37 @@ export default function CategoryStats() {
           <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
             Our Product Categories
           </h3>
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-9 gap-4">
-            {categoryModels.map((category) => (
-              <div key={category.key} className="text-center">
-                <div className="w-12 h-12 mx-auto mb-2 rounded-full overflow-hidden bg-gray-100">
-                  <img 
-                    src={category.image} 
-                    alt={category.label}
-                    className="w-full h-full object-cover"
-                  />
+          {loading ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-9 gap-4">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="text-center animate-pulse">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-gray-200"></div>
+                  <div className="bg-gray-200 h-3 rounded mb-1"></div>
+                  <div className="bg-gray-200 h-2 rounded w-2/3 mx-auto"></div>
                 </div>
-                <div className="text-xs font-medium text-gray-700 mb-1">
-                  {category.label}
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-9 gap-4">
+              {categories.map((category) => (
+                <div key={category.key} className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-full overflow-hidden bg-gray-100">
+                    <img 
+                      src={category.image} 
+                      alt={category.label}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="text-xs font-medium text-gray-700 mb-1">
+                    {category.label}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {category.productCount} items
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500">
-                  {category.productCount} items
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

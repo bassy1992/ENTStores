@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { categoryModels, CategoryModel } from '../../data/products';
+import { CategoryModel } from '../../data/products';
 import { ArrowRight, Package } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { apiService, convertApiCategory } from '../../services/api';
 
 interface CategoryGridProps {
   showFeaturedOnly?: boolean;
@@ -8,17 +10,76 @@ interface CategoryGridProps {
 }
 
 export default function CategoryGrid({ showFeaturedOnly = false, limit }: CategoryGridProps) {
-  let displayCategories = showFeaturedOnly 
-    ? categoryModels.filter(cat => cat.featured) 
-    : categoryModels;
-  
-  if (limit) {
-    displayCategories = displayCategories.slice(0, limit);
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        let apiCategories;
+        
+        if (showFeaturedOnly) {
+          apiCategories = await apiService.getFeaturedCategories();
+        } else {
+          apiCategories = await apiService.getCategories();
+        }
+        
+        let convertedCategories = apiCategories.map(convertApiCategory);
+        
+        if (limit) {
+          convertedCategories = convertedCategories.slice(0, limit);
+        }
+        
+        setCategories(convertedCategories);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setError('Failed to load categories');
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [showFeaturedOnly, limit]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {[...Array(showFeaturedOnly ? 4 : 8)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="aspect-[4/3] bg-gray-200 rounded-2xl mb-4"></div>
+            <div className="p-5">
+              <div className="bg-gray-200 h-6 rounded mb-2"></div>
+              <div className="bg-gray-200 h-4 rounded mb-2"></div>
+              <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-2 text-blue-600 hover:text-blue-700"
+        >
+          Try again
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {displayCategories.map((category) => (
+      {categories.map((category) => (
         <CategoryCard key={category.key} category={category} />
       ))}
     </div>
@@ -86,11 +147,44 @@ function CategoryCard({ category }: { category: CategoryModel }) {
 
 // Alternative compact version for smaller spaces
 export function CategoryGridCompact({ limit = 6 }: { limit?: number }) {
-  const displayCategories = categoryModels.slice(0, limit);
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const apiCategories = await apiService.getCategories();
+        const convertedCategories = apiCategories.map(convertApiCategory).slice(0, limit);
+        setCategories(convertedCategories);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [limit]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[...Array(limit)].map((_, i) => (
+          <div key={i} className="animate-pulse flex flex-col items-center p-4">
+            <div className="w-16 h-16 bg-gray-200 rounded-full mb-3"></div>
+            <div className="bg-gray-200 h-4 rounded w-16 mb-1"></div>
+            <div className="bg-gray-200 h-3 rounded w-12"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-      {displayCategories.map((category) => (
+      {categories.map((category) => (
         <Link
           key={category.key}
           to={`/shop?c=${encodeURIComponent(category.key)}`}

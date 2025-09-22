@@ -1,3 +1,5 @@
+import { CategoryModel, Category } from '../data/products';
+
 // API configuration
 // Use explicit VITE_SHOP_API_BASE_URL when provided. During local development
 // use relative URLs to leverage Vite proxy. In production use the full URL.
@@ -233,9 +235,13 @@ export function convertApiProduct(apiProduct: ApiProduct): any {
 }
 
 // Helper function to convert API category to frontend category format
-export function convertApiCategory(apiCategory: ApiCategory): any {
+export function convertApiCategory(apiCategory: ApiCategory): CategoryModel {
   return {
-    key: apiCategory.key,
+    key: apiCategory.key as Category,
     label: apiCategory.label,
+    description: apiCategory.description,
+    image: apiCategory.image,
+    featured: apiCategory.featured,
+    productCount: apiCategory.product_count,
   };
 }

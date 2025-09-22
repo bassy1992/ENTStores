@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { products, categoryModels, formatPrice } from '../../data/products';
+import { products, formatPrice, CategoryModel } from '../../data/products';
 import { ArrowRight, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { apiService, convertApiCategory } from '../../services/api';
 
 interface CategoryShowcaseProps {
   categoryKey: string;
@@ -13,8 +15,43 @@ export default function CategoryShowcase({
   title,
   subtitle 
 }: CategoryShowcaseProps) {
-  const category = categoryModels.find(cat => cat.key === categoryKey);
+  const [category, setCategory] = useState<CategoryModel | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const apiCategories = await apiService.getCategories();
+        const convertedCategories = apiCategories.map(convertApiCategory);
+        const foundCategory = convertedCategories.find(cat => cat.key === categoryKey);
+        setCategory(foundCategory || null);
+      } catch (err) {
+        console.error('Failed to fetch category:', err);
+        setCategory(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategory();
+  }, [categoryKey]);
+
   const categoryProducts = products.filter(p => p.category === categoryKey).slice(0, 4);
+
+  if (loading) {
+    return (
+      <section className="container mx-auto px-4 py-16">
+        <div className="grid gap-12 lg:grid-cols-2 items-center">
+          <div className="space-y-6 animate-pulse">
+            <div className="bg-gray-200 h-8 rounded w-3/4"></div>
+            <div className="bg-gray-200 h-6 rounded w-full"></div>
+            <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+          </div>
+          <div className="bg-gray-200 aspect-[4/3] rounded-2xl"></div>
+        </div>
+      </section>
+    );
+  }
 
   if (!category || categoryProducts.length === 0) {
     return null;
