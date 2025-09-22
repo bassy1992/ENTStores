@@ -328,7 +328,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 # Email addresses - Using your verified Brevo sender
 DEFAULT_FROM_EMAIL = 'ENTstore <awuleynovember@gmail.com>'  # Your verified sender
-ADMIN_EMAIL = 'commey120jo@gmail.com'  # Your actual email for admin notifications
+ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'Enontinoclothing@gmail.com')  # Your actual email for admin notifications
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Backup sender (the SMTP login email)

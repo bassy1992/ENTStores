@@ -170,7 +170,7 @@ def test_email(request):
         def __init__(self):
             self.id = 'TEST-EMAIL-' + str(int(timezone.now().timestamp()))
             self.customer_name = 'Test Customer'
-            self.customer_email = 'commey120jo@gmail.com'
+            self.customer_email = 'Enontinoclothing@gmail.com'
             self.total = 2500  # $25.00 in cents
             self.status = 'confirmed'
             self.created_at = timezone.now()
