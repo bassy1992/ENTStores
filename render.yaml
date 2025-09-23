@@ -3,13 +3,17 @@ services:
     name: entstore-backend
     env: python
     buildCommand: "./build.sh"
-    startCommand: "cd backend && gunicorn myproject.wsgi:application --host 0.0.0.0 --port $PORT"
+    startCommand: "cd backend && gunicorn myproject.wsgi:application --host 0.0.0.0 --port $PORT --workers 4 --timeout 120"
     disk:
       name: media-storage
       mountPath: /opt/render/project/data
       sizeGB: 1
     envVars:
       - key: DEBUG
+        value: false
+      - key: RENDER
+        value: true
+      - key: USE_SQLITE
         value: false
       - key: DJANGO_SECRET_KEY
         generateValue: true
@@ -18,10 +22,17 @@ services:
           name: entstore-db
           property: connectionString
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: entstore-frontend
-          property: host
+        value: https://enintino.vercel.app
+      - key: STRIPE_PUBLISHABLE_KEY
+        value: your_stripe_publishable_key_here
+      - key: STRIPE_SECRET_KEY
+        value: your_stripe_secret_key_here
+      - key: EMAIL_HOST_USER
+        value: your_brevo_smtp_user_here
+      - key: EMAIL_HOST_PASSWORD
+        value: your_brevo_smtp_password_here
+      - key: ADMIN_EMAIL
+        value: Enontinoclothing@gmail.com
 
 databases:
   - name: entstore-db

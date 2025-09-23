@@ -51,14 +51,14 @@ ALLOWED_HOSTS.extend([
     'testserver'  # For testing
 ])
 
-# Allow all hosts in production (Railway and Render will handle the routing)
-if not DEBUG:
-    ALLOWED_HOSTS = ['*']
-
 # Ensure Render domain is always allowed
 RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Allow all hosts in production (Railway and Render will handle the routing)
+if not DEBUG:
+    ALLOWED_HOSTS = ['*']
 
 # Security settings for production
 if not DEBUG:
@@ -134,11 +134,12 @@ DATABASES = {
 DATABASE_URL = os.getenv('DATABASE_URL')
 USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
 
-# Force PostgreSQL on Render (temporary fix)
-if 'RENDER' in os.environ or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
-    DATABASE_URL = "postgresql://entstore_db_user:m3we2cxnqRNZSMc6B5RK0vDsnku7QAXa@dpg-d36utrmmcj7s73e0q0dg-a/entstore_db"
+# Force PostgreSQL on Render
+if 'RENDER' in os.environ:
+    # Use the DATABASE_URL from Render environment variables
+    DATABASE_URL = os.getenv('DATABASE_URL')
     USE_SQLITE = False
-    print("Render deployment detected - forcing PostgreSQL with internal URL")
+    print("Render deployment detected - using PostgreSQL from DATABASE_URL")
 
 if DATABASE_URL and not USE_SQLITE:
     try:
@@ -214,7 +215,7 @@ if os.getenv('RAILWAY_ENVIRONMENT'):
 
 # For Render deployment, use persistent disk for media files
 if os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
-    MEDIA_ROOT = '/var/media'
+    MEDIA_ROOT = '/opt/render/project/data/media'
     # Ensure the media directory exists
     os.makedirs(MEDIA_ROOT, exist_ok=True)
 
