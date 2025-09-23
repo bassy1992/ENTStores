@@ -30,4 +30,5 @@ urlpatterns = [
     
     # Debug
     path('debug-products/', views.debug_products, name='debug-products'),
+    path('simple-products/', views.simple_products, name='simple-products'),
 ]

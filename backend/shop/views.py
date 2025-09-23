@@ -162,17 +162,26 @@ def debug_products(request):
         total_products = Product.objects.count()
         active_products = Product.objects.filter(is_active=True).count()
         
-        # Test if we can get a single product
+        # Test if we can get a single product without serialization
         first_product = Product.objects.first()
-        product_data = None
+        basic_product_data = None
         
         if first_product:
+            basic_product_data = {
+                'id': first_product.id,
+                'title': first_product.title,
+                'price': first_product.price,
+                'category_key': first_product.category.key if first_product.category else None,
+                'is_active': first_product.is_active,
+            }
+            
+            # Test serialization step by step
             try:
-                # Test serialization of first product
+                # Test minimal serialization
                 serializer = ProductSerializer(first_product, context={'request': request})
                 product_data = serializer.data
             except Exception as e:
-                product_data = {'error': str(e)}
+                product_data = {'serialization_error': str(e)}
         
         # Test category relationships
         categories_count = Category.objects.count()
@@ -181,8 +190,8 @@ def debug_products(request):
             'total_products': total_products,
             'active_products': active_products,
             'categories_count': categories_count,
-            'first_product': product_data,
-            'database_engine': 'postgresql' if 'postgresql' in str(Product.objects.db) else 'unknown',
+            'basic_product_data': basic_product_data,
+            'serialized_product': product_data if 'product_data' in locals() else None,
             'message': 'Products debug info'
         })
         
@@ -190,4 +199,36 @@ def debug_products(request):
         return Response({
             'error': str(e),
             'message': 'Debug products failed'
+        }, status=500)
+
+
+@api_view(['GET'])
+def simple_products(request):
+    """Simple products endpoint without complex serialization"""
+    try:
+        products = Product.objects.filter(is_active=True).select_related('category')[:10]
+        
+        simple_data = []
+        for product in products:
+            simple_data.append({
+                'id': product.id,
+                'title': product.title,
+                'price': product.price,
+                'price_display': f"${product.price / 100:.2f}",
+                'category': product.category.key if product.category else None,
+                'category_label': product.category.label if product.category else None,
+                'is_active': product.is_active,
+                'stock_quantity': product.stock_quantity,
+            })
+        
+        return Response({
+            'results': simple_data,
+            'count': len(simple_data),
+            'message': 'Simple products data'
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'message': 'Simple products failed'
         }, status=500)
