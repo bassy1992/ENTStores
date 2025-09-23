@@ -27,23 +27,40 @@ class ProductListView(generics.ListAPIView):
     
     def get_queryset(self):
         try:
-            queryset = Product.objects.filter(is_active=True).select_related('category').prefetch_related(
-                'tag_assignments__tag',
-                'images',
-                'variants__size',
-                'variants__color'
-            )
+            # Start with basic queryset
+            queryset = Product.objects.filter(is_active=True).select_related('category')
+            
+            # Only add prefetch_related if the tables exist
+            try:
+                # Test if tag-related tables exist by doing a simple query
+                from django.db import connection
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT 1 FROM shop_producttag LIMIT 1")
+                # If we get here, tables exist, so add prefetch_related
+                queryset = queryset.prefetch_related(
+                    'tag_assignments__tag',
+                    'images',
+                    'variants__size',
+                    'variants__color'
+                )
+            except Exception:
+                # Tables don't exist or there's an error, continue without prefetch
+                pass
             
             # Filter by category
             category = self.request.query_params.get('category')
             if category:
                 queryset = queryset.filter(category__key=category)
             
-            # Filter by tags
+            # Filter by tags (only if tag tables exist)
             tags = self.request.query_params.get('tags')
             if tags:
-                tag_list = tags.split(',')
-                queryset = queryset.filter(tag_assignments__tag__name__in=tag_list).distinct()
+                try:
+                    tag_list = tags.split(',')
+                    queryset = queryset.filter(tag_assignments__tag__name__in=tag_list).distinct()
+                except Exception:
+                    # If tag filtering fails, ignore it
+                    pass
             
             # Search functionality
             search = self.request.query_params.get('search')

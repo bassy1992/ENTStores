@@ -98,19 +98,27 @@ class ProductSerializer(serializers.ModelSerializer):
         
         # Use tag-based is_featured to avoid database field issues
         try:
-            has_featured_tag = instance.tag_assignments.filter(tag__name='featured').exists()
-            data['is_featured'] = has_featured_tag
-        except Exception:
+            # Check if tag_assignments relationship exists and has the featured tag
+            if hasattr(instance, 'tag_assignments'):
+                has_featured_tag = instance.tag_assignments.filter(tag__name='featured').exists()
+                data['is_featured'] = has_featured_tag
+            else:
+                data['is_featured'] = False
+        except Exception as e:
+            # If there's any error (missing tables, etc.), default to False
             data['is_featured'] = False
             
         return data
     
     def get_tags(self, obj):
         try:
-            # Use the tag_assignments relationship instead of the property
-            return [assignment.tag.name for assignment in obj.tag_assignments.all()]
+            # Check if tag_assignments relationship exists
+            if hasattr(obj, 'tag_assignments'):
+                return [assignment.tag.name for assignment in obj.tag_assignments.all()]
+            else:
+                return []
         except Exception as e:
-            # Fallback to empty list if there's an error
+            # Fallback to empty list if there's an error (missing tables, etc.)
             return []
     
     def get_image(self, obj):
