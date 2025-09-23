@@ -301,6 +301,8 @@ export function convertApiProduct(apiProduct: ApiProduct): any {
     images: apiProduct.images || [],
     category: apiProduct.category,
     tags: apiProduct.tags,
+    stock_quantity: apiProduct.stock_quantity,
+    is_in_stock: apiProduct.is_in_stock,
     variants: apiProduct.variants || [],
     available_sizes: apiProduct.available_sizes || [],
     available_colors: apiProduct.available_colors || [],

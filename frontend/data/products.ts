@@ -18,6 +18,8 @@ export type Product = {
   image: string;
   category: Category;
   tags?: string[];
+  stock_quantity?: number;
+  is_in_stock?: boolean;
 };
 
 // Lightweight, extendable in-memory catalog. In a real app fetch from API/DB.
