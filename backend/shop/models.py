@@ -111,6 +111,10 @@ class Product(models.Model):
         default=True,
         help_text="Whether the product is active and available for purchase"
     )
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="Whether the product should be featured on the home page"
+    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -304,6 +308,24 @@ class OrderItem(models.Model):
         Product,
         on_delete=models.CASCADE
     )
+    # Variant information
+    product_variant = models.ForeignKey(
+        'ProductVariant',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Selected product variant (size/color combination)"
+    )
+    selected_size = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Selected size name (stored as text for historical record)"
+    )
+    selected_color = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Selected color name (stored as text for historical record)"
+    )
     quantity = models.PositiveIntegerField(
         validators=[MinValueValidator(1)]
     )
@@ -320,7 +342,15 @@ class OrderItem(models.Model):
         ordering = ['id']
     
     def __str__(self):
-        return f"{self.quantity}x {self.product.title}"
+        variant_info = ""
+        if self.selected_size or self.selected_color:
+            parts = []
+            if self.selected_size:
+                parts.append(f"Size: {self.selected_size}")
+            if self.selected_color:
+                parts.append(f"Color: {self.selected_color}")
+            variant_info = f" ({', '.join(parts)})"
+        return f"{self.quantity}x {self.product.title}{variant_info}"
     
     def save(self, *args, **kwargs):
         self.total_price = self.quantity * self.unit_price

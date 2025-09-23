@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Featured Products API</title>
+</head>
+<body>
+    <h1>Featured Products API Test</h1>
+    <div id="results">Loading...</div>
+
+    <script>
+        async function testFeaturedAPI() {
+            try {
+                const response = await fetch('http://localhost:8000/api/shop/products/featured/');
+                const data = await response.json();
+                
+                const resultsDiv = document.getElementById('results');
+                
+                if (response.ok) {
+                    const products = data.results || data;
+                    resultsDiv.innerHTML = `
+                        <h2>Success! Found ${products.length} featured products:</h2>
+                        <ul>
+                            ${products.map(product => `
+                                <li>
+                                    <strong>${product.title}</strong> - $${(product.price / 100).toFixed(2)}
+                                    <br><small>Category: ${product.category_label || product.category}</small>
+                                    <br><small>Featured: ${product.is_featured ? 'Yes' : 'No'}</small>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `<p style="color: red;">Error: ${data.message || 'Failed to fetch'}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        testFeaturedAPI();
+    </script>
+</body>
+</html>

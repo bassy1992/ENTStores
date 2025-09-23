@@ -53,7 +53,11 @@ export default function StripeSuccess() {
             id: item.id,
             title: item.title,
             price: item.price,
-            quantity: item.quantity
+            quantity: item.quantity,
+            image: item.image,
+            selectedSize: item.selectedSize,
+            selectedColor: item.selectedColor,
+            variantId: item.variantId
           })),
           payment_method: 'stripe',
           payment_reference: sessionId,
@@ -98,7 +102,10 @@ export default function StripeSuccess() {
               items: items.map((item: any) => ({
                 product_id: item.id,
                 quantity: item.quantity,
-                unit_price: item.price
+                unit_price: item.price,
+                selected_size: item.selectedSize || null,
+                selected_color: item.selectedColor || null,
+                variant_id: item.variantId || null
               }))
             })
           });

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django import forms
 from .models import (
     Category, Product, ProductTag, ProductTagAssignment, Order, OrderItem,
     ProductImage, ProductSize, ProductColor, ProductVariant
@@ -34,6 +35,19 @@ class CategoryAdmin(admin.ModelAdmin):
         return super().get_queryset(request).prefetch_related('products')
 
 
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = '__all__'
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ensure category field shows proper choices
+        if 'category' in self.fields:
+            self.fields['category'].queryset = Category.objects.all()
+            self.fields['category'].empty_label = "Select a category"
+
+
 class ProductTagAssignmentInline(admin.TabularInline):
     model = ProductTagAssignment
     extra = 1
@@ -42,25 +56,42 @@ class ProductTagAssignmentInline(admin.TabularInline):
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
-    extra = 1
+    extra = 3  # Show 3 empty forms for adding images
     fields = ['image', 'alt_text', 'is_primary', 'order']
     readonly_fields = ['created_at']
+    verbose_name = "Product Image"
+    verbose_name_plural = "Product Images"
 
 
 class ProductVariantInline(admin.TabularInline):
     model = ProductVariant
-    extra = 1
+    extra = 2  # Show 2 empty forms for adding variants
     fields = ['size', 'color', 'stock_quantity', 'price_adjustment', 'is_available']
+    verbose_name = "Product Variant"
+    verbose_name_plural = "Product Variants (Size & Color Combinations)"
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "size":
+            kwargs["queryset"] = ProductSize.objects.all().order_by('order', 'name')
+        if db_field.name == "color":
+            kwargs["queryset"] = ProductColor.objects.all().order_by('order', 'name')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['title', 'category', 'price_display', 'stock_quantity', 'is_active', 'created_at']
-    list_filter = ['category', 'is_active', 'created_at', 'tag_assignments__tag']
+    form = ProductForm
+    list_display = ['title', 'category', 'price_display', 'stock_quantity', 'is_active', 'is_featured', 'created_at']
+    list_filter = ['category', 'is_active', 'is_featured', 'created_at', 'tag_assignments__tag']
     search_fields = ['title', 'id', 'description']
     readonly_fields = ['created_at', 'updated_at']
     prepopulated_fields = {'slug': ('title',)}
     inlines = [ProductTagAssignmentInline, ProductImageInline, ProductVariantInline]
+    
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
     
     fieldsets = (
         (None, {
@@ -69,11 +100,12 @@ class ProductAdmin(admin.ModelAdmin):
         ('Pricing & Category', {
             'fields': ('price', 'category')
         }),
-        ('Media', {
-            'fields': ('image',)
+        ('Main Image', {
+            'fields': ('image',),
+            'description': 'Upload a main product image. You can add more images in the "Product Images" section below.'
         }),
-        ('Inventory', {
-            'fields': ('stock_quantity', 'is_active')
+        ('Inventory & Settings', {
+            'fields': ('stock_quantity', 'is_active', 'is_featured')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -87,6 +119,44 @@ class ProductAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('category')
+    
+    actions = ['create_basic_variants']
+    
+    def create_basic_variants(self, request, queryset):
+        """Create basic variants (all size/color combinations) for selected products."""
+        from django.contrib import messages
+        
+        created_count = 0
+        for product in queryset:
+            sizes = ProductSize.objects.all()[:4]  # First 4 sizes (S, M, L, XL)
+            colors = ProductColor.objects.all()[:3]  # First 3 colors
+            
+            for size in sizes:
+                for color in colors:
+                    variant, created = ProductVariant.objects.get_or_create(
+                        product=product,
+                        size=size,
+                        color=color,
+                        defaults={
+                            'stock_quantity': 10,
+                            'price_adjustment': 0,
+                            'is_available': True
+                        }
+                    )
+                    if created:
+                        created_count += 1
+        
+        messages.success(request, f'Created {created_count} new product variants.')
+    create_basic_variants.short_description = "Create basic size/color variants for selected products"
+    
+    def save_model(self, request, obj, form, change):
+        # Ensure the product is saved first before any inlines
+        if not change:  # New product
+            # Generate a unique ID if not provided
+            if not obj.id:
+                import uuid
+                obj.id = f"prod-{uuid.uuid4().hex[:8]}"
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(ProductTag)
@@ -111,10 +181,21 @@ class ProductTagAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ['total_price']
+    readonly_fields = ['total_price', 'variant_display']
+    fields = ['product', 'selected_size', 'selected_color', 'quantity', 'unit_price', 'total_price', 'variant_display']
+    
+    def variant_display(self, obj):
+        """Display variant information in a readable format"""
+        parts = []
+        if obj.selected_size:
+            parts.append(f"Size: {obj.selected_size}")
+        if obj.selected_color:
+            parts.append(f"Color: {obj.selected_color}")
+        return ', '.join(parts) if parts else 'No variant selected'
+    variant_display.short_description = 'Variant Info'
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product')
+        return super().get_queryset(request).select_related('product', 'product_variant')
 
 
 @admin.register(Order)
@@ -265,13 +346,24 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ['order', 'product', 'quantity', 'unit_price', 'total_display']
-    list_filter = ['created_at']
-    search_fields = ['order__id', 'product__title']
+    list_display = ['order', 'product', 'variant_info_display', 'quantity', 'unit_price', 'total_display']
+    list_filter = ['created_at', 'selected_size', 'selected_color']
+    search_fields = ['order__id', 'product__title', 'selected_size', 'selected_color']
     readonly_fields = ['total_price', 'created_at']
+    fields = ['order', 'product', 'product_variant', 'selected_size', 'selected_color', 'quantity', 'unit_price', 'total_price', 'created_at']
+    
+    def variant_info_display(self, obj):
+        """Display variant information in list view"""
+        parts = []
+        if obj.selected_size:
+            parts.append(f"Size: {obj.selected_size}")
+        if obj.selected_color:
+            parts.append(f"Color: {obj.selected_color}")
+        return ', '.join(parts) if parts else '-'
+    variant_info_display.short_description = 'Variant'
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('order', 'product')
+        return super().get_queryset(request).select_related('order', 'product', 'product_variant')
 
 
 # Custom admin site configuration
@@ -292,23 +384,34 @@ class ProductImageAdmin(admin.ModelAdmin):
 
 @admin.register(ProductSize)
 class ProductSizeAdmin(admin.ModelAdmin):
-    list_display = ['display_name', 'name', 'order']
+    list_display = ['display_name', 'name', 'order', 'products_count']
     list_editable = ['order']
     ordering = ['order', 'name']
+    search_fields = ['name', 'display_name']
+    
+    def products_count(self, obj):
+        return obj.productvariant_set.values('product').distinct().count()
+    products_count.short_description = 'Products Using This Size'
 
 
 @admin.register(ProductColor)
 class ProductColorAdmin(admin.ModelAdmin):
-    list_display = ['name', 'hex_code', 'color_preview', 'order']
-    list_editable = ['order']
+    list_display = ['name', 'hex_code', 'color_preview', 'order', 'products_count']
+    list_editable = ['order', 'hex_code']
     ordering = ['order', 'name']
+    search_fields = ['name', 'hex_code']
     
     def color_preview(self, obj):
         return format_html(
-            '<div style="width: 20px; height: 20px; background-color: {}; border: 1px solid #ccc; border-radius: 3px; display: inline-block;"></div>',
-            obj.hex_code
+            '<div style="width: 30px; height: 20px; background-color: {}; border: 1px solid #ccc; border-radius: 3px; display: inline-block; margin-right: 5px;"></div>{}',
+            obj.hex_code,
+            obj.name
         )
     color_preview.short_description = 'Preview'
+    
+    def products_count(self, obj):
+        return obj.productvariant_set.values('product').distinct().count()
+    products_count.short_description = 'Products Using This Color'
 
 
 @admin.register(ProductVariant)

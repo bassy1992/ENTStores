@@ -62,8 +62,8 @@ class FeaturedProductsView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             is_active=True,
-            tag_assignments__tag__name='featured'
-        ).select_related('category').distinct()
+            is_featured=True
+        ).select_related('category')
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -99,7 +99,7 @@ def shop_stats(request):
     total_categories = Category.objects.count()
     featured_products = Product.objects.filter(
         is_active=True,
-        tag_assignments__tag__name='featured'
+        is_featured=True
     ).count()
     
     return Response({

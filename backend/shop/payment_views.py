@@ -390,19 +390,54 @@ def create_order(request):
         for item_data in items:
             try:
                 product = Product.objects.get(id=item_data['product_id'])
+                
+                # Extract variant information
+                selected_size = item_data.get('selected_size', '')
+                selected_color = item_data.get('selected_color', '')
+                variant_id = item_data.get('variant_id')
+                
+                # Try to get the product variant if provided
+                product_variant = None
+                if variant_id:
+                    try:
+                        from .models import ProductVariant
+                        product_variant = ProductVariant.objects.get(id=variant_id)
+                        # Use variant's size and color names if not provided
+                        if not selected_size and product_variant.size:
+                            selected_size = product_variant.size.display_name
+                        if not selected_color and product_variant.color:
+                            selected_color = product_variant.color.name
+                    except ProductVariant.DoesNotExist:
+                        logger.warning(f"Product variant {variant_id} not found for order {order_id}")
+                
                 order_item = OrderItem.objects.create(
                     order=order,
                     product=product,
+                    product_variant=product_variant,
+                    selected_size=selected_size,
+                    selected_color=selected_color,
                     quantity=item_data['quantity'],
                     unit_price=item_data['unit_price']
                 )
-                # Add to email data
+                
+                # Add to email data with variant info
+                variant_info = []
+                if selected_size:
+                    variant_info.append(f"Size: {selected_size}")
+                if selected_color:
+                    variant_info.append(f"Color: {selected_color}")
+                
+                product_name = product.title
+                if variant_info:
+                    product_name += f" ({', '.join(variant_info)})"
+                
                 order_items.append({
-                    'name': product.title,
+                    'name': product_name,
                     'sku': getattr(product, 'sku', 'N/A'),
                     'quantity': item_data['quantity'],
                     'price': f"${item_data['unit_price']:.2f}",
-                    'total': f"${item_data['quantity'] * item_data['unit_price']:.2f}"
+                    'total': f"${item_data['quantity'] * item_data['unit_price']:.2f}",
+                    'variant_info': ', '.join(variant_info) if variant_info else None
                 })
             except Product.DoesNotExist:
                 logger.warning(f"Product {item_data['product_id']} not found for order {order_id}")

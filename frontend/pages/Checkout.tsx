@@ -146,7 +146,20 @@ export default function Checkout() {
               clearInterval(interval);
               // complete order
               const orderId = Math.random().toString(36).slice(2, 10).toUpperCase();
-              const summary = { id: orderId, total, items: state.items };
+              const summary = { 
+                id: orderId, 
+                total, 
+                items: state.items.map(item => ({
+                  id: item.id,
+                  title: item.title,
+                  price: item.price,
+                  quantity: item.quantity,
+                  image: item.image,
+                  selectedSize: item.selectedSize,
+                  selectedColor: item.selectedColor,
+                  variantId: item.variantId
+                }))
+              };
               clear();
               navigate('/order-confirmation', { state: summary });
             }

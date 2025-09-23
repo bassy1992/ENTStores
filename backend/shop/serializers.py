@@ -88,7 +88,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'price', 'price_display', 'description', 
             'image', 'images', 'category', 'category_label', 'stock_quantity', 
-            'is_active', 'is_in_stock', 'tags', 'variants', 'available_sizes', 
+            'is_active', 'is_featured', 'is_in_stock', 'tags', 'variants', 'available_sizes', 
             'available_colors', 'created_at'
         ]
     
@@ -135,12 +135,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
     product_title = serializers.CharField(source='product.title', read_only=True)
     product_image = serializers.SerializerMethodField()
     total_display = serializers.CharField(read_only=True)
+    variant_info = serializers.SerializerMethodField()
     
     class Meta:
         model = OrderItem
         fields = [
             'product', 'product_title', 'product_image', 'quantity', 
-            'unit_price', 'total_price', 'total_display'
+            'unit_price', 'total_price', 'total_display', 'selected_size', 
+            'selected_color', 'variant_info'
         ]
     
     def get_product_image(self, obj):
@@ -150,6 +152,15 @@ class OrderItemSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.product.image.url)
             return obj.product.image.url
         return None
+    
+    def get_variant_info(self, obj):
+        """Get formatted variant information"""
+        parts = []
+        if obj.selected_size:
+            parts.append(f"Size: {obj.selected_size}")
+        if obj.selected_color:
+            parts.append(f"Color: {obj.selected_color}")
+        return ", ".join(parts) if parts else None
 
 
 class OrderSerializer(serializers.ModelSerializer):

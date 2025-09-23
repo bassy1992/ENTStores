@@ -7,6 +7,10 @@ export type CartItem = {
   price: number; // cents
   image: string;
   quantity: number;
+  selectedSize?: string;
+  selectedColor?: string;
+  variantId?: number;
+  uniqueKey?: string; // For distinguishing same product with different variants
 };
 
 type State = {
@@ -14,18 +18,18 @@ type State = {
 };
 
 type Action =
-  | { type: 'ADD'; product: Product; quantity?: number }
-  | { type: 'REMOVE'; id: string }
-  | { type: 'SET_QTY'; id: string; quantity: number }
+  | { type: 'ADD'; product: Product; quantity?: number; selectedSize?: string; selectedColor?: string; variantId?: number }
+  | { type: 'REMOVE'; uniqueKey: string }
+  | { type: 'SET_QTY'; uniqueKey: string; quantity: number }
   | { type: 'CLEAR' };
 
 const initialState: State = { items: [] };
 
 const CartContext = createContext<{
   state: State;
-  add: (p: Product, quantity?: number) => void;
-  remove: (id: string) => void;
-  setQty: (id: string, qty: number) => void;
+  add: (p: Product, quantity?: number, selectedSize?: string, selectedColor?: string, variantId?: number) => void;
+  remove: (uniqueKey: string) => void;
+  setQty: (uniqueKey: string, qty: number) => void;
   clear: () => void;
   count: number;
   subtotal: number; // cents
@@ -49,14 +53,19 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'ADD': {
       const qty = action.quantity ?? 1;
-      const existing = state.items.find((i) => i.id === action.product.id);
+      
+      // Create unique key for this product variant combination
+      const uniqueKey = `${action.product.id}-${action.selectedSize || 'no-size'}-${action.selectedColor || 'no-color'}`;
+      
+      const existing = state.items.find((i) => i.uniqueKey === uniqueKey);
       if (existing) {
         return {
           items: state.items.map((i) =>
-            i.id === action.product.id ? { ...i, quantity: i.quantity + qty } : i,
+            i.uniqueKey === uniqueKey ? { ...i, quantity: i.quantity + qty } : i,
           ),
         };
       }
+      
       return {
         items: [
           ...state.items,
@@ -66,16 +75,20 @@ function reducer(state: State, action: Action): State {
             price: action.product.price,
             image: action.product.image,
             quantity: qty,
+            selectedSize: action.selectedSize,
+            selectedColor: action.selectedColor,
+            variantId: action.variantId,
+            uniqueKey,
           },
         ],
       };
     }
     case 'REMOVE':
-      return { items: state.items.filter((i) => i.id !== action.id) };
+      return { items: state.items.filter((i) => i.uniqueKey !== action.uniqueKey) };
     case 'SET_QTY':
       return {
         items: state.items
-          .map((i) => (i.id === action.id ? { ...i, quantity: action.quantity } : i))
+          .map((i) => (i.uniqueKey === action.uniqueKey ? { ...i, quantity: action.quantity } : i))
           .filter((i) => i.quantity > 0),
       };
     case 'CLEAR':
@@ -102,9 +115,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  const add = (p: Product, quantity?: number) => dispatch({ type: 'ADD', product: p, quantity });
-  const remove = (id: string) => dispatch({ type: 'REMOVE', id });
-  const setQty = (id: string, quantity: number) => dispatch({ type: 'SET_QTY', id, quantity });
+  const add = (p: Product, quantity?: number, selectedSize?: string, selectedColor?: string, variantId?: number) => 
+    dispatch({ type: 'ADD', product: p, quantity, selectedSize, selectedColor, variantId });
+  const remove = (uniqueKey: string) => dispatch({ type: 'REMOVE', uniqueKey });
+  const setQty = (uniqueKey: string, quantity: number) => dispatch({ type: 'SET_QTY', uniqueKey, quantity });
   const clear = () => dispatch({ type: 'CLEAR' });
 
   const saveCheckoutData = (data: any) => {
