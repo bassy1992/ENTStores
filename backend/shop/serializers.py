@@ -74,6 +74,63 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='category.label', read_only=True)
+    price_display = serializers.CharField(read_only=True)
+    is_in_stock = serializers.BooleanField(read_only=True)
+    image = serializers.SerializerMethodField()
+    is_featured = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'title', 'slug', 'price', 'price_display', 'description', 
+            'image', 'category', 'category_label', 'stock_quantity', 
+            'is_active', 'is_in_stock', 'is_featured', 'tags', 'created_at'
+        ]
+    
+    def get_is_featured(self, obj):
+        """Get is_featured status using tags"""
+        try:
+            # Check if tag_assignments relationship exists and has the featured tag
+            if hasattr(obj, 'tag_assignments'):
+                return obj.tag_assignments.filter(tag__name='featured').exists()
+            else:
+                return False
+        except Exception:
+            # If there's any error (missing tables, etc.), default to False
+            return False
+    
+    def get_tags(self, obj):
+        """Get product tags"""
+        try:
+            # Check if tag_assignments relationship exists
+            if hasattr(obj, 'tag_assignments'):
+                return [assignment.tag.name for assignment in obj.tag_assignments.all()]
+            else:
+                return []
+        except Exception:
+            # Fallback to empty list if there's an error (missing tables, etc.)
+            return []
+    
+    def get_image(self, obj):
+        """Get product image URL"""
+        try:
+            # Use the main image field
+            if obj.image:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.image.url)
+                return obj.image.url
+        except Exception:
+            # If there's any error with images, return placeholder
+            pass
+        
+        return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+
+
+# Keep the full serializer as a backup for when all tables are properly set up
+class ProductFullSerializer(serializers.ModelSerializer):
+    category_label = serializers.CharField(source='category.label', read_only=True)
     tags = serializers.SerializerMethodField()
     price_display = serializers.CharField(read_only=True)
     is_in_stock = serializers.BooleanField(read_only=True)
@@ -123,13 +180,18 @@ class ProductSerializer(serializers.ModelSerializer):
     
     def get_image(self, obj):
         try:
-            # First try to get primary image from ProductImage
-            primary_image = obj.images.filter(is_primary=True).first()
-            if primary_image and primary_image.image:
-                request = self.context.get('request')
-                if request:
-                    return request.build_absolute_uri(primary_image.image.url)
-                return primary_image.image.url
+            # First try to get primary image from ProductImage (only if table exists)
+            if hasattr(obj, 'images'):
+                try:
+                    primary_image = obj.images.filter(is_primary=True).first()
+                    if primary_image and primary_image.image:
+                        request = self.context.get('request')
+                        if request:
+                            return request.build_absolute_uri(primary_image.image.url)
+                        return primary_image.image.url
+                except Exception:
+                    # ProductImage table might not exist, continue to fallback
+                    pass
             
             # Fallback to the main image field
             if obj.image:
@@ -145,22 +207,34 @@ class ProductSerializer(serializers.ModelSerializer):
     
     def get_available_sizes(self, obj):
         try:
+            # Check if ProductSize and ProductVariant tables exist
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM shop_productsize LIMIT 1")
+            
             sizes = ProductSize.objects.filter(
                 productvariant__product=obj,
                 productvariant__is_available=True
             ).distinct()
             return ProductSizeSerializer(sizes, many=True).data
         except Exception as e:
+            # Tables don't exist or other error
             return []
     
     def get_available_colors(self, obj):
         try:
+            # Check if ProductColor and ProductVariant tables exist
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM shop_productcolor LIMIT 1")
+            
             colors = ProductColor.objects.filter(
                 productvariant__product=obj,
                 productvariant__is_available=True
             ).distinct()
             return ProductColorSerializer(colors, many=True).data
         except Exception as e:
+            # Tables don't exist or other error
             return []
 
 
