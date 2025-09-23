@@ -366,76 +366,80 @@ class OrderItem(models.Model):
 @receiver(post_save, sender=Order)
 def order_status_changed(sender, instance, created, **kwargs):
     """Send email notifications when order status changes or new order is created"""
-    if created:
-        # New order created - send admin notification
-        try:
-            from .email_service import send_admin_notification_email
-            
-            # Get order items for the notification
-            order_items = []
-            for item in instance.items.all():
-                order_items.append({
-                    'name': item.product.title,
-                    'sku': getattr(item.product, 'sku', 'N/A'),
-                    'quantity': item.quantity,
-                    'price': f"${item.unit_price / 100:.2f}",
-                    'total': f"${item.total_price / 100:.2f}"
-                })
-            
-            success = send_admin_notification_email(instance, order_items)
-            print(f"Admin notification email sent for new order {instance.id}: {success}")
-            
-        except Exception as e:
-            print(f"Failed to send admin notification for new order {instance.id}: {e}")
-    
-    elif not created and instance.pk:  # Only for existing orders (not new ones)
-        try:
-            # Get the previous state from the database
-            old_order = Order.objects.filter(pk=instance.pk).first()
-            if old_order and hasattr(instance, '_old_status'):
-                old_status = instance._old_status
+    try:
+        if created:
+            # New order created - send admin notification
+            try:
+                from .email_service import send_admin_notification_email
                 
-                if old_status != instance.status:
-                    # Status has changed, send appropriate email
-                    from .email_service import send_shipping_confirmation_email, send_status_update_email
+                # Get order items for the notification
+                order_items = []
+                for item in instance.items.all():
+                    order_items.append({
+                        'name': item.product.title,
+                        'sku': getattr(item.product, 'sku', 'N/A'),
+                        'quantity': item.quantity,
+                        'price': f"${item.unit_price / 100:.2f}",
+                        'total': f"${item.total_price / 100:.2f}"
+                    })
+                
+                success = send_admin_notification_email(instance, order_items)
+                print(f"Admin notification email sent for new order {instance.id}: {success}")
+                
+            except Exception as e:
+                print(f"Failed to send admin notification for new order {instance.id}: {e}")
+        
+        elif not created and instance.pk:  # Only for existing orders (not new ones)
+            try:
+                # Get the previous state from the database
+                if hasattr(instance, '_old_status'):
+                    old_status = instance._old_status
                     
-                    if instance.status == 'shipped':
-                        # Use existing tracking number or generate one
-                        tracking_number = instance.tracking_number
-                        if not tracking_number:
-                            tracking_number = f"ENT{instance.id}{timezone.now().strftime('%Y%m%d')}"
-                            # Save the generated tracking number
-                            instance.tracking_number = tracking_number
-                            instance.save(update_fields=['tracking_number'])
+                    if old_status != instance.status:
+                        # Status has changed, send appropriate email
+                        from .email_service import send_shipping_confirmation_email, send_status_update_email
                         
-                        # Send shipping confirmation with enhanced details
-                        success = send_shipping_confirmation_email(
-                            instance,
-                            tracking_number=tracking_number,
-                            carrier="Standard Shipping",
-                            estimated_days=3,
-                            delivery_instructions="Package will be left at your door if no one is available to receive it. Please ensure someone is available during delivery hours (9 AM - 6 PM)."
-                        )
-                        print(f"Shipping confirmation email sent for order {instance.id} with tracking {tracking_number}: {success}")
-                    
-                    elif instance.status in ['processing', 'delivered', 'cancelled']:
-                        # Send status update
-                        status_messages = {
-                            'processing': 'Your order is now being processed and will ship soon.',
-                            'delivered': 'Your order has been delivered! Thank you for your purchase.',
-                            'cancelled': 'Your order has been cancelled. If you have questions, please contact support.'
-                        }
+                        if instance.status == 'shipped':
+                            # Use existing tracking number or generate one
+                            tracking_number = instance.tracking_number
+                            if not tracking_number:
+                                tracking_number = f"ENT{instance.id}{timezone.now().strftime('%Y%m%d')}"
+                                # Save the generated tracking number
+                                instance.tracking_number = tracking_number
+                                instance.save(update_fields=['tracking_number'])
+                            
+                            # Send shipping confirmation with enhanced details
+                            success = send_shipping_confirmation_email(
+                                instance,
+                                tracking_number=tracking_number,
+                                carrier="Standard Shipping",
+                                estimated_days=3,
+                                delivery_instructions="Package will be left at your door if no one is available to receive it. Please ensure someone is available during delivery hours (9 AM - 6 PM)."
+                            )
+                            print(f"Shipping confirmation email sent for order {instance.id} with tracking {tracking_number}: {success}")
                         
-                        success = send_status_update_email(
-                            instance,
-                            instance.status.title(),
-                            update_message=status_messages.get(instance.status, ''),
-                            tracking_number=f"TRK{instance.id}" if instance.status == 'delivered' else None
-                        )
-                        print(f"Status update email sent for order {instance.id} - Status: {instance.status}: {success}")
-                        
-        except Exception as e:
-            print(f"Failed to send status change email for order {instance.id}: {e}")
+                        elif instance.status in ['processing', 'delivered', 'cancelled']:
+                            # Send status update
+                            status_messages = {
+                                'processing': 'Your order is now being processed and will ship soon.',
+                                'delivered': 'Your order has been delivered! Thank you for your purchase.',
+                                'cancelled': 'Your order has been cancelled. If you have questions, please contact support.'
+                            }
+                            
+                            success = send_status_update_email(
+                                instance,
+                                instance.status.title(),
+                                update_message=status_messages.get(instance.status, ''),
+                                tracking_number=f"TRK{instance.id}" if instance.status == 'delivered' else None
+                            )
+                            print(f"Status update email sent for order {instance.id} - Status: {instance.status}: {success}")
+                            
+            except Exception as e:
+                print(f"Failed to send status change email for order {instance.id}: {e}")
+    except Exception as e:
+        # Catch any other errors to prevent admin page crashes
+        print(f"Error in order signal handler for order {instance.id}: {e}")
+        pass  # Don't let email errors break the admin interface
 
 
 # Store old status before saving

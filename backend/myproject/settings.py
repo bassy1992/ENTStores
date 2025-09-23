@@ -134,23 +134,52 @@ DATABASES = {
 DATABASE_URL = os.getenv('DATABASE_URL')
 USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
 
-# Force PostgreSQL on Render
-if 'RENDER' in os.environ:
-    # Use the DATABASE_URL from Render environment variables
+# Production Database Configuration
+if not DEBUG or 'RENDER' in os.environ:
+    # Force PostgreSQL in production or on Render
     DATABASE_URL = os.getenv('DATABASE_URL')
     USE_SQLITE = False
-    print("Render deployment detected - using PostgreSQL from DATABASE_URL")
+    print("Production environment detected - forcing PostgreSQL")
+    
+    if DATABASE_URL:
+        try:
+            import dj_database_url
+            DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
+            
+            # Add production database settings
+            DATABASES['default'].update({
+                'CONN_MAX_AGE': 600,  # Connection pooling
+                'OPTIONS': {
+                    'sslmode': 'require',  # Require SSL for production
+                },
+            })
+            
+            print(f"✅ Connected to PostgreSQL database: {DATABASES['default']['NAME']}")
+            print(f"   Host: {DATABASES['default']['HOST']}")
+            print(f"   Port: {DATABASES['default']['PORT']}")
+            
+        except Exception as e:
+            print(f"❌ Failed to connect to PostgreSQL: {e}")
+            print("🔄 This will cause deployment to fail - check DATABASE_URL")
+            raise e
+    else:
+        print("❌ DATABASE_URL not found in environment variables")
+        print("🔄 This will cause deployment to fail - set DATABASE_URL in Render")
+        if not DEBUG:
+            raise ValueError("DATABASE_URL is required in production")
 
-if DATABASE_URL and not USE_SQLITE:
+elif DATABASE_URL and not USE_SQLITE:
+    # Development with PostgreSQL
     try:
         import dj_database_url
         DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
-        print(f"Using PostgreSQL database from DATABASE_URL")
+        print(f"🔧 Development: Using PostgreSQL from DATABASE_URL")
     except Exception as e:
-        print(f"Failed to connect to PostgreSQL: {e}")
-        print(f"Falling back to SQLite database at: {DATABASES['default']['NAME']}")
+        print(f"⚠️  Failed to connect to PostgreSQL: {e}")
+        print(f"🔄 Falling back to SQLite database at: {DATABASES['default']['NAME']}")
 else:
-    print(f"Using SQLite database at: {DATABASES['default']['NAME']}")
+    # Development with SQLite
+    print(f"🔧 Development: Using SQLite database at: {DATABASES['default']['NAME']}")
 
 
 # Password validation
