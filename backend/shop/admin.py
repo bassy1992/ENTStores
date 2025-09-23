@@ -186,16 +186,35 @@ class OrderItemInline(admin.TabularInline):
     
     def variant_display(self, obj):
         """Display variant information in a readable format"""
-        parts = []
-        if obj.selected_size:
-            parts.append(f"Size: {obj.selected_size}")
-        if obj.selected_color:
-            parts.append(f"Color: {obj.selected_color}")
-        return ', '.join(parts) if parts else 'No variant selected'
+        try:
+            parts = []
+            if hasattr(obj, 'selected_size') and obj.selected_size:
+                parts.append(f"Size: {obj.selected_size}")
+            if hasattr(obj, 'selected_color') and obj.selected_color:
+                parts.append(f"Color: {obj.selected_color}")
+            return ', '.join(parts) if parts else 'No variant selected'
+        except Exception as e:
+            return f'Error loading variant: {str(e)}'
     variant_display.short_description = 'Variant Info'
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product', 'product_variant')
+        try:
+            # Try the full queryset with relations
+            queryset = super().get_queryset(request).select_related('product')
+            
+            # Test if product_variant field exists
+            if hasattr(OrderItem._meta.get_field('product_variant'), 'related_model'):
+                queryset = queryset.select_related('product_variant')
+            
+            return queryset
+        except Exception as e:
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"OrderItem inline queryset error: {e}")
+            
+            # Fallback to basic queryset
+            return super().get_queryset(request)
 
 
 @admin.register(Order)
@@ -354,16 +373,35 @@ class OrderItemAdmin(admin.ModelAdmin):
     
     def variant_info_display(self, obj):
         """Display variant information in list view"""
-        parts = []
-        if obj.selected_size:
-            parts.append(f"Size: {obj.selected_size}")
-        if obj.selected_color:
-            parts.append(f"Color: {obj.selected_color}")
-        return ', '.join(parts) if parts else '-'
+        try:
+            parts = []
+            if hasattr(obj, 'selected_size') and obj.selected_size:
+                parts.append(f"Size: {obj.selected_size}")
+            if hasattr(obj, 'selected_color') and obj.selected_color:
+                parts.append(f"Color: {obj.selected_color}")
+            return ', '.join(parts) if parts else '-'
+        except Exception as e:
+            return f'Error: {str(e)}'
     variant_info_display.short_description = 'Variant'
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('order', 'product', 'product_variant')
+        try:
+            # Try the full queryset with all relations
+            queryset = super().get_queryset(request).select_related('order', 'product')
+            
+            # Test if product_variant field exists by trying to access it
+            if hasattr(OrderItem._meta.get_field('product_variant'), 'related_model'):
+                queryset = queryset.select_related('product_variant')
+            
+            return queryset
+        except Exception as e:
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"OrderItem admin queryset error: {e}")
+            
+            # Fallback to basic queryset
+            return super().get_queryset(request)
 
 
 # Custom admin site configuration
