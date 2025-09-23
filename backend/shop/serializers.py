@@ -91,6 +91,19 @@ class ProductSerializer(serializers.ModelSerializer):
             'is_active', 'is_in_stock', 'tags', 'variants', 'available_sizes', 
             'available_colors', 'created_at'
         ]
+        
+    def to_representation(self, instance):
+        """Handle missing fields gracefully"""
+        data = super().to_representation(instance)
+        
+        # Add is_featured if it exists
+        try:
+            data['is_featured'] = instance.is_featured
+        except AttributeError:
+            # Field doesn't exist in database yet
+            data['is_featured'] = False
+            
+        return data
     
     def get_tags(self, obj):
         try:

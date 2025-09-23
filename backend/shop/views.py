@@ -69,14 +69,16 @@ class FeaturedProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
     
     def get_queryset(self):
-        # Temporarily use tag-based featured products until migration is applied
+        # Handle missing is_featured field gracefully
         try:
+            # Check if is_featured field exists by trying to use it
             return Product.objects.filter(
                 is_active=True,
                 is_featured=True
             ).select_related('category')
-        except:
+        except Exception as e:
             # Fallback to tag-based if is_featured field doesn't exist
+            print(f"Using tag-based featured products fallback: {e}")
             return Product.objects.filter(
                 is_active=True,
                 tag_assignments__tag__name='featured'
@@ -119,12 +121,13 @@ def shop_stats(request):
             is_active=True,
             is_featured=True
         ).count()
-    except:
+    except Exception as e:
         # Fallback if is_featured field doesn't exist
+        print(f"Using tag-based featured count fallback: {e}")
         featured_products = Product.objects.filter(
             is_active=True,
             tag_assignments__tag__name='featured'
-        ).count()
+        ).distinct().count()
     
     return Response({
         'total_products': total_products,

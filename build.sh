@@ -27,6 +27,10 @@ python manage.py collectstatic --no-input --clear
 echo "Running database migrations..."
 python manage.py migrate --no-input
 
+# Show migration status for debugging
+echo "Checking migration status..."
+python manage.py showmigrations shop
+
 # Create superuser if it doesn't exist (optional)
 echo "Checking for superuser..."
 python manage.py shell -c "
