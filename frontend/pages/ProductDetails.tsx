@@ -407,9 +407,10 @@ export default function ProductDetails() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium">Quantity</h3>
-                      {selectedVariant && (
-                        <div className="flex items-center gap-2">
-                          {selectedVariant.is_in_stock ? (
+                      <div className="flex items-center gap-2">
+                        {/* Show variant stock if variants exist, otherwise show product stock */}
+                        {selectedVariant ? (
+                          selectedVariant.is_in_stock ? (
                             <Badge variant="secondary" className="text-green-600 bg-green-50">
                               <Check className="w-3 h-3 mr-1" />
                               In Stock ({selectedVariant.stock_quantity})
@@ -418,9 +419,21 @@ export default function ProductDetails() {
                             <Badge variant="destructive">
                               Out of Stock
                             </Badge>
-                          )}
-                        </div>
-                      )}
+                          )
+                        ) : product.variants?.length === 0 ? (
+                          // Product has no variants, show main product stock
+                          product.is_in_stock ? (
+                            <Badge variant="secondary" className="text-green-600 bg-green-50">
+                              <Check className="w-3 h-3 mr-1" />
+                              In Stock ({product.stock_quantity})
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive">
+                              Out of Stock
+                            </Badge>
+                          )
+                        ) : null}
+                      </div>
                     </div>
                     
                     <div className="flex items-center gap-3">
@@ -438,7 +451,11 @@ export default function ProductDetails() {
                           variant="ghost"
                           size="sm"
                           onClick={() => setQuantity(quantity + 1)}
-                          disabled={selectedVariant && quantity >= selectedVariant.stock_quantity}
+                          disabled={
+                            selectedVariant 
+                              ? quantity >= selectedVariant.stock_quantity
+                              : product.variants?.length === 0 && quantity >= product.stock_quantity
+                          }
                         >
                           +
                         </Button>
@@ -477,10 +494,24 @@ export default function ProductDetails() {
                           selectedVariant?.id
                         );
                       }}
-                      disabled={!selectedVariant || !selectedVariant.is_in_stock}
+                      disabled={
+                        selectedVariant 
+                          ? !selectedVariant.is_in_stock
+                          : product.variants?.length === 0 
+                            ? !product.is_in_stock
+                            : true // Disable if variants exist but none selected
+                      }
                       className="h-12 text-base font-medium"
                     >
-                      {!selectedVariant || !selectedVariant.is_in_stock ? 'Out of Stock' : `Add ${quantity} to Cart`}
+                      {(() => {
+                        if (selectedVariant) {
+                          return selectedVariant.is_in_stock ? `Add ${quantity} to Cart` : 'Out of Stock';
+                        } else if (product.variants?.length === 0) {
+                          return product.is_in_stock ? `Add ${quantity} to Cart` : 'Out of Stock';
+                        } else {
+                          return 'Select Options';
+                        }
+                      })()}
                     </Button>
                     <Button variant="outline" size="lg" className="h-12" asChild>
                       <a href="/cart">View Cart</a>

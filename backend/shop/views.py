@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Q
 from .models import Category, Product, ProductTag, Order
 from .serializers import (
-    CategorySerializer, ProductSerializer, ProductTagSerializer,
+    CategorySerializer, ProductSerializer, ProductFullSerializer, ProductTagSerializer,
     OrderSerializer, CreateOrderSerializer
 )
 
@@ -69,7 +69,7 @@ class FeaturedProductsView(generics.ListAPIView):
 class ProductDetailView(generics.RetrieveAPIView):
     """Get product details by slug"""
     queryset = Product.objects.filter(is_active=True).select_related('category')
-    serializer_class = ProductSerializer
+    serializer_class = ProductFullSerializer
     lookup_field = 'slug'
 
 
