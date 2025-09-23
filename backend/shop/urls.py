@@ -27,4 +27,7 @@ urlpatterns = [
     # Stats
     path('stats/', views.shop_stats, name='shop-stats'),
     path('search/', views.product_search, name='search'),
+    
+    # Debug
+    path('debug-products/', views.debug_products, name='debug-products'),
 ]

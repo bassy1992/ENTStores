@@ -201,12 +201,8 @@ class ProductTagAssignment(models.Model):
         return f"{self.product.title} - {self.tag.display_name}"
 
 
-# Add a property to Product model for tags
-def get_tags(self):
-    """Get all tags for this product"""
-    return [assignment.tag for assignment in self.tag_assignments.all()]
-
-Product.add_to_class('tags', property(get_tags))
+# Note: Removed dynamic property addition to avoid production issues
+# Tags are now accessed via tag_assignments relationship in serializers
 
 
 class Order(models.Model):

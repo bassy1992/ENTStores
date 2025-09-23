@@ -152,3 +152,42 @@ def product_search(request):
         'count': products.count(),
         'query': query
     })
+
+
+@api_view(['GET'])
+def debug_products(request):
+    """Debug products API issues"""
+    try:
+        # Test basic product count
+        total_products = Product.objects.count()
+        active_products = Product.objects.filter(is_active=True).count()
+        
+        # Test if we can get a single product
+        first_product = Product.objects.first()
+        product_data = None
+        
+        if first_product:
+            try:
+                # Test serialization of first product
+                serializer = ProductSerializer(first_product, context={'request': request})
+                product_data = serializer.data
+            except Exception as e:
+                product_data = {'error': str(e)}
+        
+        # Test category relationships
+        categories_count = Category.objects.count()
+        
+        return Response({
+            'total_products': total_products,
+            'active_products': active_products,
+            'categories_count': categories_count,
+            'first_product': product_data,
+            'database_engine': 'postgresql' if 'postgresql' in str(Product.objects.db) else 'unknown',
+            'message': 'Products debug info'
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'message': 'Debug products failed'
+        }, status=500)
