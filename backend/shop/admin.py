@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Product, ProductTag, ProductTagAssignment, Order, OrderItem
+from .models import (
+    Category, Product, ProductTag, ProductTagAssignment, Order, OrderItem,
+    ProductImage, ProductSize, ProductColor, ProductVariant
+)
 
 
 @admin.register(Category)
@@ -37,6 +40,19 @@ class ProductTagAssignmentInline(admin.TabularInline):
     autocomplete_fields = ['tag']
 
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+    fields = ['image', 'alt_text', 'is_primary', 'order']
+    readonly_fields = ['created_at']
+
+
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
+    fields = ['size', 'color', 'stock_quantity', 'price_adjustment', 'is_available']
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['title', 'category', 'price_display', 'stock_quantity', 'is_active', 'created_at']
@@ -44,7 +60,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['title', 'id', 'description']
     readonly_fields = ['created_at', 'updated_at']
     prepopulated_fields = {'slug': ('title',)}
-    inlines = [ProductTagAssignmentInline]
+    inlines = [ProductTagAssignmentInline, ProductImageInline, ProductVariantInline]
     
     fieldsets = (
         (None, {
@@ -262,3 +278,49 @@ class OrderItemAdmin(admin.ModelAdmin):
 admin.site.site_header = "ENNC Shop Administration"
 admin.site.site_title = "ENNC Shop Admin"
 admin.site.index_title = "Welcome to ENNC Shop Administration"
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ['product', 'alt_text', 'is_primary', 'order', 'created_at']
+    list_filter = ['is_primary', 'created_at']
+    search_fields = ['product__title', 'alt_text']
+    list_editable = ['is_primary', 'order']
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('product')
+
+
+@admin.register(ProductSize)
+class ProductSizeAdmin(admin.ModelAdmin):
+    list_display = ['display_name', 'name', 'order']
+    list_editable = ['order']
+    ordering = ['order', 'name']
+
+
+@admin.register(ProductColor)
+class ProductColorAdmin(admin.ModelAdmin):
+    list_display = ['name', 'hex_code', 'color_preview', 'order']
+    list_editable = ['order']
+    ordering = ['order', 'name']
+    
+    def color_preview(self, obj):
+        return format_html(
+            '<div style="width: 20px; height: 20px; background-color: {}; border: 1px solid #ccc; border-radius: 3px; display: inline-block;"></div>',
+            obj.hex_code
+        )
+    color_preview.short_description = 'Preview'
+
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ['product', 'size', 'color', 'stock_quantity', 'price_adjustment', 'final_price_display', 'is_available']
+    list_filter = ['size', 'color', 'is_available']
+    search_fields = ['product__title']
+    list_editable = ['stock_quantity', 'price_adjustment', 'is_available']
+    
+    def final_price_display(self, obj):
+        return f"${obj.final_price / 100:.2f}"
+    final_price_display.short_description = 'Final Price'
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('product', 'size', 'color')

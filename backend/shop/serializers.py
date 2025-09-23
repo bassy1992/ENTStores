@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Category, Product, ProductTag, Order, OrderItem
+from .models import (
+    Category, Product, ProductTag, Order, OrderItem,
+    ProductImage, ProductSize, ProductColor, ProductVariant
+)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -24,25 +27,84 @@ class ProductTagSerializer(serializers.ModelSerializer):
         fields = ['name', 'display_name', 'color']
 
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'alt_text', 'is_primary', 'order']
+    
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class ProductSizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductSize
+        fields = ['id', 'name', 'display_name', 'order']
+
+
+class ProductColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductColor
+        fields = ['id', 'name', 'hex_code', 'order']
+
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    size = ProductSizeSerializer(read_only=True)
+    color = ProductColorSerializer(read_only=True)
+    final_price = serializers.IntegerField(read_only=True)
+    final_price_display = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ProductVariant
+        fields = [
+            'id', 'size', 'color', 'stock_quantity', 'price_adjustment', 
+            'final_price', 'final_price_display', 'is_available', 'is_in_stock'
+        ]
+    
+    def get_final_price_display(self, obj):
+        return f"${obj.final_price / 100:.2f}"
+
+
 class ProductSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='category.label', read_only=True)
     tags = serializers.SerializerMethodField()
     price_display = serializers.CharField(read_only=True)
     is_in_stock = serializers.BooleanField(read_only=True)
     image = serializers.SerializerMethodField()
+    images = ProductImageSerializer(many=True, read_only=True)
+    variants = ProductVariantSerializer(many=True, read_only=True)
+    available_sizes = serializers.SerializerMethodField()
+    available_colors = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
         fields = [
             'id', 'title', 'slug', 'price', 'price_display', 'description', 
-            'image', 'category', 'category_label', 'stock_quantity', 
-            'is_active', 'is_in_stock', 'tags', 'created_at'
+            'image', 'images', 'category', 'category_label', 'stock_quantity', 
+            'is_active', 'is_in_stock', 'tags', 'variants', 'available_sizes', 
+            'available_colors', 'created_at'
         ]
     
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags]
     
     def get_image(self, obj):
+        # First try to get primary image from ProductImage
+        primary_image = obj.images.filter(is_primary=True).first()
+        if primary_image and primary_image.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(primary_image.image.url)
+            return primary_image.image.url
+        
+        # Fallback to the main image field
         if obj.image:
             try:
                 request = self.context.get('request')
@@ -53,6 +115,20 @@ class ProductSerializer(serializers.ModelSerializer):
                 # If image file doesn't exist, return placeholder
                 return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
         return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+    
+    def get_available_sizes(self, obj):
+        sizes = ProductSize.objects.filter(
+            productvariant__product=obj,
+            productvariant__is_available=True
+        ).distinct()
+        return ProductSizeSerializer(sizes, many=True).data
+    
+    def get_available_colors(self, obj):
+        colors = ProductColor.objects.filter(
+            productvariant__product=obj,
+            productvariant__is_available=True
+        ).distinct()
+        return ProductColorSerializer(colors, many=True).data
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

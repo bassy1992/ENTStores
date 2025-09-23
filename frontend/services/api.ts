@@ -24,6 +24,40 @@ function processImageUrl(imageUrl: string): string {
 }
 
 // Types for API responses
+export interface ApiProductImage {
+  id: number;
+  image: string;
+  alt_text: string;
+  is_primary: boolean;
+  order: number;
+}
+
+export interface ApiProductSize {
+  id: number;
+  name: string;
+  display_name: string;
+  order: number;
+}
+
+export interface ApiProductColor {
+  id: number;
+  name: string;
+  hex_code: string;
+  order: number;
+}
+
+export interface ApiProductVariant {
+  id: number;
+  size: ApiProductSize;
+  color: ApiProductColor;
+  stock_quantity: number;
+  price_adjustment: number;
+  final_price: number;
+  final_price_display: string;
+  is_available: boolean;
+  is_in_stock: boolean;
+}
+
 export interface ApiProduct {
   id: string;
   title: string;
@@ -32,12 +66,16 @@ export interface ApiProduct {
   price_display: string;
   description: string;
   image: string;
+  images: ApiProductImage[];
   category: string;
   category_label: string;
   stock_quantity: number;
   is_active: boolean;
   is_in_stock: boolean;
   tags: string[];
+  variants: ApiProductVariant[];
+  available_sizes: ApiProductSize[];
+  available_colors: ApiProductColor[];
   created_at: string;
 }
 
@@ -229,8 +267,12 @@ export function convertApiProduct(apiProduct: ApiProduct): any {
     price: apiProduct.price,
     description: apiProduct.description,
     image: apiProduct.image,
+    images: apiProduct.images || [],
     category: apiProduct.category,
     tags: apiProduct.tags,
+    variants: apiProduct.variants || [],
+    available_sizes: apiProduct.available_sizes || [],
+    available_colors: apiProduct.available_colors || [],
   };
 }
 
