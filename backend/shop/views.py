@@ -69,20 +69,11 @@ class FeaturedProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
     
     def get_queryset(self):
-        # Handle missing is_featured field gracefully
-        try:
-            # Check if is_featured field exists by trying to use it
-            return Product.objects.filter(
-                is_active=True,
-                is_featured=True
-            ).select_related('category')
-        except Exception as e:
-            # Fallback to tag-based if is_featured field doesn't exist
-            print(f"Using tag-based featured products fallback: {e}")
-            return Product.objects.filter(
-                is_active=True,
-                tag_assignments__tag__name='featured'
-            ).select_related('category').distinct()
+        # Use tag-based featured products to avoid is_featured field issues
+        return Product.objects.filter(
+            is_active=True,
+            tag_assignments__tag__name='featured'
+        ).select_related('category').prefetch_related('tag_assignments__tag').distinct()
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -116,18 +107,12 @@ def shop_stats(request):
     """Get shop statistics"""
     total_products = Product.objects.filter(is_active=True).count()
     total_categories = Category.objects.count()
-    try:
-        featured_products = Product.objects.filter(
-            is_active=True,
-            is_featured=True
-        ).count()
-    except Exception as e:
-        # Fallback if is_featured field doesn't exist
-        print(f"Using tag-based featured count fallback: {e}")
-        featured_products = Product.objects.filter(
-            is_active=True,
-            tag_assignments__tag__name='featured'
-        ).distinct().count()
+    
+    # Use tag-based featured count to avoid is_featured field issues
+    featured_products = Product.objects.filter(
+        is_active=True,
+        tag_assignments__tag__name='featured'
+    ).distinct().count()
     
     return Response({
         'total_products': total_products,

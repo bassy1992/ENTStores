@@ -96,11 +96,11 @@ class ProductSerializer(serializers.ModelSerializer):
         """Handle missing fields gracefully"""
         data = super().to_representation(instance)
         
-        # Add is_featured if it exists
+        # Use tag-based is_featured to avoid database field issues
         try:
-            data['is_featured'] = instance.is_featured
-        except AttributeError:
-            # Field doesn't exist in database yet
+            has_featured_tag = instance.tag_assignments.filter(tag__name='featured').exists()
+            data['is_featured'] = has_featured_tag
+        except Exception:
             data['is_featured'] = False
             
         return data
