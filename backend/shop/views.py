@@ -60,10 +60,18 @@ class FeaturedProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
     
     def get_queryset(self):
-        return Product.objects.filter(
-            is_active=True,
-            is_featured=True
-        ).select_related('category')
+        # Temporarily use tag-based featured products until migration is applied
+        try:
+            return Product.objects.filter(
+                is_active=True,
+                is_featured=True
+            ).select_related('category')
+        except:
+            # Fallback to tag-based if is_featured field doesn't exist
+            return Product.objects.filter(
+                is_active=True,
+                tag_assignments__tag__name='featured'
+            ).select_related('category').distinct()
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -97,10 +105,17 @@ def shop_stats(request):
     """Get shop statistics"""
     total_products = Product.objects.filter(is_active=True).count()
     total_categories = Category.objects.count()
-    featured_products = Product.objects.filter(
-        is_active=True,
-        is_featured=True
-    ).count()
+    try:
+        featured_products = Product.objects.filter(
+            is_active=True,
+            is_featured=True
+        ).count()
+    except:
+        # Fallback if is_featured field doesn't exist
+        featured_products = Product.objects.filter(
+            is_active=True,
+            tag_assignments__tag__name='featured'
+        ).count()
     
     return Response({
         'total_products': total_products,
