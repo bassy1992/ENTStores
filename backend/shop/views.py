@@ -184,25 +184,49 @@ def debug_products(request):
 def simple_products(request):
     """Simple products endpoint without complex serialization"""
     try:
-        products = Product.objects.filter(is_active=True).select_related('category')[:10]
+        # Get category filter if provided
+        category = request.GET.get('category')
+        
+        # Build queryset
+        queryset = Product.objects.filter(is_active=True).select_related('category')
+        
+        if category:
+            queryset = queryset.filter(category__key=category)
+        
+        products = queryset[:50]  # Limit to 50 products
         
         simple_data = []
         for product in products:
+            # Build image URL
+            image_url = "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+            if product.image:
+                try:
+                    image_url = request.build_absolute_uri(product.image.url)
+                except:
+                    pass
+            
             simple_data.append({
                 'id': product.id,
                 'title': product.title,
+                'slug': product.slug,
                 'price': product.price,
                 'price_display': f"${product.price / 100:.2f}",
+                'description': product.description,
+                'image': image_url,
                 'category': product.category.key if product.category else None,
                 'category_label': product.category.label if product.category else None,
-                'is_active': product.is_active,
                 'stock_quantity': product.stock_quantity,
+                'is_active': product.is_active,
+                'is_in_stock': product.stock_quantity > 0,
+                'is_featured': False,  # Default for now
+                'tags': [],  # Default for now
+                'created_at': product.created_at.isoformat() if product.created_at else None,
             })
         
         return Response({
             'results': simple_data,
             'count': len(simple_data),
-            'message': 'Simple products data'
+            'message': 'Simple products data with full fields'
         })
         
     except Exception as e:
