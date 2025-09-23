@@ -76,56 +76,39 @@ class ProductSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='category.label', read_only=True)
     price_display = serializers.CharField(read_only=True)
     is_in_stock = serializers.BooleanField(read_only=True)
-    image = serializers.SerializerMethodField()
-    is_featured = serializers.SerializerMethodField()
-    tags = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
         fields = [
             'id', 'title', 'slug', 'price', 'price_display', 'description', 
-            'image', 'category', 'category_label', 'stock_quantity', 
-            'is_active', 'is_in_stock', 'is_featured', 'tags', 'created_at'
+            'category', 'category_label', 'stock_quantity', 
+            'is_active', 'is_in_stock', 'created_at'
         ]
     
-    def get_is_featured(self, obj):
-        """Get is_featured status using tags"""
+    def to_representation(self, instance):
+        """Add computed fields safely"""
+        data = super().to_representation(instance)
+        
+        # Add is_featured field
+        data['is_featured'] = False  # Default to False for now
+        
+        # Add tags field
+        data['tags'] = []  # Default to empty list for now
+        
+        # Add image field
         try:
-            # Check if tag_assignments relationship exists and has the featured tag
-            if hasattr(obj, 'tag_assignments'):
-                return obj.tag_assignments.filter(tag__name='featured').exists()
-            else:
-                return False
-        except Exception:
-            # If there's any error (missing tables, etc.), default to False
-            return False
-    
-    def get_tags(self, obj):
-        """Get product tags"""
-        try:
-            # Check if tag_assignments relationship exists
-            if hasattr(obj, 'tag_assignments'):
-                return [assignment.tag.name for assignment in obj.tag_assignments.all()]
-            else:
-                return []
-        except Exception:
-            # Fallback to empty list if there's an error (missing tables, etc.)
-            return []
-    
-    def get_image(self, obj):
-        """Get product image URL"""
-        try:
-            # Use the main image field
-            if obj.image:
+            if instance.image:
                 request = self.context.get('request')
                 if request:
-                    return request.build_absolute_uri(obj.image.url)
-                return obj.image.url
+                    data['image'] = request.build_absolute_uri(instance.image.url)
+                else:
+                    data['image'] = instance.image.url
+            else:
+                data['image'] = "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
         except Exception:
-            # If there's any error with images, return placeholder
-            pass
+            data['image'] = "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
         
-        return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+        return data
 
 
 # Keep the full serializer as a backup for when all tables are properly set up
