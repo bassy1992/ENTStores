@@ -26,33 +26,42 @@ class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     
     def get_queryset(self):
-        queryset = Product.objects.filter(is_active=True).select_related('category')
-        
-        # Filter by category
-        category = self.request.query_params.get('category')
-        if category:
-            queryset = queryset.filter(category__key=category)
-        
-        # Filter by tags
-        tags = self.request.query_params.get('tags')
-        if tags:
-            tag_list = tags.split(',')
-            queryset = queryset.filter(tag_assignments__tag__name__in=tag_list).distinct()
-        
-        # Search functionality
-        search = self.request.query_params.get('search')
-        if search:
-            queryset = queryset.filter(
-                Q(title__icontains=search) | 
-                Q(description__icontains=search)
+        try:
+            queryset = Product.objects.filter(is_active=True).select_related('category').prefetch_related(
+                'tag_assignments__tag',
+                'images',
+                'variants__size',
+                'variants__color'
             )
-        
-        # Filter by stock availability
-        in_stock = self.request.query_params.get('in_stock')
-        if in_stock and in_stock.lower() == 'true':
-            queryset = queryset.filter(stock_quantity__gt=0)
-        
-        return queryset
+            
+            # Filter by category
+            category = self.request.query_params.get('category')
+            if category:
+                queryset = queryset.filter(category__key=category)
+            
+            # Filter by tags
+            tags = self.request.query_params.get('tags')
+            if tags:
+                tag_list = tags.split(',')
+                queryset = queryset.filter(tag_assignments__tag__name__in=tag_list).distinct()
+            
+            # Search functionality
+            search = self.request.query_params.get('search')
+            if search:
+                queryset = queryset.filter(
+                    Q(title__icontains=search) | 
+                    Q(description__icontains=search)
+                )
+            
+            # Filter by stock availability
+            in_stock = self.request.query_params.get('in_stock')
+            if in_stock and in_stock.lower() == 'true':
+                queryset = queryset.filter(stock_quantity__gt=0)
+            
+            return queryset
+        except Exception as e:
+            # Return empty queryset if there's an error
+            return Product.objects.none()
 
 
 class FeaturedProductsView(generics.ListAPIView):

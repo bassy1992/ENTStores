@@ -93,42 +93,54 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
     
     def get_tags(self, obj):
-        return [tag.name for tag in obj.tags]
+        try:
+            # Use the tag_assignments relationship instead of the property
+            return [assignment.tag.name for assignment in obj.tag_assignments.all()]
+        except Exception as e:
+            # Fallback to empty list if there's an error
+            return []
     
     def get_image(self, obj):
-        # First try to get primary image from ProductImage
-        primary_image = obj.images.filter(is_primary=True).first()
-        if primary_image and primary_image.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(primary_image.image.url)
-            return primary_image.image.url
-        
-        # Fallback to the main image field
-        if obj.image:
-            try:
+        try:
+            # First try to get primary image from ProductImage
+            primary_image = obj.images.filter(is_primary=True).first()
+            if primary_image and primary_image.image:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(primary_image.image.url)
+                return primary_image.image.url
+            
+            # Fallback to the main image field
+            if obj.image:
                 request = self.context.get('request')
                 if request:
                     return request.build_absolute_uri(obj.image.url)
                 return obj.image.url
-            except:
-                # If image file doesn't exist, return placeholder
-                return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+        except Exception as e:
+            # If there's any error with images, return placeholder
+            pass
+        
         return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
     
     def get_available_sizes(self, obj):
-        sizes = ProductSize.objects.filter(
-            productvariant__product=obj,
-            productvariant__is_available=True
-        ).distinct()
-        return ProductSizeSerializer(sizes, many=True).data
+        try:
+            sizes = ProductSize.objects.filter(
+                productvariant__product=obj,
+                productvariant__is_available=True
+            ).distinct()
+            return ProductSizeSerializer(sizes, many=True).data
+        except Exception as e:
+            return []
     
     def get_available_colors(self, obj):
-        colors = ProductColor.objects.filter(
-            productvariant__product=obj,
-            productvariant__is_available=True
-        ).distinct()
-        return ProductColorSerializer(colors, many=True).data
+        try:
+            colors = ProductColor.objects.filter(
+                productvariant__product=obj,
+                productvariant__is_available=True
+            ).distinct()
+            return ProductColorSerializer(colors, many=True).data
+        except Exception as e:
+            return []
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
