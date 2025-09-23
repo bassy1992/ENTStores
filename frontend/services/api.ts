@@ -6,7 +6,7 @@ import { CategoryModel, Category } from '../data/products';
 const _env = (import.meta as any).env;
 const API_BASE_URL = _env.VITE_SHOP_API_BASE_URL || (_env.DEV ? '/api/shop' : 'https://entstores.onrender.com/api/shop');
 
-// Helper function to process image URLs for development
+// Helper function to process image URLs for development and production
 function processImageUrl(imageUrl: string): string {
   if (!imageUrl) return '';
   
@@ -18,6 +18,21 @@ function processImageUrl(imageUrl: string): string {
   // In development, if we get a relative URL, keep it as is for proxy
   if (_env.DEV && imageUrl.startsWith('/media/')) {
     return imageUrl;
+  }
+  
+  // In production, if we get a relative URL, convert to full production URL
+  if (!_env.DEV && imageUrl.startsWith('/media/')) {
+    return `https://entstores.onrender.com${imageUrl}`;
+  }
+  
+  // If it's already a full URL, return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // Fallback: assume it's a relative path and prepend production URL
+  if (!_env.DEV) {
+    return `https://entstores.onrender.com/media/${imageUrl}`;
   }
   
   return imageUrl;
@@ -129,7 +144,11 @@ export const apiService = {
     if (data.results) {
       data.results = data.results.map((product: ApiProduct) => ({
         ...product,
-        image: processImageUrl(product.image)
+        image: processImageUrl(product.image),
+        images: product.images?.map(img => ({
+          ...img,
+          image: processImageUrl(img.image)
+        })) || []
       }));
     }
     
@@ -147,7 +166,11 @@ export const apiService = {
     if (data.results) {
       data.results = data.results.map((product: ApiProduct) => ({
         ...product,
-        image: processImageUrl(product.image)
+        image: processImageUrl(product.image),
+        images: product.images?.map(img => ({
+          ...img,
+          image: processImageUrl(img.image)
+        })) || []
       }));
     }
     
@@ -161,10 +184,14 @@ export const apiService = {
     }
     const product = await response.json();
     
-    // Process image URL for development
+    // Process image URLs for development
     return {
       ...product,
-      image: processImageUrl(product.image)
+      image: processImageUrl(product.image),
+      images: product.images?.map(img => ({
+        ...img,
+        image: processImageUrl(img.image)
+      })) || []
     };
   },
 
@@ -179,7 +206,11 @@ export const apiService = {
     if (data.results) {
       data.results = data.results.map((product: ApiProduct) => ({
         ...product,
-        image: processImageUrl(product.image)
+        image: processImageUrl(product.image),
+        images: product.images?.map(img => ({
+          ...img,
+          image: processImageUrl(img.image)
+        })) || []
       }));
     }
     
