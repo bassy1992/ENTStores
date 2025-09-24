@@ -238,34 +238,41 @@ WHITENOISE_AUTOREFRESH = True
 
 # Media files (User uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# For Railway deployment, use persistent volume for media files
-if os.getenv('RAILWAY_ENVIRONMENT'):
-    MEDIA_ROOT = '/app/data/media'
+# Default file storage - use enhanced storage for better persistence
+DEFAULT_FILE_STORAGE = 'shop.storage.DualLocationStorage'
 
-# For Render deployment, use persistent disk for media files
+# Media root configuration
 if os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
+    # Render deployment - use persistent disk
     MEDIA_ROOT = '/opt/render/project/data/media'
-    # Ensure the media directory exists with proper structure
-    os.makedirs(MEDIA_ROOT, exist_ok=True)
-    os.makedirs(os.path.join(MEDIA_ROOT, 'products'), exist_ok=True)
-    os.makedirs(os.path.join(MEDIA_ROOT, 'categories'), exist_ok=True)
-    print(f"📁 Media root set to: {MEDIA_ROOT}")
-    print(f"📁 Media directory exists: {os.path.exists(MEDIA_ROOT)}")
+    print(f"📁 Render: Media root set to: {MEDIA_ROOT}")
     
-    # Also create a local media symlink for development consistency
-    local_media = os.path.join(BASE_DIR, 'media')
-    if not os.path.exists(local_media) and not os.path.islink(local_media):
-        try:
-            os.symlink(MEDIA_ROOT, local_media)
-            print(f"🔗 Created symlink: {local_media} -> {MEDIA_ROOT}")
-        except (OSError, NotImplementedError):
-            # Symlink creation failed, create regular directory
-            os.makedirs(local_media, exist_ok=True)
-            print(f"📁 Created regular directory: {local_media}")
+    # Ensure all media directories exist
+    media_dirs = [
+        MEDIA_ROOT,
+        '/opt/render/project/data/media_backup',
+        '/opt/render/project/data/media_archive',
+        os.path.join(MEDIA_ROOT, 'products'),
+        os.path.join(MEDIA_ROOT, 'categories'),
+    ]
+    
+    for media_dir in media_dirs:
+        os.makedirs(media_dir, exist_ok=True)
+    
+    print(f"📁 Media directories created and verified")
+    
+elif os.getenv('RAILWAY_ENVIRONMENT'):
+    # Railway deployment - use persistent volume
+    MEDIA_ROOT = '/app/data/media'
+    print(f"📁 Railway: Media root set to: {MEDIA_ROOT}")
 else:
-    print(f"📁 Using local media directory: {MEDIA_ROOT}")
+    # Local development
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    print(f"📁 Local: Media root set to: {MEDIA_ROOT}")
+
+# Ensure media root exists
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
