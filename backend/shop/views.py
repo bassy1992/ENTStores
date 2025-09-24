@@ -59,11 +59,11 @@ class FeaturedProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
     
     def get_queryset(self):
-        # Use tag-based featured products to avoid is_featured field issues
+        # Use the is_featured field
         return Product.objects.filter(
             is_active=True,
-            tag_assignments__tag__name='featured'
-        ).select_related('category').prefetch_related('tag_assignments__tag').distinct()
+            is_featured=True
+        ).select_related('category')
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -98,11 +98,11 @@ def shop_stats(request):
     total_products = Product.objects.filter(is_active=True).count()
     total_categories = Category.objects.count()
     
-    # Use tag-based featured count to avoid is_featured field issues
+    # Use the is_featured field
     featured_products = Product.objects.filter(
         is_active=True,
-        tag_assignments__tag__name='featured'
-    ).distinct().count()
+        is_featured=True
+    ).count()
     
     return Response({
         'total_products': total_products,
@@ -218,7 +218,7 @@ def simple_products(request):
                 'stock_quantity': product.stock_quantity,
                 'is_active': product.is_active,
                 'is_in_stock': product.stock_quantity > 0,
-                'is_featured': False,  # Default for now
+                'is_featured': getattr(product, 'is_featured', False),
                 'tags': [],  # Default for now
                 'created_at': product.created_at.isoformat() if product.created_at else None,
             })

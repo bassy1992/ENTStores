@@ -82,15 +82,18 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'price', 'price_display', 'description', 
             'category', 'category_label', 'stock_quantity', 
-            'is_active', 'is_in_stock', 'created_at'
+            'is_active', 'is_featured', 'is_in_stock', 'created_at'
         ]
     
     def to_representation(self, instance):
         """Add computed fields safely"""
         data = super().to_representation(instance)
         
-        # Add is_featured field
-        data['is_featured'] = False  # Default to False for now
+        # Add is_featured field from the model
+        try:
+            data['is_featured'] = getattr(instance, 'is_featured', False)
+        except AttributeError:
+            data['is_featured'] = False
         
         # Add tags field
         data['tags'] = []  # Default to empty list for now
