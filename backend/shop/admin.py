@@ -81,8 +81,8 @@ class ProductVariantInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
-    list_display = ['title', 'category', 'price_display', 'stock_quantity', 'is_active', 'created_at']
-    list_filter = ['category', 'is_active', 'created_at', 'tag_assignments__tag']
+    list_display = ['title', 'category', 'price_display', 'stock_quantity', 'is_active', 'is_featured', 'created_at']
+    list_filter = ['category', 'is_active', 'is_featured', 'created_at', 'tag_assignments__tag']
     search_fields = ['title', 'id', 'description']
     readonly_fields = ['created_at', 'updated_at']
     prepopulated_fields = {'slug': ('title',)}
@@ -105,7 +105,7 @@ class ProductAdmin(admin.ModelAdmin):
             'description': 'Upload a main product image. You can add more images in the "Product Images" section below.'
         }),
         ('Inventory & Settings', {
-            'fields': ('stock_quantity', 'is_active')
+            'fields': ('stock_quantity', 'is_active', 'is_featured')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

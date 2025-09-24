@@ -111,11 +111,10 @@ class Product(models.Model):
         default=True,
         help_text="Whether the product is active and available for purchase"
     )
-    # Temporarily commented out due to migration issues on production
-    # is_featured = models.BooleanField(
-    #     default=False,
-    #     help_text="Whether the product should be featured on the home page"
-    # )
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="Whether the product should be featured on the home page"
+    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
