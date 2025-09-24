@@ -233,10 +233,15 @@ urlpatterns = [
     path('api/momo/status/<str:reference>/', payment_views.check_momo_status, name='legacy-momo-status'),
 ]
 
-# Serve media files even when DEBUG=False (required for Render Web Services)
-urlpatterns += [
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-]
+# Serve media files in all environments (required for Render Web Services)
+if settings.DEBUG:
+    # Development: serve media files
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # Production: serve media files manually since DEBUG=False
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
 # Serve frontend assets
 if settings.DEBUG:

@@ -13,10 +13,18 @@ cd backend
 
 # Create media directory if it doesn't exist (for Render persistent disk)
 if [ "$RENDER" = "true" ]; then
-    echo "Creating media directory for Render..."
+    echo "Setting up media directory for Render..."
     mkdir -p /opt/render/project/data/media
-    chmod 755 /opt/render/project/data/media
-    echo "Created media directory at /opt/render/project/data/media"
+    mkdir -p /opt/render/project/data/media/products
+    mkdir -p /opt/render/project/data/media/categories
+    chmod -R 755 /opt/render/project/data/media
+    echo "Created media directory structure at /opt/render/project/data/media"
+    
+    # Create a symlink from backend/media to the persistent disk (if needed)
+    if [ ! -L "media" ]; then
+        ln -sf /opt/render/project/data/media media
+        echo "Created symlink from backend/media to persistent disk"
+    fi
 fi
 
 # Collect static files
