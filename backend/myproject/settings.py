@@ -220,7 +220,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Additional locations of static files
-STATICFILES_DIRS = []
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # Backend static files (admin CSS, etc.)
+]
 
 # Only add frontend static files if they exist (for local development)
 frontend_static_path = os.path.join(BASE_DIR.parent, 'frontend', 'dist', 'spa')

@@ -92,6 +92,7 @@ class ProductAdmin(admin.ModelAdmin):
         css = {
             'all': ('admin/css/custom_admin.css',)
         }
+
     
     fieldsets = (
         (None, {
