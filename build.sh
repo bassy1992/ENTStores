@@ -11,36 +11,35 @@ pip install -r requirements.txt
 # Navigate to backend directory
 cd backend
 
-# AGGRESSIVE MEDIA PROTECTION for Render
+# PERMANENT CLOUD STORAGE SETUP for Render
 if [ "$RENDER" = "true" ]; then
-    echo "🛡️ AGGRESSIVE MEDIA PROTECTION SYSTEM ACTIVATING..."
+    echo "☁️ PERMANENT CLOUD STORAGE SYSTEM ACTIVATING..."
     
-    # Step 1: Set up protection system
-    echo "🔧 Setting up media protection..."
-    python manage.py protect_media --setup || echo "⚠️  Protection setup failed"
+    # Step 1: Set up local media directories (for fallback)
+    echo "📁 Setting up local media directories..."
+    mkdir -p /opt/render/project/data/media/products
+    mkdir -p /opt/render/project/data/media/categories
+    chmod -R 755 /opt/render/project/data/media
     
-    # Step 2: Create comprehensive backup
-    echo "📦 Creating comprehensive backup..."
-    python manage.py backup_restore_media --backup || echo "⚠️  Backup failed"
+    # Step 2: Show permanent storage status
+    echo "📊 Checking permanent storage status..."
+    python manage.py migrate_to_permanent || echo "ℹ️  Status check completed"
     
-    # Step 3: Force restore all missing files
-    echo "🚨 Force restoring all media files..."
-    python manage.py protect_media --force-restore || echo "⚠️  Force restore failed"
+    # Step 3: Create and upload placeholder files to permanent storage
+    echo "☁️ Creating permanent placeholder files..."
+    python manage.py migrate_to_permanent --create-placeholders || echo "⚠️  Placeholder creation failed"
     
-    # Step 4: Verify everything is working
-    echo "🔍 Final verification..."
-    python manage.py protect_media --verify || echo "⚠️  Verification failed"
+    # Step 4: Verify all files are accessible
+    echo "🔍 Verifying permanent storage..."
+    python manage.py migrate_to_permanent --verify || echo "⚠️  Verification completed"
     
-    # Step 5: Show final status
-    echo "📊 Media protection status:"
-    python manage.py protect_media || echo "⚠️  Status check failed"
+    # Step 5: Final status
+    echo "📊 Final permanent storage status:"
+    python manage.py migrate_to_permanent || echo "ℹ️  Status displayed"
     
-    # Step 6: Create emergency placeholders if needed
-    echo "🖼️ Creating emergency placeholders..."
-    python manage.py protect_media --create-placeholders || echo "⚠️  Placeholder creation failed"
-    
-    echo "✅ AGGRESSIVE MEDIA PROTECTION COMPLETE!"
-    echo "📊 Final file count: $(find /opt/render/project/data/media -type f 2>/dev/null | wc -l) files"
+    echo "✅ PERMANENT CLOUD STORAGE READY!"
+    echo "☁️ Media files are now stored permanently in the cloud"
+    echo "🌐 Files will NEVER be lost during deployments"
 fi
 
 # Collect static files

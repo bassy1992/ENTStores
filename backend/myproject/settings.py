@@ -239,8 +239,17 @@ WHITENOISE_AUTOREFRESH = True
 # Media files (User uploads)
 MEDIA_URL = '/media/'
 
-# Default file storage - use enhanced storage for better persistence
-DEFAULT_FILE_STORAGE = 'shop.storage.DualLocationStorage'
+# Default file storage - use permanent cloud storage
+DEFAULT_FILE_STORAGE = 'shop.cloud_storage.PermanentStorage'
+
+# GitHub storage configuration (for permanent media storage)
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN', '')  # Set this in Render environment
+GITHUB_MEDIA_REPO = 'ENTstore-media'  # Create this repository
+
+# Cloudinary configuration (optional, for additional redundancy)
+CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', '')
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '')
+CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME', 'entstore')
 
 # Media root configuration
 if os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
