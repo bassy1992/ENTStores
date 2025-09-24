@@ -13,7 +13,11 @@ cd backend
 
 # Set up media directory for Render persistent disk
 if [ "$RENDER" = "true" ]; then
-    echo "Setting up media directory for Render..."
+    echo "🔧 Setting up bulletproof media system for Render..."
+    
+    # Create backup directory
+    mkdir -p /opt/render/project/data/backups
+    chmod 755 /opt/render/project/data/backups
     
     # Create persistent media directory structure
     mkdir -p /opt/render/project/data/media
@@ -22,19 +26,22 @@ if [ "$RENDER" = "true" ]; then
     chmod -R 755 /opt/render/project/data/media
     echo "✅ Created persistent media directory at /opt/render/project/data/media"
     
-    # Create local media directory
-    mkdir -p media
-    chmod 755 media
-    echo "✅ Created local media directory"
+    # Create backup before any changes
+    echo "📦 Creating pre-deployment backup..."
+    python manage.py backup_restore_media --backup || echo "⚠️  Backup creation failed"
     
-    # Sync any existing media files
-    echo "🔄 Syncing media files..."
-    python manage.py sync_media || echo "⚠️  Media sync failed, continuing..."
+    # Auto-restore missing files if available
+    echo "🔄 Auto-restoring missing media files..."
+    python manage.py backup_restore_media --auto-restore || echo "ℹ️  No restore needed or no backups available"
     
-    # List media files for debugging
-    echo "📊 Media files status:"
-    echo "   Persistent disk files: $(find /opt/render/project/data/media -type f 2>/dev/null | wc -l)"
-    echo "   Local media files: $(find media -type f 2>/dev/null | wc -l)"
+    # Clean up old backups (keep last 10)
+    python manage.py backup_restore_media --cleanup || echo "ℹ️  Cleanup skipped"
+    
+    # Final status check
+    echo "📊 Final media status:"
+    python manage.py backup_restore_media || echo "⚠️  Status check failed"
+    
+    echo "✅ Bulletproof media system ready!"
 fi
 
 # Collect static files
