@@ -11,20 +11,30 @@ pip install -r requirements.txt
 # Navigate to backend directory
 cd backend
 
-# Create media directory if it doesn't exist (for Render persistent disk)
+# Set up media directory for Render persistent disk
 if [ "$RENDER" = "true" ]; then
     echo "Setting up media directory for Render..."
+    
+    # Create persistent media directory structure
     mkdir -p /opt/render/project/data/media
     mkdir -p /opt/render/project/data/media/products
     mkdir -p /opt/render/project/data/media/categories
     chmod -R 755 /opt/render/project/data/media
-    echo "Created media directory structure at /opt/render/project/data/media"
+    echo "✅ Created persistent media directory at /opt/render/project/data/media"
     
-    # Create a symlink from backend/media to the persistent disk (if needed)
-    if [ ! -L "media" ]; then
-        ln -sf /opt/render/project/data/media media
-        echo "Created symlink from backend/media to persistent disk"
-    fi
+    # Create local media directory
+    mkdir -p media
+    chmod 755 media
+    echo "✅ Created local media directory"
+    
+    # Sync any existing media files
+    echo "🔄 Syncing media files..."
+    python manage.py sync_media || echo "⚠️  Media sync failed, continuing..."
+    
+    # List media files for debugging
+    echo "📊 Media files status:"
+    echo "   Persistent disk files: $(find /opt/render/project/data/media -type f 2>/dev/null | wc -l)"
+    echo "   Local media files: $(find media -type f 2>/dev/null | wc -l)"
 fi
 
 # Collect static files

@@ -247,8 +247,25 @@ if os.getenv('RAILWAY_ENVIRONMENT'):
 # For Render deployment, use persistent disk for media files
 if os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
     MEDIA_ROOT = '/opt/render/project/data/media'
-    # Ensure the media directory exists
+    # Ensure the media directory exists with proper structure
     os.makedirs(MEDIA_ROOT, exist_ok=True)
+    os.makedirs(os.path.join(MEDIA_ROOT, 'products'), exist_ok=True)
+    os.makedirs(os.path.join(MEDIA_ROOT, 'categories'), exist_ok=True)
+    print(f"📁 Media root set to: {MEDIA_ROOT}")
+    print(f"📁 Media directory exists: {os.path.exists(MEDIA_ROOT)}")
+    
+    # Also create a local media symlink for development consistency
+    local_media = os.path.join(BASE_DIR, 'media')
+    if not os.path.exists(local_media) and not os.path.islink(local_media):
+        try:
+            os.symlink(MEDIA_ROOT, local_media)
+            print(f"🔗 Created symlink: {local_media} -> {MEDIA_ROOT}")
+        except (OSError, NotImplementedError):
+            # Symlink creation failed, create regular directory
+            os.makedirs(local_media, exist_ok=True)
+            print(f"📁 Created regular directory: {local_media}")
+else:
+    print(f"📁 Using local media directory: {MEDIA_ROOT}")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
