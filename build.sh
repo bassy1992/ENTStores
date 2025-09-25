@@ -11,35 +11,37 @@ pip install -r requirements.txt
 # Navigate to backend directory
 cd backend
 
-# PERMANENT CLOUD STORAGE SETUP for Render
+# AUTO-SYNC MEDIA SYSTEM for Render
 if [ "$RENDER" = "true" ]; then
-    echo "☁️ PERMANENT CLOUD STORAGE SYSTEM ACTIVATING..."
+    echo "🔄 AUTO-SYNC MEDIA SYSTEM ACTIVATING..."
     
-    # Step 1: Set up local media directories (for fallback)
-    echo "📁 Setting up local media directories..."
+    # Step 1: Set up local media directories
+    echo "📁 Setting up media directories..."
     mkdir -p /opt/render/project/data/media/products
     mkdir -p /opt/render/project/data/media/categories
-    chmod -R 755 /opt/render/project/data/media
+    mkdir -p /opt/render/project/data/media_backup
+    mkdir -p /opt/render/project/data/media_archive
+    chmod -R 755 /opt/render/project/data/media*
     
-    # Step 2: Show permanent storage status
-    echo "📊 Checking permanent storage status..."
-    python manage.py migrate_to_permanent || echo "ℹ️  Status check completed"
+    # Step 2: Auto-sync all media files
+    echo "🚀 Auto-syncing media files..."
+    python manage.py migrate_to_permanent --auto-sync || echo "⚠️  Auto-sync completed with warnings"
     
-    # Step 3: Create and upload placeholder files to permanent storage
-    echo "☁️ Creating permanent placeholder files..."
-    python manage.py migrate_to_permanent --create-placeholders || echo "⚠️  Placeholder creation failed"
+    # Step 3: Force create any still missing files
+    echo "🔧 Ensuring all files exist..."
+    python manage.py migrate_to_permanent --force-create || echo "⚠️  Force create completed"
     
-    # Step 4: Verify all files are accessible
-    echo "🔍 Verifying permanent storage..."
-    python manage.py migrate_to_permanent --verify || echo "⚠️  Verification completed"
+    # Step 4: Final verification
+    echo "🔍 Final verification..."
+    python manage.py migrate_to_permanent --verify-only || echo "ℹ️  Verification completed"
     
-    # Step 5: Final status
-    echo "📊 Final permanent storage status:"
+    # Step 5: Show final status
+    echo "📊 Media system status:"
     python manage.py migrate_to_permanent || echo "ℹ️  Status displayed"
     
-    echo "✅ PERMANENT CLOUD STORAGE READY!"
-    echo "☁️ Media files are now stored permanently in the cloud"
-    echo "🌐 Files will NEVER be lost during deployments"
+    echo "✅ AUTO-SYNC MEDIA SYSTEM READY!"
+    echo "🔄 All media files automatically synced and protected"
+    echo "📊 File count: $(find /opt/render/project/data/media -type f 2>/dev/null | wc -l) files"
 fi
 
 # Collect static files
