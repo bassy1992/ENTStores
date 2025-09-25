@@ -116,17 +116,41 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [state]);
 
   const add = (p: Product, quantity?: number, selectedSize?: string, selectedColor?: string, variantId?: number) => {
-    // Check if product is in stock before adding
-    if (!p.is_in_stock || p.stock_quantity === 0) {
-      console.warn(`Cannot add ${p.title} to cart: out of stock`);
-      return;
-    }
-    
-    // Check if requested quantity exceeds available stock
     const requestedQty = quantity || 1;
-    if (p.stock_quantity < requestedQty) {
-      console.warn(`Cannot add ${requestedQty} of ${p.title} to cart: only ${p.stock_quantity} in stock`);
-      return;
+    
+    // If a variant is specified, validate variant stock
+    if (variantId && p.variants) {
+      const variant = p.variants.find(v => v.id === variantId);
+      if (!variant) {
+        console.warn(`Cannot add ${p.title} to cart: variant not found`);
+        return;
+      }
+      if (!variant.is_in_stock || variant.stock_quantity === 0) {
+        console.warn(`Cannot add ${p.title} to cart: selected variant is out of stock`);
+        return;
+      }
+      if (variant.stock_quantity < requestedQty) {
+        console.warn(`Cannot add ${requestedQty} of ${p.title} to cart: only ${variant.stock_quantity} in stock for selected variant`);
+        return;
+      }
+    } else {
+      // For products without variants or when no variant is selected
+      if (!p.is_in_stock) {
+        console.warn(`Cannot add ${p.title} to cart: out of stock`);
+        return;
+      }
+      
+      // If product has variants but no variant is selected, require variant selection
+      if (p.variants && p.variants.length > 0) {
+        console.warn(`Cannot add ${p.title} to cart: please select size and color options`);
+        return;
+      }
+      
+      // Check main product stock for products without variants
+      if (p.stock_quantity < requestedQty) {
+        console.warn(`Cannot add ${requestedQty} of ${p.title} to cart: only ${p.stock_quantity} in stock`);
+        return;
+      }
     }
     
     dispatch({ type: 'ADD', product: p, quantity, selectedSize, selectedColor, variantId });

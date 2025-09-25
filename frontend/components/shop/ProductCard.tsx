@@ -6,12 +6,22 @@ import { getProductImageUrl } from '../../lib/media';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
-  const isOutOfStock = product.is_in_stock === false || product.stock_quantity === 0;
+  
+  // Check if product is truly out of stock
+  // For products with variants, use is_in_stock (which considers variant availability)
+  // For products without variants, check both is_in_stock and stock_quantity
+  const hasVariants = product.variants && product.variants.length > 0;
+  const isOutOfStock = hasVariants 
+    ? product.is_in_stock === false 
+    : (product.is_in_stock === false || product.stock_quantity === 0);
+  
+  // For products with variants, don't allow direct add to cart from grid
+  const canAddDirectly = !hasVariants && !isOutOfStock;
 
   function onAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (!isOutOfStock) {
+    if (canAddDirectly) {
       add(product, 1);
     }
   }
@@ -42,7 +52,7 @@ export default function ProductCard({ product }: { product: Product }) {
             onClick={onAdd}
             className="absolute right-3 bottom-3 rounded-md bg-[hsl(var(--brand-blue))] text-white px-3 py-1 text-sm font-medium shadow-lg opacity-95 hover:brightness-110"
           >
-            Add
+            {hasVariants ? 'Options' : 'Add'}
           </button>
         )}
       </div>
@@ -52,7 +62,12 @@ export default function ProductCard({ product }: { product: Product }) {
           <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
           {product.stock_quantity !== undefined && (
             <p className={`text-xs ${isOutOfStock ? 'text-red-600' : 'text-green-600'}`}>
-              {isOutOfStock ? 'Out of stock' : `${product.stock_quantity} in stock`}
+              {isOutOfStock 
+                ? 'Out of stock' 
+                : hasVariants 
+                  ? 'Multiple options'
+                  : `${product.stock_quantity} in stock`
+              }
             </p>
           )}
         </div>
