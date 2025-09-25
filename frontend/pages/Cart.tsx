@@ -16,7 +16,6 @@ export default function Cart() {
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [productDetails, setProductDetails] = useState<{[key: string]: any}>({});
-  const [availablePromoCodes, setAvailablePromoCodes] = useState<any[]>([]);
 
   // Enhanced coupon logic with API validation
   const applyCoupon = async (code: string) => {
@@ -123,18 +122,7 @@ export default function Cart() {
     }
   }, [state.items]);
 
-  // Load available promo codes for promotional display
-  useEffect(() => {
-    const loadPromoCodes = async () => {
-      try {
-        const codes = await apiService.getPromoCodes();
-        setAvailablePromoCodes(codes.slice(0, 3)); // Show top 3 codes
-      } catch (error) {
-        console.error('Failed to load promo codes:', error);
-      }
-    };
-    loadPromoCodes();
-  }, []);
+
 
   const discount = appliedPromoCode ? appliedPromoCode.discount_amount : 0;
   const freeShippingFromPromo = appliedPromoCode?.free_shipping || false;
@@ -463,30 +451,7 @@ export default function Cart() {
                             </div>
                           )}
 
-                          {/* Show available promo codes */}
-                          {availablePromoCodes.length > 0 && (
-                            <div className="mt-4">
-                              <p className="text-xs text-gray-500 mb-2">Available offers:</p>
-                              <div className="space-y-1">
-                                {availablePromoCodes.map((promo) => (
-                                  <button
-                                    key={promo.code}
-                                    onClick={() => {
-                                      setCoupon(promo.code);
-                                      applyCoupon(promo.code);
-                                    }}
-                                    className="w-full text-left p-2 text-xs bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded transition-colors"
-                                  >
-                                    <div className="font-medium text-blue-800">{promo.code}</div>
-                                    <div className="text-blue-600">{promo.description}</div>
-                                    {promo.minimum_order_amount > 0 && (
-                                      <div className="text-blue-500">Min. order: ${promo.minimum_order_amount}</div>
-                                    )}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+
                         </>
                       ) : (
                         <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
