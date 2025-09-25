@@ -122,6 +122,11 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
     );
   }
 
+  // Calculate average rating
+  const avgRating = reviews.length > 0 
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+    : 0;
+
   return (
     <div className="space-y-6">
       {/* Review Summary */}
@@ -142,31 +147,20 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
             {/* Overall Rating */}
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                {(() => {
-                  const avgRating = reviews.length > 0 
-                    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
-                    : 0;
-                  
-                  return (
-                    <>
-                      <div className="text-4xl font-bold">{avgRating.toFixed(1)}</div>
-                      <div>
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`w-5 h-5 ${
-                                i < Math.floor(avgRating) 
-                                  ? 'fill-yellow-400 text-yellow-400' 
-                                  : 'text-gray-300'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
+                <div className="text-4xl font-bold">{avgRating.toFixed(1)}</div>
+                <div>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-5 h-5 ${
+                          i < Math.floor(avgRating) 
+                            ? 'fill-yellow-400 text-yellow-400' 
+                            : 'text-gray-300'
+                        }`} 
+                      />
+                    ))}
+                  </div>
                   <p className="text-sm text-gray-600">
                     Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}
                   </p>
