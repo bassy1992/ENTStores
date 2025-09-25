@@ -28,6 +28,10 @@ urlpatterns = [
     path('promo-codes/', views.PromoCodeListView.as_view(), name='promo-code-list'),
     path('validate-promo-code/', views.ValidatePromoCodeView.as_view(), name='validate-promo-code'),
     
+    # Reviews
+    path('products/<str:product_id>/reviews/', views.ProductReviewListCreateView.as_view(), name='product-reviews'),
+    path('reviews/<int:review_id>/vote/', views.vote_on_review, name='review-vote'),
+    
     # Shipping
     path('shipping/', include('shop.shipping_urls')),
     

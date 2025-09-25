@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -735,3 +735,171 @@ class PromoCode(models.Model):
         """Increment usage count"""
         self.usage_count += 1
         self.save(update_fields=['usage_count'])
+
+
+class ProductReview(models.Model):
+    """Customer reviews for products"""
+    
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        help_text="Product being reviewed"
+    )
+    
+    # User information (can be anonymous)
+    user_name = models.CharField(
+        max_length=100,
+        help_text="Name of the reviewer"
+    )
+    user_email = models.EmailField(
+        blank=True,
+        help_text="Email of the reviewer (optional)"
+    )
+    
+    # Review content
+    rating = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating from 1 to 5 stars"
+    )
+    title = models.CharField(
+        max_length=200,
+        help_text="Review title"
+    )
+    comment = models.TextField(
+        help_text="Review comment"
+    )
+    
+    # Purchase verification
+    verified_purchase = models.BooleanField(
+        default=False,
+        help_text="Whether this review is from a verified purchase"
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Order associated with this review (if verified)"
+    )
+    
+    # Purchase details
+    size_purchased = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Size purchased by the reviewer"
+    )
+    color_purchased = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Color purchased by the reviewer"
+    )
+    
+    # Moderation
+    is_approved = models.BooleanField(
+        default=True,  # Auto-approve for now, can be changed to False for manual moderation
+        help_text="Whether this review is approved for display"
+    )
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="Whether this review is featured"
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Helpful votes
+    helpful_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of helpful votes"
+    )
+    not_helpful_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of not helpful votes"
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        # Prevent duplicate reviews from same email for same product
+        unique_together = ['product', 'user_email', 'user_name']
+    
+    def __str__(self):
+        return f"{self.user_name} - {self.product.title} ({self.rating}★)"
+    
+    @property
+    def rating_stars(self):
+        """Return rating as stars string"""
+        return "★" * self.rating + "☆" * (5 - self.rating)
+
+
+class ReviewHelpfulVote(models.Model):
+    """Helpful votes for reviews"""
+    
+    review = models.ForeignKey(
+        ProductReview,
+        on_delete=models.CASCADE,
+        related_name='votes',
+        help_text="Review being voted on"
+    )
+    user_ip = models.GenericIPAddressField(
+        help_text="IP address of the voter (to prevent spam)"
+    )
+    user_session = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Session ID of the voter"
+    )
+    helpful = models.BooleanField(
+        help_text="True for helpful, False for not helpful"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['review', 'user_ip']  # One vote per IP per review
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        vote_type = "Helpful" if self.helpful else "Not Helpful"
+        return f"{vote_type} vote for {self.review}"
+    
+    def save(self, *args, **kwargs):
+        # Update review counts when vote is saved
+        if self.pk is None:  # New vote
+            if self.helpful:
+                self.review.helpful_count += 1
+            else:
+                self.review.not_helpful_count += 1
+            self.review.save(update_fields=['helpful_count', 'not_helpful_count'])
+        super().save(*args, **kwargs)
+
+
+class ReviewImage(models.Model):
+    """Images attached to reviews"""
+    
+    review = models.ForeignKey(
+        ProductReview,
+        on_delete=models.CASCADE,
+        related_name='images',
+        help_text="Review this image belongs to"
+    )
+    image = models.ImageField(
+        upload_to='review_images/',
+        help_text="Review image file"
+    )
+    alt_text = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Alternative text for the image"
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text="Display order of the image"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        
+    def __str__(self):
+        return f"Image for review by {self.review.user_name}"

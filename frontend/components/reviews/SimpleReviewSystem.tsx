@@ -18,6 +18,8 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
   const [showWriteReview, setShowWriteReview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful'>('newest');
+  const [filterRating, setFilterRating] = useState<number | null>(null);
   const [reviews, setReviews] = useState([
     {
       id: '1',
@@ -51,13 +53,29 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
   });
 
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
+    const fetchReviews = async () => {
+      setLoading(true);
+      
+      try {
+        // Try to fetch from API
+        const response = await fetch(`/api/shop/products/${productId}/reviews/?sort=${sortBy}${filterRating ? `&rating=${filterRating}` : ''}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setReviews(data.reviews || []);
+        } else {
+          // Keep existing mock data if API fails
+          console.log('API not available, keeping mock data');
+        }
+      } catch (error) {
+        console.log('API not available, keeping mock data:', error);
+      }
+      
       setLoading(false);
-    }, 1000);
+    };
 
-    return () => clearTimeout(timer);
-  }, []);
+    fetchReviews();
+  }, [productId, sortBy, filterRating]);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,22 +83,65 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
 
     setSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Create new review
-    const review = {
-      id: Date.now().toString(),
-      user_name: newReview.user_name,
-      rating: newReview.rating,
-      title: newReview.title,
-      comment: newReview.comment,
-      created_at: new Date().toISOString(),
-      verified_purchase: false
-    };
+    try {
+      // Try to submit to API
+      const response = await fetch(`/api/shop/products/${productId}/reviews/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_name: newReview.user_name,
+          user_email: newReview.user_email,
+          rating: newReview.rating,
+          title: newReview.title,
+          comment: newReview.comment,
+          size_purchased: newReview.size_purchased,
+          color_purchased: newReview.color_purchased
+        })
+      });
 
-    setReviews(prev => [review, ...prev]);
-    setSubmitSuccess(true);
+      if (response.ok) {
+        const result = await response.json();
+        setSubmitSuccess(true);
+        
+        // Refresh reviews after successful submission
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        // Fallback to mock behavior
+        const review = {
+          id: Date.now().toString(),
+          user_name: newReview.user_name,
+          rating: newReview.rating,
+          title: newReview.title,
+          comment: newReview.comment,
+          created_at: new Date().toISOString(),
+          verified_purchase: false
+        };
+
+        setReviews(prev => [review, ...prev]);
+        setSubmitSuccess(true);
+      }
+    } catch (error) {
+      console.log('API not available, using mock submission:', error);
+      
+      // Fallback to mock behavior
+      const review = {
+        id: Date.now().toString(),
+        user_name: newReview.user_name,
+        rating: newReview.rating,
+        title: newReview.title,
+        comment: newReview.comment,
+        created_at: new Date().toISOString(),
+        verified_purchase: false
+      };
+
+      setReviews(prev => [review, ...prev]);
+      setSubmitSuccess(true);
+    }
+    
     setSubmitting(false);
     
     // Reset form

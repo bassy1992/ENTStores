@@ -2,11 +2,13 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Q
-from .models import Category, Product, ProductTag, Order, ProductVariant, PromoCode
+from django.db.models import Q, Avg, Count
+from django.shortcuts import get_object_or_404
+from .models import Category, Product, ProductTag, Order, ProductVariant, PromoCode, ProductReview, ReviewHelpfulVote
 from .serializers import (
     CategorySerializer, ProductSerializer, ProductFullSerializer, ProductTagSerializer,
-    OrderSerializer, CreateOrderSerializer, PromoCodeSerializer, ValidatePromoCodeSerializer
+    OrderSerializer, CreateOrderSerializer, PromoCodeSerializer, ValidatePromoCodeSerializer,
+    ProductReviewSerializer, CreateReviewSerializer, ReviewStatsSerializer, ReviewHelpfulVoteSerializer
 )
 import logging
 
@@ -394,3 +396,184 @@ def simple_products(request):
             'error': str(e),
             'message': 'Simple products failed'
         }, status=500)
+
+
+class ProductReviewListCreateView(generics.ListCreateAPIView):
+    """List and create product reviews"""
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateReviewSerializer
+        return ProductReviewSerializer
+    
+    def get_queryset(self):
+        product_id = self.kwargs['product_id']
+        queryset = ProductReview.objects.filter(
+            product_id=product_id,
+            is_approved=True
+        ).select_related('product')
+        
+        # Sorting
+        sort = self.request.query_params.get('sort', 'newest')
+        if sort == 'newest':
+            queryset = queryset.order_by('-created_at')
+        elif sort == 'oldest':
+            queryset = queryset.order_by('created_at')
+        elif sort == 'highest':
+            queryset = queryset.order_by('-rating', '-created_at')
+        elif sort == 'lowest':
+            queryset = queryset.order_by('rating', '-created_at')
+        elif sort == 'helpful':
+            queryset = queryset.order_by('-helpful_count', '-created_at')
+        
+        # Rating filter
+        rating = self.request.query_params.get('rating')
+        if rating:
+            try:
+                rating_int = int(rating)
+                if 1 <= rating_int <= 5:
+                    queryset = queryset.filter(rating=rating_int)
+            except ValueError:
+                pass
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        product_id = self.kwargs['product_id']
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Add product to context for the serializer
+        serializer.context['product'] = product
+        serializer.save()
+    
+    def list(self, request, *args, **kwargs):
+        # Get reviews
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            reviews_data = serializer.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            reviews_data = serializer.data
+        
+        # Get review statistics
+        product_id = self.kwargs['product_id']
+        stats = self.get_review_stats(product_id)
+        
+        # Prepare response
+        response_data = {
+            'reviews': reviews_data,
+            'stats': stats,
+        }
+        
+        if page is not None:
+            response_data['pagination'] = {
+                'page': self.paginator.page.number,
+                'total_pages': self.paginator.page.paginator.num_pages,
+                'has_next': self.paginator.page.has_next(),
+                'has_previous': self.paginator.page.has_previous(),
+            }
+            return self.get_paginated_response(response_data)
+        
+        return Response(response_data)
+    
+    def get_review_stats(self, product_id):
+        """Calculate review statistics for a product"""
+        reviews = ProductReview.objects.filter(
+            product_id=product_id,
+            is_approved=True
+        )
+        
+        total_reviews = reviews.count()
+        if total_reviews == 0:
+            return {
+                'average_rating': 0,
+                'total_reviews': 0,
+                'rating_distribution': {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}
+            }
+        
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        
+        # Rating distribution
+        distribution = {}
+        for rating in [5, 4, 3, 2, 1]:
+            distribution[rating] = reviews.filter(rating=rating).count()
+        
+        return {
+            'average_rating': round(avg_rating, 2),
+            'total_reviews': total_reviews,
+            'rating_distribution': distribution
+        }
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            response = super().create(request, *args, **kwargs)
+            return Response({
+                'success': True,
+                'message': 'Review submitted successfully',
+                'review_id': response.data.get('id')
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            if hasattr(e, 'detail') and 'already reviewed' in str(e.detail):
+                return Response({
+                    'success': False,
+                    'message': 'You have already reviewed this product',
+                    'errors': {'duplicate': 'You have already reviewed this product'}
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response({
+                'success': False,
+                'message': 'Failed to submit review',
+                'errors': getattr(e, 'detail', str(e))
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def vote_on_review(request, review_id):
+    """Vote on whether a review is helpful"""
+    try:
+        review = get_object_or_404(ProductReview, id=review_id)
+        helpful = request.data.get('helpful', True)
+        
+        # Get user IP for spam prevention
+        user_ip = request.META.get('HTTP_X_FORWARDED_FOR')
+        if user_ip:
+            user_ip = user_ip.split(',')[0].strip()
+        else:
+            user_ip = request.META.get('REMOTE_ADDR')
+        
+        # Check if user already voted
+        existing_vote = ReviewHelpfulVote.objects.filter(
+            review=review,
+            user_ip=user_ip
+        ).first()
+        
+        if existing_vote:
+            return Response({
+                'success': False,
+                'error': 'You have already voted on this review'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create vote
+        ReviewHelpfulVote.objects.create(
+            review=review,
+            user_ip=user_ip,
+            helpful=helpful
+        )
+        
+        # Return updated counts
+        review.refresh_from_db()
+        return Response({
+            'success': True,
+            'helpful_count': review.helpful_count,
+            'not_helpful_count': review.not_helpful_count
+        })
+        
+    except Exception as e:
+        logger.error(f"Review vote error: {e}")
+        return Response({
+            'success': False,
+            'error': 'Failed to vote on review'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

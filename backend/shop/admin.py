@@ -3,7 +3,8 @@ from django.utils.html import format_html
 from django import forms
 from .models import (
     Category, Product, ProductTag, ProductTagAssignment, Order, OrderItem,
-    ProductImage, ProductSize, ProductColor, ProductVariant, PromoCode
+    ProductImage, ProductSize, ProductColor, ProductVariant, PromoCode,
+    ProductReview, ReviewHelpfulVote, ReviewImage
 )
 
 
@@ -500,3 +501,82 @@ class PromoCodeAdmin(admin.ModelAdmin):
             # Don't allow changing critical fields if code has been used
             readonly_fields.extend(['code', 'discount_type', 'discount_value'])
         return readonly_fields
+
+
+class ReviewImageInline(admin.TabularInline):
+    model = ReviewImage
+    extra = 1
+    fields = ['image', 'alt_text', 'order']
+    readonly_fields = ['created_at']
+
+
+@admin.register(ProductReview)
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = ['user_name', 'product', 'rating', 'rating_stars', 'title', 'is_approved', 'verified_purchase', 'helpful_count', 'created_at']
+    list_filter = ['rating', 'is_approved', 'verified_purchase', 'created_at']
+    search_fields = ['user_name', 'user_email', 'title', 'comment', 'product__title']
+    readonly_fields = ['created_at', 'updated_at', 'helpful_count', 'not_helpful_count', 'rating_stars']
+    list_editable = ['is_approved']
+    ordering = ['-created_at']
+    inlines = [ReviewImageInline]
+    
+    fieldsets = (
+        ('Review Information', {
+            'fields': ('product', 'rating', 'rating_stars', 'title', 'comment')
+        }),
+        ('User Information', {
+            'fields': ('user_name', 'user_email')
+        }),
+        ('Purchase Details', {
+            'fields': ('verified_purchase', 'order', 'size_purchased', 'color_purchased')
+        }),
+        ('Moderation', {
+            'fields': ('is_approved', 'is_featured')
+        }),
+        ('Statistics', {
+            'fields': ('helpful_count', 'not_helpful_count', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('product', 'order')
+    
+    actions = ['approve_reviews', 'disapprove_reviews', 'feature_reviews']
+    
+    def approve_reviews(self, request, queryset):
+        updated = queryset.update(is_approved=True)
+        self.message_user(request, f'{updated} review(s) approved.')
+    approve_reviews.short_description = "Approve selected reviews"
+    
+    def disapprove_reviews(self, request, queryset):
+        updated = queryset.update(is_approved=False)
+        self.message_user(request, f'{updated} review(s) disapproved.')
+    disapprove_reviews.short_description = "Disapprove selected reviews"
+    
+    def feature_reviews(self, request, queryset):
+        updated = queryset.update(is_featured=True)
+        self.message_user(request, f'{updated} review(s) featured.')
+    feature_reviews.short_description = "Feature selected reviews"
+
+
+@admin.register(ReviewHelpfulVote)
+class ReviewHelpfulVoteAdmin(admin.ModelAdmin):
+    list_display = ['review', 'user_ip', 'helpful', 'created_at']
+    list_filter = ['helpful', 'created_at']
+    readonly_fields = ['created_at']
+    search_fields = ['review__user_name', 'review__product__title', 'user_ip']
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('review', 'review__product')
+
+
+@admin.register(ReviewImage)
+class ReviewImageAdmin(admin.ModelAdmin):
+    list_display = ['review', 'alt_text', 'order', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['review__user_name', 'review__product__title', 'alt_text']
+    readonly_fields = ['created_at']
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('review', 'review__product')

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     Category, Product, ProductTag, Order, OrderItem,
-    ProductImage, ProductSize, ProductColor, ProductVariant, PromoCode
+    ProductImage, ProductSize, ProductColor, ProductVariant, PromoCode,
+    ProductReview, ReviewHelpfulVote, ReviewImage
 )
 
 
@@ -439,3 +440,120 @@ class ValidatePromoCodeSerializer(serializers.Serializer):
         data['free_shipping'] = promo_code.discount_type == 'free_shipping'
         
         return data
+
+
+class ReviewImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ReviewImage
+        fields = ['image', 'alt_text']
+    
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    images = ReviewImageSerializer(many=True, read_only=True)
+    rating_stars = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = ProductReview
+        fields = [
+            'id', 'user_name', 'user_email', 'rating', 'rating_stars', 'title', 'comment',
+            'created_at', 'verified_purchase', 'helpful_count', 'not_helpful_count',
+            'images', 'size_purchased', 'color_purchased'
+        ]
+        read_only_fields = ['id', 'created_at', 'verified_purchase', 'helpful_count', 'not_helpful_count', 'rating_stars']
+    
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5")
+        return value
+    
+    def validate_user_name(self, value):
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("Name must be at least 2 characters long")
+        return value.strip()
+    
+    def validate_title(self, value):
+        if len(value.strip()) < 5:
+            raise serializers.ValidationError("Title must be at least 5 characters long")
+        return value.strip()
+    
+    def validate_comment(self, value):
+        if len(value.strip()) < 10:
+            raise serializers.ValidationError("Comment must be at least 10 characters long")
+        return value.strip()
+
+
+class CreateReviewSerializer(serializers.ModelSerializer):
+    """Serializer for creating new reviews"""
+    
+    class Meta:
+        model = ProductReview
+        fields = [
+            'user_name', 'user_email', 'rating', 'title', 'comment',
+            'size_purchased', 'color_purchased'
+        ]
+    
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5")
+        return value
+    
+    def validate_user_name(self, value):
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("Name must be at least 2 characters long")
+        return value.strip()
+    
+    def validate_title(self, value):
+        if len(value.strip()) < 5:
+            raise serializers.ValidationError("Title must be at least 5 characters long")
+        return value.strip()
+    
+    def validate_comment(self, value):
+        if len(value.strip()) < 10:
+            raise serializers.ValidationError("Comment must be at least 10 characters long")
+        return value.strip()
+    
+    def create(self, validated_data):
+        # Get product from context
+        product = self.context['product']
+        
+        # Check for duplicate reviews (same email and name for same product)
+        if validated_data.get('user_email'):
+            existing_review = ProductReview.objects.filter(
+                product=product,
+                user_email=validated_data['user_email'],
+                user_name=validated_data['user_name']
+            ).first()
+            
+            if existing_review:
+                raise serializers.ValidationError("You have already reviewed this product.")
+        
+        # Create the review
+        review = ProductReview.objects.create(
+            product=product,
+            **validated_data
+        )
+        
+        return review
+
+
+class ReviewStatsSerializer(serializers.Serializer):
+    """Serializer for review statistics"""
+    average_rating = serializers.FloatField()
+    total_reviews = serializers.IntegerField()
+    rating_distribution = serializers.DictField()
+
+
+class ReviewHelpfulVoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewHelpfulVote
+        fields = ['helpful']
