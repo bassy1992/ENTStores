@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django import forms
 from .models import (
     Category, Product, ProductTag, ProductTagAssignment, Order, OrderItem,
-    ProductImage, ProductSize, ProductColor, ProductVariant
+    ProductImage, ProductSize, ProductColor, ProductVariant, PromoCode
 )
 
 
@@ -466,3 +466,37 @@ class ProductVariantAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('product', 'size', 'color')
+
+
+@admin.register(PromoCode)
+class PromoCodeAdmin(admin.ModelAdmin):
+    list_display = ['code', 'description', 'discount_type', 'discount_value', 'is_active', 'usage_count', 'valid_from', 'valid_until']
+    list_filter = ['discount_type', 'is_active', 'valid_from', 'valid_until']
+    search_fields = ['code', 'description']
+    readonly_fields = ['usage_count', 'created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('code', 'description', 'is_active')
+        }),
+        ('Discount Settings', {
+            'fields': ('discount_type', 'discount_value', 'minimum_order_amount', 'maximum_discount_amount')
+        }),
+        ('Usage Limits', {
+            'fields': ('usage_limit', 'usage_count')
+        }),
+        ('Validity Period', {
+            'fields': ('valid_from', 'valid_until')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(self.readonly_fields)
+        if obj and obj.usage_count > 0:
+            # Don't allow changing critical fields if code has been used
+            readonly_fields.extend(['code', 'discount_type', 'discount_value'])
+        return readonly_fields

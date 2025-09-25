@@ -9,24 +9,69 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, Shield, Truck, Credit
 import { apiService } from '../services/api';
 
 export default function Cart() {
-  const { state, setQty, remove, subtotal, clear } = useCart();
+  const { state, setQty, remove, subtotal, clear, appliedPromoCode, setAppliedPromoCode } = useCart();
   const navigate = useNavigate();
 
   const [coupon, setCoupon] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
   const [productDetails, setProductDetails] = useState<{[key: string]: any}>({});
+  const [availablePromoCodes, setAvailablePromoCodes] = useState<any[]>([]);
 
-  // simple coupon logic: ENNC10 => 10% off
-  const applyCoupon = (code: string) => {
-    const c = code.trim().toUpperCase();
-    if (c === 'ENNC10') {
-      setAppliedCoupon(c);
-      setCouponError(null);
+  // Enhanced coupon logic with API validation
+  const applyCoupon = async (code: string) => {
+    if (!code.trim()) {
+      setCouponError('Please enter a promo code');
       return;
     }
-    setCouponError('Invalid code');
-    setAppliedCoupon(null);
+
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const result = await apiService.validatePromoCode(code, subtotal);
+      
+      if (result.valid) {
+        setAppliedPromoCode({
+          code: result.code,
+          description: result.description,
+          discount_type: result.discount_type,
+          discount_amount: Math.round((result.discount_amount || 0) * 100), // Convert to cents
+          discount_display: result.discount_display,
+          free_shipping: result.free_shipping,
+          message: result.message
+        });
+        setCouponError(null);
+        setCoupon(''); // Clear input after successful application
+      } else {
+        setAppliedPromoCode(null);
+        if (result.errors) {
+          // Handle validation errors from serializer
+          const errorMessages = [];
+          if (result.errors.code) {
+            errorMessages.push(Array.isArray(result.errors.code) ? result.errors.code[0] : result.errors.code);
+          }
+          if (result.errors.subtotal) {
+            errorMessages.push(Array.isArray(result.errors.subtotal) ? result.errors.subtotal[0] : result.errors.subtotal);
+          }
+          setCouponError(errorMessages.join('. ') || 'Invalid promo code');
+        } else {
+          setCouponError(result.error || 'Invalid promo code');
+        }
+      }
+    } catch (error) {
+      console.error('Promo code validation error:', error);
+      setCouponError('Failed to validate promo code. Please try again.');
+      setAppliedPromoCode(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedPromoCode(null);
+    setCouponError(null);
+    setCoupon('');
   };
 
   // Fetch product details for cart items
@@ -78,8 +123,22 @@ export default function Cart() {
     }
   }, [state.items]);
 
-  const discount = appliedCoupon === 'ENNC10' ? Math.round(subtotal * 0.1) : 0;
-  const shipping = subtotal >= 7500 ? 0 : 999; // cents
+  // Load available promo codes for promotional display
+  useEffect(() => {
+    const loadPromoCodes = async () => {
+      try {
+        const codes = await apiService.getPromoCodes();
+        setAvailablePromoCodes(codes.slice(0, 3)); // Show top 3 codes
+      } catch (error) {
+        console.error('Failed to load promo codes:', error);
+      }
+    };
+    loadPromoCodes();
+  }, []);
+
+  const discount = appliedPromoCode ? appliedPromoCode.discount_amount : 0;
+  const freeShippingFromPromo = appliedPromoCode?.free_shipping || false;
+  const shipping = (subtotal >= 7500 || freeShippingFromPromo) ? 0 : 999; // cents
   const tax = Math.round((subtotal - discount) * 0.07); // simple 7% tax estimate
   const total = Math.max(0, subtotal - discount) + shipping + tax;
 
@@ -306,7 +365,14 @@ export default function Cart() {
                       
                       {discount > 0 && (
                         <div className="flex justify-between text-green-600">
-                          <span>Discount</span>
+                          <div className="flex items-center gap-1">
+                            <span>Discount</span>
+                            {appliedPromoCode && (
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                                {appliedPromoCode.code}
+                              </span>
+                            )}
+                          </div>
                           <span className="font-medium">-{formatPrice(discount)}</span>
                         </div>
                       )}
@@ -318,7 +384,13 @@ export default function Cart() {
                         </div>
                         <span className="font-medium">
                           {shipping === 0 ? (
-                            <span className="text-green-600">Free</span>
+                            <span className="text-green-600">
+                              Free {freeShippingFromPromo && appliedPromoCode && (
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-1">
+                                  {appliedPromoCode.code}
+                                </span>
+                              )}
+                            </span>
                           ) : (
                             formatPrice(shipping)
                           )}
@@ -365,30 +437,79 @@ export default function Cart() {
                     </div>
                     
                     <div className="space-y-3">
-                      <div className="flex gap-2">
-                        <input
-                          value={coupon}
-                          onChange={(e) => setCoupon(e.target.value)}
-                          placeholder="Enter code"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <button
-                          onClick={() => applyCoupon(coupon)}
-                          className="px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-                        >
-                          Apply
-                        </button>
-                      </div>
-                      
-                      {couponError && (
-                        <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-                          {couponError}
-                        </div>
-                      )}
-                      
-                      {appliedCoupon && (
-                        <div className="text-sm text-green-600 bg-green-50 p-2 rounded">
-                          ✓ Coupon "{appliedCoupon}" applied successfully!
+                      {!appliedPromoCode ? (
+                        <>
+                          <div className="flex gap-2">
+                            <input
+                              value={coupon}
+                              onChange={(e) => setCoupon(e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && applyCoupon(coupon)}
+                              placeholder="Enter promo code"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              disabled={couponLoading}
+                            />
+                            <button
+                              onClick={() => applyCoupon(coupon)}
+                              disabled={couponLoading || !coupon.trim()}
+                              className="px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              {couponLoading ? 'Checking...' : 'Apply'}
+                            </button>
+                          </div>
+                          
+                          {couponError && (
+                            <div className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
+                              {couponError}
+                            </div>
+                          )}
+
+                          {/* Show available promo codes */}
+                          {availablePromoCodes.length > 0 && (
+                            <div className="mt-4">
+                              <p className="text-xs text-gray-500 mb-2">Available offers:</p>
+                              <div className="space-y-1">
+                                {availablePromoCodes.map((promo) => (
+                                  <button
+                                    key={promo.code}
+                                    onClick={() => {
+                                      setCoupon(promo.code);
+                                      applyCoupon(promo.code);
+                                    }}
+                                    className="w-full text-left p-2 text-xs bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded transition-colors"
+                                  >
+                                    <div className="font-medium text-blue-800">{promo.code}</div>
+                                    <div className="text-blue-600">{promo.description}</div>
+                                    {promo.minimum_order_amount > 0 && (
+                                      <div className="text-blue-500">Min. order: ${promo.minimum_order_amount}</div>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-sm font-medium text-green-800">
+                                ✓ {appliedPromoCode.code} Applied
+                              </div>
+                              <div className="text-xs text-green-600">
+                                {appliedPromoCode.description}
+                              </div>
+                              <div className="text-xs text-green-600 mt-1">
+                                Saving: {formatPrice(appliedPromoCode.discount_amount)}
+                                {appliedPromoCode.free_shipping && ' + Free Shipping'}
+                              </div>
+                            </div>
+                            <button
+                              onClick={removeCoupon}
+                              className="text-green-600 hover:text-green-800 text-sm underline"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>

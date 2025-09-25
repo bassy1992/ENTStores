@@ -3,10 +3,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
-from .models import Category, Product, ProductTag, Order, ProductVariant
+from .models import Category, Product, ProductTag, Order, ProductVariant, PromoCode
 from .serializers import (
     CategorySerializer, ProductSerializer, ProductFullSerializer, ProductTagSerializer,
-    OrderSerializer, CreateOrderSerializer
+    OrderSerializer, CreateOrderSerializer, PromoCodeSerializer, ValidatePromoCodeSerializer
 )
 import logging
 
@@ -201,6 +201,55 @@ class ValidateStockView(APIView):
         except Exception as e:
             logger.error(f"Stock validation error: {e}")
             return Response({'error': 'Failed to validate stock'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ValidatePromoCodeView(APIView):
+    """Validate a promo code and calculate discount"""
+    
+    def post(self, request):
+        try:
+            serializer = ValidatePromoCodeSerializer(data=request.data)
+            if serializer.is_valid():
+                validated_data = serializer.validated_data
+                promo_code = validated_data['promo_code']
+                
+                return Response({
+                    'valid': True,
+                    'code': promo_code.code,
+                    'description': promo_code.description,
+                    'discount_type': promo_code.discount_type,
+                    'discount_amount': validated_data['discount_amount'],
+                    'discount_display': promo_code.get_discount_display(),
+                    'free_shipping': validated_data['free_shipping'],
+                    'message': validated_data['discount_message']
+                })
+            else:
+                return Response({
+                    'valid': False,
+                    'errors': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            logger.error(f"Promo code validation error: {e}")
+            return Response({
+                'valid': False,
+                'error': 'Failed to validate promo code'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PromoCodeListView(generics.ListAPIView):
+    """List active promo codes (for admin or promotional purposes)"""
+    serializer_class = PromoCodeSerializer
+    
+    def get_queryset(self):
+        # Only return active promo codes that are currently valid
+        from django.utils import timezone
+        now = timezone.now()
+        return PromoCode.objects.filter(
+            is_active=True,
+            valid_from__lte=now,
+            valid_until__gte=now
+        )
 
 
 @api_view(['GET'])

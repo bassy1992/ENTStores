@@ -610,3 +610,128 @@ class ProductVariant(models.Model):
     def is_in_stock(self):
         """Check if this variant is in stock"""
         return self.stock_quantity > 0 and self.is_available
+
+
+class PromoCode(models.Model):
+    """Promo code model for discounts"""
+    
+    DISCOUNT_TYPE_CHOICES = [
+        ('percentage', 'Percentage'),
+        ('fixed', 'Fixed Amount'),
+        ('free_shipping', 'Free Shipping'),
+    ]
+    
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Promo code (e.g., ENNC10, SUMMER20)"
+    )
+    description = models.CharField(
+        max_length=200,
+        help_text="Description of the promo code"
+    )
+    discount_type = models.CharField(
+        max_length=20,
+        choices=DISCOUNT_TYPE_CHOICES,
+        default='percentage',
+        help_text="Type of discount"
+    )
+    discount_value = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Discount value (percentage or fixed amount in dollars)"
+    )
+    minimum_order_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Minimum order amount required to use this code"
+    )
+    maximum_discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Maximum discount amount (for percentage discounts)"
+    )
+    usage_limit = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Maximum number of times this code can be used (null = unlimited)"
+    )
+    usage_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of times this code has been used"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this promo code is active"
+    )
+    valid_from = models.DateTimeField(
+        help_text="Date and time when this code becomes valid"
+    )
+    valid_until = models.DateTimeField(
+        help_text="Date and time when this code expires"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.code} - {self.get_discount_display()}"
+    
+    def get_discount_display(self):
+        """Get human-readable discount display"""
+        if self.discount_type == 'percentage':
+            return f"{self.discount_value}% off"
+        elif self.discount_type == 'fixed':
+            return f"${self.discount_value} off"
+        elif self.discount_type == 'free_shipping':
+            return "Free shipping"
+        return f"{self.discount_value} off"
+    
+    def is_valid(self):
+        """Check if the promo code is currently valid"""
+        from django.utils import timezone
+        now = timezone.now()
+        
+        if not self.is_active:
+            return False, "This promo code is not active"
+        
+        if now < self.valid_from:
+            return False, "This promo code is not yet valid"
+        
+        if now > self.valid_until:
+            return False, "This promo code has expired"
+        
+        if self.usage_limit and self.usage_count >= self.usage_limit:
+            return False, "This promo code has reached its usage limit"
+        
+        return True, "Valid"
+    
+    def calculate_discount(self, subtotal):
+        """Calculate discount amount for given subtotal"""
+        if subtotal < self.minimum_order_amount:
+            return 0, f"Minimum order amount of ${self.minimum_order_amount} required"
+        
+        if self.discount_type == 'percentage':
+            discount = subtotal * (self.discount_value / 100)
+            if self.maximum_discount_amount:
+                discount = min(discount, self.maximum_discount_amount)
+            return discount, "Discount applied"
+        
+        elif self.discount_type == 'fixed':
+            discount = min(self.discount_value, subtotal)  # Don't exceed subtotal
+            return discount, "Discount applied"
+        
+        elif self.discount_type == 'free_shipping':
+            return 0, "Free shipping applied"  # Shipping discount handled separately
+        
+        return 0, "Invalid discount type"
+    
+    def apply_usage(self):
+        """Increment usage count"""
+        self.usage_count += 1
+        self.save(update_fields=['usage_count'])

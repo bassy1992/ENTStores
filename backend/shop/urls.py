@@ -24,6 +24,10 @@ urlpatterns = [
     # Stock validation
     path('validate-stock/', views.ValidateStockView.as_view(), name='validate-stock'),
     
+    # Promo codes
+    path('promo-codes/', views.PromoCodeListView.as_view(), name='promo-code-list'),
+    path('validate-promo-code/', views.ValidatePromoCodeView.as_view(), name='validate-promo-code'),
+    
     # Shipping
     path('shipping/', include('shop.shipping_urls')),
     

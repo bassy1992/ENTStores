@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     Category, Product, ProductTag, Order, OrderItem,
-    ProductImage, ProductSize, ProductColor, ProductVariant
+    ProductImage, ProductSize, ProductColor, ProductVariant, PromoCode
 )
 
 
@@ -383,3 +383,59 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 product.save()
         
         return order
+
+
+class PromoCodeSerializer(serializers.ModelSerializer):
+    discount_display = serializers.CharField(source='get_discount_display', read_only=True)
+    is_valid_now = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = PromoCode
+        fields = [
+            'code', 'description', 'discount_type', 'discount_value',
+            'discount_display', 'minimum_order_amount', 'maximum_discount_amount',
+            'is_active', 'valid_from', 'valid_until', 'is_valid_now'
+        ]
+    
+    def get_is_valid_now(self, obj):
+        """Check if promo code is currently valid"""
+        is_valid, message = obj.is_valid()
+        return is_valid
+
+
+class ValidatePromoCodeSerializer(serializers.Serializer):
+    """Serializer for validating promo codes"""
+    code = serializers.CharField(max_length=50)
+    subtotal = serializers.DecimalField(max_digits=10, decimal_places=2)
+    
+    def validate_code(self, value):
+        """Validate that the promo code exists"""
+        try:
+            promo_code = PromoCode.objects.get(code=value.upper())
+            return promo_code
+        except PromoCode.DoesNotExist:
+            raise serializers.ValidationError("Invalid promo code")
+    
+    def validate(self, data):
+        """Validate the promo code against the subtotal"""
+        promo_code = data['code']  # This is now a PromoCode object from validate_code
+        subtotal = data['subtotal']
+        
+        # Check if promo code is valid
+        is_valid, message = promo_code.is_valid()
+        if not is_valid:
+            raise serializers.ValidationError({"code": message})
+        
+        # Calculate discount
+        discount_amount, discount_message = promo_code.calculate_discount(subtotal)
+        
+        if discount_amount == 0 and "required" in discount_message:
+            raise serializers.ValidationError({"subtotal": discount_message})
+        
+        # Add calculated values to validated data
+        data['promo_code'] = promo_code
+        data['discount_amount'] = discount_amount
+        data['discount_message'] = discount_message
+        data['free_shipping'] = promo_code.discount_type == 'free_shipping'
+        
+        return data

@@ -36,6 +36,8 @@ const CartContext = createContext<{
   saveCheckoutData: (data: any) => void;
   getCheckoutData: () => any;
   clearCheckoutData: () => void;
+  appliedPromoCode: any;
+  setAppliedPromoCode: (promoCode: any) => void;
 }>({
   state: initialState,
   add: () => {},
@@ -47,6 +49,8 @@ const CartContext = createContext<{
   saveCheckoutData: () => {},
   getCheckoutData: () => null,
   clearCheckoutData: () => {},
+  appliedPromoCode: null,
+  setAppliedPromoCode: () => {},
 });
 
 function reducer(state: State, action: Action): State {
@@ -100,6 +104,7 @@ function reducer(state: State, action: Action): State {
 
 const STORAGE_KEY = 'ennc_cart_v1';
 const CHECKOUT_DATA_KEY = 'ennc_checkout_data_v1';
+const PROMO_CODE_KEY = 'ennc_promo_code_v1';
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState, () => {
@@ -111,9 +116,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
+  const [appliedPromoCode, setAppliedPromoCodeState] = useState<any>(() => {
+    try {
+      const raw = localStorage.getItem(PROMO_CODE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    if (appliedPromoCode) {
+      localStorage.setItem(PROMO_CODE_KEY, JSON.stringify(appliedPromoCode));
+    } else {
+      localStorage.removeItem(PROMO_CODE_KEY);
+    }
+  }, [appliedPromoCode]);
+
+  const setAppliedPromoCode = (promoCode: any) => {
+    setAppliedPromoCodeState(promoCode);
+  };
 
   const add = (p: Product, quantity?: number, selectedSize?: string, selectedColor?: string, variantId?: number) => {
     const requestedQty = quantity || 1;
@@ -194,7 +220,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <CartContext.Provider value={{ 
       state, add, remove, setQty, clear, count, subtotal,
-      saveCheckoutData, getCheckoutData, clearCheckoutData 
+      saveCheckoutData, getCheckoutData, clearCheckoutData,
+      appliedPromoCode, setAppliedPromoCode
     }}>
       {children}
     </CartContext.Provider>

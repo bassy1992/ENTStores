@@ -352,6 +352,57 @@ export const apiService = {
     }
     
     return response.json();
+  },
+
+  // Promo code validation
+  async validatePromoCode(code: string, subtotal: number): Promise<{
+    valid: boolean;
+    code?: string;
+    description?: string;
+    discount_type?: string;
+    discount_amount?: number;
+    discount_display?: string;
+    free_shipping?: boolean;
+    message?: string;
+    errors?: any;
+    error?: string;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/validate-promo-code/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        code: code.trim().toUpperCase(), 
+        subtotal: subtotal / 100 // Convert cents to dollars
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      return {
+        valid: false,
+        error: errorData.error || 'Failed to validate promo code',
+        errors: errorData.errors
+      };
+    }
+    
+    return response.json();
+  },
+
+  // Get available promo codes (for promotional display)
+  async getPromoCodes(): Promise<Array<{
+    code: string;
+    description: string;
+    discount_display: string;
+    minimum_order_amount: number;
+  }>> {
+    const response = await fetch(`${API_BASE_URL}/promo-codes/`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch promo codes: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.results || data;
   }
 };
 
