@@ -302,9 +302,21 @@ REST_FRAMEWORK = {
 
 # CORS settings moved below - using CORS_ALLOW_ALL_ORIGINS for now
 
-# Temporarily allow all origins for debugging
-CORS_ALLOW_ALL_ORIGINS = True  # TODO: Change back to False after testing
-CORS_ALLOWED_ORIGINS = []  # Clear this when using CORS_ALLOW_ALL_ORIGINS
+# CORS allowed origins - specific domains for security
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "https://www.enontinoclothingstore.com",
+    "https://enontinoclothingstore.com",
+    "https://enontino-production.up.railway.app",
+    "https://enintino.vercel.app",
+    "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
+    "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
+    "https://entstore-backend.onrender.com",
+    "https://entstore-frontend.onrender.com",
+    "https://ent-stores.vercel.app",
+    "http://localhost:8080",  # For local development
+    "http://127.0.0.1:8080",  # For local development
+]
 
 # Additional CORS settings
 CORS_ALLOW_CREDENTIALS = True
@@ -313,9 +325,11 @@ CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
     'authorization',
+    'cache-control',
     'content-type',
     'dnt',
     'origin',
+    'pragma',
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
@@ -331,6 +345,8 @@ CORS_ALLOW_METHODS = [
 
 # CSRF settings for Railway, Render, and Vercel
 CSRF_TRUSTED_ORIGINS = [
+    "https://www.enontinoclothingstore.com",
+    "https://enontinoclothingstore.com",
     "https://enontino-production.up.railway.app",
     "https://enintino.vercel.app",  # Main production frontend
     "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
@@ -361,17 +377,6 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 
 # For development, you can also use CORS_ALLOW_ALL_ORIGINS = True
 # But the above specific origins are more secure
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-]
 
 # Payment Settings
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
