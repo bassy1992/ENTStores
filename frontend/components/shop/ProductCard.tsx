@@ -26,11 +26,29 @@ export default function ProductCard({ product }: { product: Product }) {
     }
   }
 
+  function handleCardClick(e: React.MouseEvent) {
+    // Prevent navigation if product is truly out of stock
+    if (isOutOfStock) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+  }
+
+  // Use div instead of Link for out of stock products
+  const CardWrapper = isOutOfStock ? 'div' : Link;
+  const cardProps = isOutOfStock 
+    ? { 
+        className: "group rounded-xl border bg-card transition overflow-hidden relative cursor-not-allowed opacity-75",
+        onClick: handleCardClick
+      }
+    : { 
+        to: `/product/${product.slug}`,
+        className: "group rounded-xl border bg-card hover:shadow-md transition overflow-hidden relative"
+      };
+
   return (
-    <Link
-      to={`/product/${product.slug}`}
-      className="group rounded-xl border bg-card hover:shadow-md transition overflow-hidden relative"
-    >
+    <CardWrapper {...cardProps}>
       <div className="aspect-square overflow-hidden bg-muted relative">
         <img
           src={getProductImageUrl(product.image)}
@@ -72,6 +90,6 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
         </div>
       </div>
-    </Link>
+    </CardWrapper>
   );
 }

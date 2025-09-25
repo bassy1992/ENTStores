@@ -518,8 +518,27 @@ export default function ProductDetails() {
                     </Button>
                   </div>
                   
-                  <Button variant="secondary" size="lg" className="w-full h-12">
-                    Buy Now - Express Checkout
+                  <Button 
+                    variant="secondary" 
+                    size="lg" 
+                    className="w-full h-12"
+                    disabled={
+                      selectedVariant 
+                        ? !selectedVariant.is_in_stock
+                        : product.variants?.length === 0 
+                          ? !product.is_in_stock
+                          : true // Disable if variants exist but none selected
+                    }
+                  >
+                    {(() => {
+                      if (selectedVariant) {
+                        return selectedVariant.is_in_stock ? 'Buy Now - Express Checkout' : 'Out of Stock';
+                      } else if (product.variants?.length === 0) {
+                        return product.is_in_stock ? 'Buy Now - Express Checkout' : 'Out of Stock';
+                      } else {
+                        return 'Select Options First';
+                      }
+                    })()}
                   </Button>
                 </div>
 
