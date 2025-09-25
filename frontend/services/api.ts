@@ -403,6 +403,118 @@ export const apiService = {
     }
     const data = await response.json();
     return data.results || data;
+  },
+
+  // Reviews
+  async getProductReviews(productId: string, params?: {
+    page?: number;
+    sort?: 'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful';
+    rating?: number;
+  }): Promise<{
+    reviews: Array<{
+      id: string;
+      user_name: string;
+      user_email?: string;
+      rating: number;
+      title: string;
+      comment: string;
+      created_at: string;
+      verified_purchase: boolean;
+      helpful_count: number;
+      not_helpful_count: number;
+      user_found_helpful?: boolean | null;
+      images?: string[];
+      size_purchased?: string;
+      color_purchased?: string;
+    }>;
+    stats: {
+      average_rating: number;
+      total_reviews: number;
+      rating_distribution: {
+        5: number;
+        4: number;
+        3: number;
+        2: number;
+        1: number;
+      };
+    };
+    pagination: {
+      page: number;
+      total_pages: number;
+      has_next: boolean;
+      has_previous: boolean;
+    };
+  }> {
+    const searchParams = new URLSearchParams();
+    
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.sort) searchParams.append('sort', params.sort);
+    if (params?.rating) searchParams.append('rating', params.rating.toString());
+
+    const response = await fetch(`${API_BASE_URL}/products/${productId}/reviews/?${searchParams}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch reviews: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  async submitReview(productId: string, review: {
+    rating: number;
+    title: string;
+    comment: string;
+    user_name: string;
+    user_email?: string;
+    size_purchased?: string;
+    color_purchased?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    review_id?: string;
+    errors?: any;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/products/${productId}/reviews/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(review),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data.message || 'Failed to submit review',
+        errors: data.errors
+      };
+    }
+    
+    return {
+      success: true,
+      message: data.message || 'Review submitted successfully',
+      review_id: data.review_id
+    };
+  },
+
+  async voteOnReview(reviewId: string, helpful: boolean): Promise<{
+    success: boolean;
+    helpful_count: number;
+    not_helpful_count: number;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}/vote/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ helpful }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to vote on review: ${response.statusText}`);
+    }
+    
+    return response.json();
   }
 };
 

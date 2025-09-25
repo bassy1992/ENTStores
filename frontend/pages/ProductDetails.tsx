@@ -27,6 +27,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import ReviewSystem from '../components/reviews/ReviewSystem';
+import ReviewSummary from '../components/reviews/ReviewSummary';
+import TestReview from '../components/reviews/TestReview';
+import SimpleReviewSystem from '../components/reviews/SimpleReviewSystem';
 
 export default function ProductDetails() {
   const { slug } = useParams();
@@ -279,14 +283,7 @@ export default function ProductDetails() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-2">
                       <h1 className="text-3xl lg:text-4xl font-bold tracking-tight">{product.title}</h1>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                        <span className="text-sm text-muted-foreground">(4.8) • 127 reviews</span>
-                      </div>
+                      <ReviewSummary productId={product.id} />
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -574,7 +571,7 @@ export default function ProductDetails() {
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="description">Description</TabsTrigger>
                   <TabsTrigger value="specifications">Specifications</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews (127)</TabsTrigger>
+                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
                   <TabsTrigger value="shipping">Shipping & Returns</TabsTrigger>
                 </TabsList>
                 
@@ -643,50 +640,7 @@ export default function ProductDetails() {
                 </TabsContent>
                 
                 <TabsContent value="reviews" className="mt-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Customer Reviews</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                          <div className="text-4xl font-bold">4.8</div>
-                          <div>
-                            <div className="flex items-center">
-                              {[...Array(5)].map((_, i) => (
-                                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              ))}
-                            </div>
-                            <p className="text-sm text-muted-foreground">Based on 127 reviews</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          {[1, 2, 3].map((review) => (
-                            <div key={review} className="border-b pb-4 last:border-b-0">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                  ))}
-                                </div>
-                                <span className="text-sm font-medium">John D.</span>
-                                <span className="text-xs text-muted-foreground">2 days ago</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Great quality product! Fits perfectly and the material feels premium. 
-                                Highly recommend this item.
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                        
-                        <Button variant="outline" className="w-full">
-                          View All Reviews
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <SimpleReviewSystem productId={product.id} productSlug={product.slug} />
                 </TabsContent>
                 
                 <TabsContent value="shipping" className="mt-6">
