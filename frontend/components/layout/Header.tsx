@@ -47,28 +47,38 @@ export default function Header() {
         setDebugInfo('Fetching...');
         setCategoriesLoading(true);
         
-        const response = await apiService.getCategories();
-        console.log('📋 Raw API response:', response);
-        setDebugInfo(`API returned ${response.length} categories`);
-        
-        const convertedCategories = response.map(convertApiCategory);
-        console.log('✅ Converted categories:', convertedCategories);
-        setCategories(convertedCategories);
-        setDebugInfo(`Loaded ${convertedCategories.length} categories`);
-      } catch (error) {
-        console.error('❌ Failed to fetch categories:', error);
-        setDebugInfo(`Error: ${error.message}`);
-        
-        // Fallback to hardcoded categories if API fails
-        const fallbackCategories = [
-          { key: 't-shirts', label: 'T-Shirts', productCount: 0 },
-          { key: 'hoodies', label: 'Hoodies', productCount: 0 },
+        // First, try to use hardcoded categories to test rendering
+        const testCategories = [
+          { key: 't-shirts', label: 'T-Shirts', productCount: 6 },
+          { key: 'hoodies', label: 'Hoodies', productCount: 2 },
           { key: 'accessories', label: 'Accessories', productCount: 0 },
+          { key: 'polos', label: 'Polos', productCount: 0 },
         ];
-        console.log('🔄 Using fallback categories:', fallbackCategories);
-        setCategories(fallbackCategories);
-        setDebugInfo(`Using ${fallbackCategories.length} fallback categories`);
-      } finally {
+        
+        console.log('🧪 Using test categories first:', testCategories);
+        setCategories(testCategories);
+        setDebugInfo(`Test: ${testCategories.length} categories`);
+        setCategoriesLoading(false);
+        
+        // Then try to fetch from API in background
+        setTimeout(async () => {
+          try {
+            const response = await apiService.getCategories();
+            console.log('📋 Raw API response:', response);
+            
+            const convertedCategories = response.map(convertApiCategory);
+            console.log('✅ Converted categories:', convertedCategories);
+            setCategories(convertedCategories);
+            setDebugInfo(`API: ${convertedCategories.length} categories`);
+          } catch (apiError) {
+            console.error('❌ API failed, keeping test categories:', apiError);
+            setDebugInfo(`API failed, using test data`);
+          }
+        }, 1000);
+        
+      } catch (error) {
+        console.error('❌ Failed to set up categories:', error);
+        setDebugInfo(`Error: ${error.message}`);
         setCategoriesLoading(false);
       }
     };

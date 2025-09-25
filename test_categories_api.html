@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Categories API</title>
+</head>
+<body>
+    <h1>Categories API Test</h1>
+    <div id="status">Loading...</div>
+    <div id="results"></div>
+
+    <script>
+        async function testCategoriesAPI() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                statusDiv.innerHTML = 'Testing API...';
+                
+                // Test different API URLs
+                const urls = [
+                    '/api/shop/categories/',
+                    'http://localhost:8000/api/shop/categories/',
+                    'https://entstores.onrender.com/api/shop/categories/'
+                ];
+                
+                for (const url of urls) {
+                    try {
+                        console.log(`Testing URL: ${url}`);
+                        const response = await fetch(url);
+                        console.log(`Response status: ${response.status}`);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('Response data:', data);
+                            
+                            statusDiv.innerHTML = `✅ Success with ${url}`;
+                            resultsDiv.innerHTML = `
+                                <h3>Categories found:</h3>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            `;
+                            return; // Success, stop testing other URLs
+                        }
+                    } catch (error) {
+                        console.log(`Error with ${url}:`, error);
+                    }
+                }
+                
+                // If we get here, all URLs failed
+                statusDiv.innerHTML = '❌ All API URLs failed';
+                resultsDiv.innerHTML = 'Check console for details';
+                
+            } catch (error) {
+                statusDiv.innerHTML = '❌ Error: ' + error.message;
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Run test when page loads
+        testCategoriesAPI();
+    </script>
+</body>
+</html>
