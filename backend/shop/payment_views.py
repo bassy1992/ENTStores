@@ -78,7 +78,7 @@ def create_stripe_checkout_session(request):
                 'price_data': {
                     'currency': 'usd',
                     'product_data': product_data,
-                    'unit_amount': int(item['amount']),  # amount in cents
+                    'unit_amount': int(float(item['amount']) * 100),  # convert dollars to cents for Stripe
                 },
                 'quantity': item['quantity'],
             })
@@ -223,7 +223,7 @@ def initiate_momo_payment(request):
     try:
         data = request.data
         phone = data.get('phone', '').strip()
-        usd_amount = data.get('amount', 0)  # Amount in USD cents
+        usd_amount = data.get('amount', 0)  # Amount in USD dollars
         
         if not phone or not usd_amount:
             return Response({'error': 'Phone number and amount are required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -512,7 +512,7 @@ def get_exchange_rate(request):
     """Get current USD to GHS exchange rate"""
     try:
         rate_info = get_rate_display()
-        sample_conversion = convert_usd_to_ghs(2500)  # $25.00 sample
+        sample_conversion = convert_usd_to_ghs(25.00)  # $25.00 sample
         
         return Response({
             'rate': rate_info['rate'],

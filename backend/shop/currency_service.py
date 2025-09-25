@@ -110,12 +110,12 @@ class CurrencyConverter:
         return None
     
     @classmethod
-    def convert_usd_to_ghs(cls, usd_amount_cents):
+    def convert_usd_to_ghs(cls, usd_amount_dollars):
         """
-        Convert USD amount in cents to GHS amount in pesewas
+        Convert USD amount in dollars to GHS amount in pesewas
         
         Args:
-            usd_amount_cents (int): Amount in USD cents (e.g., 2500 = $25.00)
+            usd_amount_dollars (float/Decimal): Amount in USD dollars (e.g., 25.00 = $25.00)
             
         Returns:
             dict: {
@@ -130,8 +130,8 @@ class CurrencyConverter:
         # Get current exchange rate
         rate = cls.get_usd_to_ghs_rate()
         
-        # Convert USD cents to USD dollars
-        usd_dollars = Decimal(usd_amount_cents) / 100
+        # Convert to Decimal for precise calculation
+        usd_dollars = Decimal(str(usd_amount_dollars))
         
         # Convert to GHS
         ghs_amount = usd_dollars * rate
@@ -170,9 +170,9 @@ class CurrencyConverter:
 
 
 # Convenience functions
-def convert_usd_to_ghs(usd_cents):
-    """Convert USD cents to GHS pesewas"""
-    return CurrencyConverter.convert_usd_to_ghs(usd_cents)
+def convert_usd_to_ghs(usd_dollars):
+    """Convert USD dollars to GHS pesewas"""
+    return CurrencyConverter.convert_usd_to_ghs(usd_dollars)
 
 def get_current_exchange_rate():
     """Get current USD to GHS exchange rate"""

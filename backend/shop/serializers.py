@@ -69,7 +69,7 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         ]
     
     def get_final_price_display(self, obj):
-        return f"${obj.final_price / 100:.2f}"
+        return f"${obj.final_price:.2f}"
 
 
 class ProductSerializer(serializers.ModelSerializer):

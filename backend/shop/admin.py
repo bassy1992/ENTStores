@@ -461,7 +461,7 @@ class ProductVariantAdmin(admin.ModelAdmin):
     list_editable = ['stock_quantity', 'price_adjustment', 'is_available']
     
     def final_price_display(self, obj):
-        return f"${obj.final_price / 100:.2f}"
+        return f"${obj.final_price:.2f}"
     final_price_display.short_description = 'Final Price'
     
     def get_queryset(self, request):

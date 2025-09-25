@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator
+from decimal import Decimal
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -81,9 +82,11 @@ class Product(models.Model):
         unique=True,
         help_text="URL-friendly version of the title"
     )
-    price = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
-        help_text="Price in cents (e.g., 2500 = $25.00)"
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0.01)],
+        help_text="Price in dollars (e.g., 25.00 = $25.00)"
     )
     description = models.TextField(
         help_text="Product description"
@@ -144,7 +147,7 @@ class Product(models.Model):
     @property
     def price_display(self):
         """Return formatted price as currency"""
-        return f"${self.price / 100:.2f}"
+        return f"${self.price:.2f}"
     
     @property
     def is_in_stock(self):
@@ -238,19 +241,27 @@ class Order(models.Model):
     shipping_postal_code = models.CharField(max_length=20, blank=True)
     
     # Order details
-    subtotal = models.PositiveIntegerField(
-        help_text="Subtotal in cents"
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Subtotal in dollars"
     )
-    shipping_cost = models.PositiveIntegerField(
-        default=0,
-        help_text="Shipping cost in cents"
+    shipping_cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Shipping cost in dollars"
     )
-    tax_amount = models.PositiveIntegerField(
-        default=0,
-        help_text="Tax amount in cents"
+    tax_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Tax amount in dollars"
     )
-    total = models.PositiveIntegerField(
-        help_text="Total amount in cents"
+    total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Total amount in dollars"
     )
     
     status = models.CharField(
@@ -289,7 +300,7 @@ class Order(models.Model):
     @property
     def total_display(self):
         """Return formatted total as currency"""
-        return f"${self.total / 100:.2f}"
+        return f"${self.total:.2f}"
 
 
 class OrderItem(models.Model):
@@ -325,11 +336,15 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(
         validators=[MinValueValidator(1)]
     )
-    unit_price = models.PositiveIntegerField(
-        help_text="Price per unit in cents at time of purchase"
+    unit_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Price per unit in dollars at time of purchase"
     )
-    total_price = models.PositiveIntegerField(
-        help_text="Total price for this line item in cents"
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Total price for this line item in dollars"
     )
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -355,7 +370,7 @@ class OrderItem(models.Model):
     @property
     def total_display(self):
         """Return formatted total as currency"""
-        return f"${self.total_price / 100:.2f}"
+        return f"${self.total_price:.2f}"
 
 
 # Signal handlers for email notifications
@@ -375,8 +390,8 @@ def order_status_changed(sender, instance, created, **kwargs):
                         'name': item.product.title,
                         'sku': getattr(item.product, 'sku', 'N/A'),
                         'quantity': item.quantity,
-                        'price': f"${item.unit_price / 100:.2f}",
-                        'total': f"${item.total_price / 100:.2f}"
+                        'price': f"${item.unit_price:.2f}",
+                        'total': f"${item.total_price:.2f}"
                     })
                 
                 success = send_admin_notification_email(instance, order_items)
@@ -556,9 +571,11 @@ class ProductVariant(models.Model):
         default=0,
         help_text="Stock quantity for this specific variant"
     )
-    price_adjustment = models.IntegerField(
-        default=0,
-        help_text="Price adjustment in cents (can be negative)"
+    price_adjustment = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Price adjustment in dollars (can be negative)"
     )
     is_available = models.BooleanField(
         default=True,

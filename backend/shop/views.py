@@ -210,7 +210,7 @@ def simple_products(request):
                 'title': product.title,
                 'slug': product.slug,
                 'price': product.price,
-                'price_display': f"${product.price / 100:.2f}",
+                'price_display': f"${product.price:.2f}",
                 'description': product.description,
                 'image': image_url,
                 'category': product.category.key if product.category else None,
