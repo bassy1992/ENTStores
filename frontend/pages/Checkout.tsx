@@ -10,7 +10,7 @@ import { Label } from '../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Separator } from '../components/ui/separator';
 import { Badge } from '../components/ui/badge';
-import { CreditCard, Smartphone, Shield, Clock, CheckCircle, AlertCircle, Globe, MapPin } from 'lucide-react';
+import { CreditCard, Smartphone, Shield, Clock, CheckCircle, AlertCircle, Globe, MapPin, Tag } from 'lucide-react';
 import PageTransition from '../components/ui/PageTransition';
 import { motion } from 'framer-motion';
 import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
@@ -31,7 +31,7 @@ const fetchExchangeRate = async () => {
 };
 
 export default function Checkout() {
-  const { state, subtotal, clear, saveCheckoutData } = useCart();
+  const { state, subtotal, clear, saveCheckoutData, appliedPromoCode } = useCart();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -60,9 +60,11 @@ export default function Checkout() {
   // Calculate shipping based on selected country
   const selectedCountry = countries.find(c => c.code === form.country);
   const shippingZone = getShippingZone(form.country);
-  const shipping = getShippingCost(form.country, subtotal);
-  const tax = Math.round(subtotal * 0.05); // 5% tax
-  const total = subtotal + shipping + tax;
+  const discount = appliedPromoCode ? appliedPromoCode.discount_amount : 0;
+  const freeShippingFromPromo = appliedPromoCode?.free_shipping || false;
+  const shipping = (subtotal >= shippingZone.freeShippingThreshold || freeShippingFromPromo) ? 0 : getShippingCost(form.country, subtotal);
+  const tax = Math.round((subtotal - discount) * 0.05); // 5% tax on discounted amount
+  const total = Math.max(0, subtotal - discount) + shipping + tax;
 
   // Fetch exchange rate on component mount
   useEffect(() => {
@@ -705,6 +707,20 @@ export default function Checkout() {
                       <span>{formatPrice(subtotal)}</span>
                     </div>
                     
+                    {discount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <div className="flex items-center gap-1">
+                          <span>Discount</span>
+                          {appliedPromoCode && (
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                              {appliedPromoCode.code}
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-medium">-{formatPrice(discount)}</span>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between">
                       <span className="flex items-center gap-1">
                         Shipping
@@ -712,7 +728,19 @@ export default function Checkout() {
                           <span className="text-xs text-gray-500">({shippingZone.name})</span>
                         )}
                       </span>
-                      <span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
+                      <span>
+                        {shipping === 0 ? (
+                          <span className="text-green-600">
+                            Free {freeShippingFromPromo && appliedPromoCode && (
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-1">
+                                {appliedPromoCode.code}
+                              </span>
+                            )}
+                          </span>
+                        ) : (
+                          formatPrice(shipping)
+                        )}
+                      </span>
                     </div>
                     
                     {shipping === 0 ? (
@@ -747,6 +775,27 @@ export default function Checkout() {
                   {selectedCountry && (
                     <div className="text-xs text-center text-gray-500">
                       Shipping to {selectedCountry.flag} {selectedCountry.name}
+                    </div>
+                  )}
+
+                  {/* Promo Code Section */}
+                  {!appliedPromoCode && (
+                    <div className="border-t pt-4">
+                      <div className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                        <Tag className="w-4 h-4" />
+                        Have a promo code?
+                      </div>
+                      <div className="text-xs text-gray-500 mb-3">
+                        Go back to your cart to apply promo codes and see updated pricing.
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/cart')}
+                        className="w-full text-xs"
+                      >
+                        Apply Promo Code in Cart
+                      </Button>
                     </div>
                   )}
 
