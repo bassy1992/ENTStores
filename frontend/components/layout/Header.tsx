@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useCart } from '../../context/cart';
 import { cn } from '../../lib/utils';
+import { apiService, convertApiCategory } from '../../services/api';
 import { 
   Search, 
   ShoppingBag, 
@@ -23,6 +24,8 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,6 +36,30 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const response = await apiService.getCategories();
+        const convertedCategories = response.map(convertApiCategory);
+        setCategories(convertedCategories);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        // Fallback to hardcoded categories if API fails
+        setCategories([
+          { key: 't-shirts', label: 'T-Shirts', icon: Shirt },
+          { key: 'hoodies', label: 'Hoodies', icon: Crown },
+          { key: 'accessories', label: 'Accessories', icon: Package },
+        ]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   // Close mobile menu on route change
@@ -47,11 +74,21 @@ export default function Header() {
     if (query) navigate(`/search?q=${encodeURIComponent(query)}`);
   };
 
-  const categories = [
-    { key: 't-shirts', label: 'T-Shirts', icon: Shirt },
-    { key: 'hoodies', label: 'Hoodies', icon: Crown },
-    { key: 'accessories', label: 'Accessories', icon: Package },
-  ];
+  // Helper function to get icon for category
+  const getCategoryIcon = (categoryKey: string) => {
+    const iconMap: { [key: string]: any } = {
+      't-shirts': Shirt,
+      'polos': Shirt,
+      'hoodies': Crown,
+      'sweatshirts': Crown,
+      'tracksuits': Package,
+      'jackets': Package,
+      'shorts': Shirt,
+      'headwear': Crown,
+      'accessories': Package,
+    };
+    return iconMap[categoryKey] || Package;
+  };
 
   const isActiveLink = (path: string) => {
     return location.pathname === path;
@@ -145,16 +182,28 @@ export default function Header() {
                       exit={{ opacity: 0, y: 10 }}
                       className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2"
                     >
-                      {categories.map(({ key, label, icon: Icon }) => (
-                        <Link
-                          key={key}
-                          to={`/shop?category=${key}`}
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
-                        >
-                          <Icon className="w-5 h-5 text-gray-400" />
-                          <span className="font-medium text-gray-700">{label}</span>
-                        </Link>
-                      ))}
+                      {categoriesLoading ? (
+                        <div className="px-4 py-3 text-gray-500 text-sm">Loading categories...</div>
+                      ) : (
+                        categories.map((category) => {
+                          const Icon = getCategoryIcon(category.key);
+                          return (
+                            <Link
+                              key={category.key}
+                              to={`/shop?category=${category.key}`}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                            >
+                              <Icon className="w-5 h-5 text-gray-400" />
+                              <span className="font-medium text-gray-700">{category.label}</span>
+                              {category.productCount > 0 && (
+                                <span className="ml-auto text-xs text-gray-400">
+                                  {category.productCount}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })
+                      )}
                       <div className="border-t border-gray-100 mt-2 pt-2">
                         <Link
                           to="/categories"
@@ -284,12 +333,48 @@ export default function Header() {
                   >
                     Shop
                   </Link>
-                  <Link 
-                    to="/categories" 
-                    className="block text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                  >
-                    Categories
-                  </Link>
+                  
+                  <div>
+                    <Link 
+                      to="/categories" 
+                      className="block text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors mb-3"
+                    >
+                      Categories
+                    </Link>
+                    <div className="ml-4 space-y-2">
+                      {categoriesLoading ? (
+                        <div className="text-gray-500 text-sm">Loading...</div>
+                      ) : (
+                        categories.slice(0, 5).map((category) => {
+                          const Icon = getCategoryIcon(category.key);
+                          return (
+                            <Link
+                              key={category.key}
+                              to={`/shop?category=${category.key}`}
+                              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                            >
+                              <Icon className="w-4 h-4" />
+                              <span>{category.label}</span>
+                              {category.productCount > 0 && (
+                                <span className="text-xs text-gray-400">
+                                  ({category.productCount})
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })
+                      )}
+                      {categories.length > 5 && (
+                        <Link 
+                          to="/categories" 
+                          className="text-blue-600 text-sm hover:underline"
+                        >
+                          View all categories
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                  
                   <Link 
                     to="/contact" 
                     className="block text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors"
