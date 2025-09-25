@@ -1,12 +1,16 @@
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import Q
-from .models import Category, Product, ProductTag, Order
+from .models import Category, Product, ProductTag, Order, ProductVariant
 from .serializers import (
     CategorySerializer, ProductSerializer, ProductFullSerializer, ProductTagSerializer,
     OrderSerializer, CreateOrderSerializer
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CategoryListView(generics.ListAPIView):
@@ -90,6 +94,113 @@ class OrderDetailView(generics.RetrieveAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     lookup_field = 'id'
+
+
+class ValidateStockView(APIView):
+    """Validate stock availability for cart items"""
+    
+    def post(self, request):
+        try:
+            items = request.data.get('items', [])
+            if not items:
+                return Response({'error': 'No items provided'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            stock_errors = []
+            stock_warnings = []
+            
+            for item in items:
+                try:
+                    product = Product.objects.get(id=item['product_id'])
+                    requested_quantity = item.get('quantity', 1)
+                    variant_id = item.get('variant_id')
+                    
+                    # Check if product is active
+                    if not product.is_active:
+                        stock_errors.append({
+                            'product_id': product.id,
+                            'product_title': product.title,
+                            'error': 'Product is no longer available'
+                        })
+                        continue
+                    
+                    # Check variant stock if variant is specified
+                    if variant_id:
+                        try:
+                            variant = ProductVariant.objects.get(id=variant_id, product=product)
+                            if not variant.is_available:
+                                stock_errors.append({
+                                    'product_id': product.id,
+                                    'product_title': product.title,
+                                    'variant_id': variant_id,
+                                    'error': 'Selected variant is not available'
+                                })
+                            elif variant.stock_quantity == 0:
+                                stock_errors.append({
+                                    'product_id': product.id,
+                                    'product_title': product.title,
+                                    'variant_id': variant_id,
+                                    'error': 'Selected variant is out of stock'
+                                })
+                            elif variant.stock_quantity < requested_quantity:
+                                stock_errors.append({
+                                    'product_id': product.id,
+                                    'product_title': product.title,
+                                    'variant_id': variant_id,
+                                    'error': f'Only {variant.stock_quantity} in stock, but {requested_quantity} requested',
+                                    'available_quantity': variant.stock_quantity
+                                })
+                            elif variant.stock_quantity <= 5:  # Low stock warning
+                                stock_warnings.append({
+                                    'product_id': product.id,
+                                    'product_title': product.title,
+                                    'variant_id': variant_id,
+                                    'warning': f'Low stock: only {variant.stock_quantity} remaining'
+                                })
+                        except ProductVariant.DoesNotExist:
+                            stock_errors.append({
+                                'product_id': product.id,
+                                'product_title': product.title,
+                                'variant_id': variant_id,
+                                'error': 'Selected variant not found'
+                            })
+                    else:
+                        # Check main product stock
+                        if not product.is_in_stock:
+                            stock_errors.append({
+                                'product_id': product.id,
+                                'product_title': product.title,
+                                'error': 'Product is out of stock'
+                            })
+                        elif product.stock_quantity < requested_quantity:
+                            stock_errors.append({
+                                'product_id': product.id,
+                                'product_title': product.title,
+                                'error': f'Only {product.stock_quantity} in stock, but {requested_quantity} requested',
+                                'available_quantity': product.stock_quantity
+                            })
+                        elif product.stock_quantity <= 5:  # Low stock warning
+                            stock_warnings.append({
+                                'product_id': product.id,
+                                'product_title': product.title,
+                                'warning': f'Low stock: only {product.stock_quantity} remaining'
+                            })
+                            
+                except Product.DoesNotExist:
+                    stock_errors.append({
+                        'product_id': item.get('product_id'),
+                        'error': 'Product not found'
+                    })
+            
+            return Response({
+                'valid': len(stock_errors) == 0,
+                'errors': stock_errors,
+                'warnings': stock_warnings,
+                'message': 'Stock validation completed'
+            })
+            
+        except Exception as e:
+            logger.error(f"Stock validation error: {e}")
+            return Response({'error': 'Failed to validate stock'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])

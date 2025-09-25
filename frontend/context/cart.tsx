@@ -115,8 +115,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  const add = (p: Product, quantity?: number, selectedSize?: string, selectedColor?: string, variantId?: number) => 
+  const add = (p: Product, quantity?: number, selectedSize?: string, selectedColor?: string, variantId?: number) => {
+    // Check if product is in stock before adding
+    if (!p.is_in_stock || p.stock_quantity === 0) {
+      console.warn(`Cannot add ${p.title} to cart: out of stock`);
+      return;
+    }
+    
+    // Check if requested quantity exceeds available stock
+    const requestedQty = quantity || 1;
+    if (p.stock_quantity < requestedQty) {
+      console.warn(`Cannot add ${requestedQty} of ${p.title} to cart: only ${p.stock_quantity} in stock`);
+      return;
+    }
+    
     dispatch({ type: 'ADD', product: p, quantity, selectedSize, selectedColor, variantId });
+  };
   const remove = (uniqueKey: string) => dispatch({ type: 'REMOVE', uniqueKey });
   const setQty = (uniqueKey: string, quantity: number) => dispatch({ type: 'SET_QTY', uniqueKey, quantity });
   const clear = () => dispatch({ type: 'CLEAR' });

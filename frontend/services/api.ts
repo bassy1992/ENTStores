@@ -315,6 +315,43 @@ export const apiService = {
       throw new Error(`Failed to fetch shop stats: ${response.statusText}`);
     }
     return response.json();
+  },
+
+  // Stock validation
+  async validateStock(items: Array<{
+    product_id: string;
+    quantity: number;
+    variant_id?: number;
+  }>): Promise<{
+    valid: boolean;
+    errors: Array<{
+      product_id: string;
+      product_title?: string;
+      variant_id?: number;
+      error: string;
+      available_quantity?: number;
+    }>;
+    warnings: Array<{
+      product_id: string;
+      product_title?: string;
+      variant_id?: number;
+      warning: string;
+    }>;
+    message: string;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/validate-stock/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ items }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to validate stock: ${response.statusText}`);
+    }
+    
+    return response.json();
   }
 };
 

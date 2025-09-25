@@ -384,8 +384,58 @@ def create_order(request):
             status='processing'
         )
         
-        # Create order items
+        # Validate stock before creating order items
         items = data.get('items', [])
+        stock_errors = []
+        
+        for item_data in items:
+            try:
+                product = Product.objects.get(id=item_data['product_id'])
+                requested_quantity = item_data.get('quantity', 1)
+                variant_id = item_data.get('variant_id')
+                
+                # Check if product is active
+                if not product.is_active:
+                    stock_errors.append(f"{product.title} is no longer available")
+                    continue
+                
+                # Check variant stock if variant is specified
+                if variant_id:
+                    try:
+                        from .models import ProductVariant
+                        variant = ProductVariant.objects.get(id=variant_id, product=product)
+                        if not variant.is_available:
+                            stock_errors.append(f"{product.title} (selected variant) is not available")
+                        elif variant.stock_quantity < requested_quantity:
+                            stock_errors.append(
+                                f"{product.title} (selected variant): Only {variant.stock_quantity} in stock, "
+                                f"but {requested_quantity} requested"
+                            )
+                    except Exception:
+                        stock_errors.append(f"{product.title}: Selected variant not found")
+                else:
+                    # Check main product stock
+                    if not product.is_in_stock:
+                        stock_errors.append(f"{product.title} is out of stock")
+                    elif product.stock_quantity < requested_quantity:
+                        stock_errors.append(
+                            f"{product.title}: Only {product.stock_quantity} in stock, "
+                            f"but {requested_quantity} requested"
+                        )
+                        
+            except Product.DoesNotExist:
+                stock_errors.append(f"Product with ID {item_data.get('product_id')} not found")
+        
+        # If there are stock errors, return them
+        if stock_errors:
+            logger.warning(f"Stock validation failed for order creation: {stock_errors}")
+            return Response({
+                'error': 'Stock validation failed',
+                'stock_errors': stock_errors,
+                'message': 'Some items are out of stock or unavailable'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create order items
         order_items = []
         for item_data in items:
             try:
@@ -419,6 +469,19 @@ def create_order(request):
                     quantity=item_data['quantity'],
                     unit_price=item_data['unit_price']
                 )
+                
+                # Reduce stock after successful order item creation
+                requested_quantity = item_data['quantity']
+                if product_variant:
+                    # Reduce variant stock
+                    product_variant.stock_quantity = max(0, product_variant.stock_quantity - requested_quantity)
+                    product_variant.save()
+                    logger.info(f"Reduced variant stock for {product.title}: {requested_quantity} units")
+                else:
+                    # Reduce main product stock
+                    product.stock_quantity = max(0, product.stock_quantity - requested_quantity)
+                    product.save()
+                    logger.info(f"Reduced product stock for {product.title}: {requested_quantity} units")
                 
                 # Add to email data with variant info
                 variant_info = []

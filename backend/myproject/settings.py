@@ -173,13 +173,13 @@ elif DATABASE_URL and not USE_SQLITE:
     try:
         import dj_database_url
         DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
-        print(f"🔧 Development: Using PostgreSQL from DATABASE_URL")
+        print("Development: Using PostgreSQL from DATABASE_URL")
     except Exception as e:
         print(f"⚠️  Failed to connect to PostgreSQL: {e}")
         print(f"🔄 Falling back to SQLite database at: {DATABASES['default']['NAME']}")
 else:
     # Development with SQLite
-    print(f"🔧 Development: Using SQLite database at: {DATABASES['default']['NAME']}")
+    print(f"Development: Using SQLite database at: {DATABASES['default']['NAME']}")
 
 
 # Password validation

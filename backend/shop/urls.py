@@ -21,6 +21,9 @@ urlpatterns = [
     path('orders/', views.OrderCreateView.as_view(), name='order-create'),
     path('orders/<str:id>/', views.OrderDetailView.as_view(), name='order-detail'),
     
+    # Stock validation
+    path('validate-stock/', views.ValidateStockView.as_view(), name='validate-stock'),
+    
     # Shipping
     path('shipping/', include('shop.shipping_urls')),
     

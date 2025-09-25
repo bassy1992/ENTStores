@@ -296,17 +296,90 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             'payment_method', 'payment_reference', 'items'
         ]
     
+    def validate_items(self, items_data):
+        """Validate stock availability for all items"""
+        stock_errors = []
+        
+        for item_data in items_data:
+            try:
+                product = Product.objects.get(id=item_data['product_id'])
+                requested_quantity = item_data.get('quantity', 1)
+                variant_id = item_data.get('variant_id')
+                
+                # Check if product is active
+                if not product.is_active:
+                    stock_errors.append(f"{product.title} is no longer available")
+                    continue
+                
+                # Check variant stock if variant is specified
+                if variant_id:
+                    try:
+                        variant = ProductVariant.objects.get(id=variant_id, product=product)
+                        if not variant.is_available:
+                            stock_errors.append(f"{product.title} (selected variant) is not available")
+                        elif variant.stock_quantity < requested_quantity:
+                            stock_errors.append(
+                                f"{product.title} (selected variant): Only {variant.stock_quantity} in stock, "
+                                f"but {requested_quantity} requested"
+                            )
+                    except ProductVariant.DoesNotExist:
+                        stock_errors.append(f"{product.title}: Selected variant not found")
+                else:
+                    # Check main product stock
+                    if not product.is_in_stock:
+                        stock_errors.append(f"{product.title} is out of stock")
+                    elif product.stock_quantity < requested_quantity:
+                        stock_errors.append(
+                            f"{product.title}: Only {product.stock_quantity} in stock, "
+                            f"but {requested_quantity} requested"
+                        )
+                        
+            except Product.DoesNotExist:
+                stock_errors.append(f"Product with ID {item_data.get('product_id')} not found")
+        
+        if stock_errors:
+            raise serializers.ValidationError({
+                'stock_errors': stock_errors,
+                'message': 'Some items are out of stock or unavailable'
+            })
+        
+        return items_data
+    
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         order = Order.objects.create(**validated_data)
         
         for item_data in items_data:
             product = Product.objects.get(id=item_data['product_id'])
+            
+            # Get variant if specified
+            product_variant = None
+            variant_id = item_data.get('variant_id')
+            if variant_id:
+                try:
+                    product_variant = ProductVariant.objects.get(id=variant_id, product=product)
+                except ProductVariant.DoesNotExist:
+                    pass
+            
             OrderItem.objects.create(
                 order=order,
                 product=product,
+                product_variant=product_variant,
+                selected_size=item_data.get('selected_size', ''),
+                selected_color=item_data.get('selected_color', ''),
                 quantity=item_data['quantity'],
                 unit_price=item_data['unit_price']
             )
+            
+            # Reduce stock after successful order creation
+            requested_quantity = item_data['quantity']
+            if product_variant:
+                # Reduce variant stock
+                product_variant.stock_quantity = max(0, product_variant.stock_quantity - requested_quantity)
+                product_variant.save()
+            else:
+                # Reduce main product stock
+                product.stock_quantity = max(0, product.stock_quantity - requested_quantity)
+                product.save()
         
         return order
