@@ -27,7 +27,7 @@ export default function Shop() {
         setError(null);
 
         let response;
-        
+
         if (searchQuery) {
           // If there's a search query, use search API
           response = await apiService.searchProducts(searchQuery);
@@ -150,7 +150,7 @@ export default function Shop() {
             ) : products.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-gray-600 mb-4">
-                  {searchQuery 
+                  {searchQuery
                     ? `No products found for "${searchQuery}"${category ? ` in "${category}" category` : ''}`
                     : `No products found${category ? ` in "${category}" category` : ''}`
                   }
