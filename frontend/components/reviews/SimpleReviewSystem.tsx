@@ -57,18 +57,30 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
       setLoading(true);
       
       try {
-        // Try to fetch from API
-        const response = await fetch(`/api/shop/products/${productId}/reviews/?sort=${sortBy}${filterRating ? `&rating=${filterRating}` : ''}`);
+        const url = `/api/shop/products/${productId}/reviews/?sort=${sortBy}${filterRating ? `&rating=${filterRating}` : ''}`;
+        console.log('🔍 Fetching reviews from:', url);
+        
+        const response = await fetch(url);
+        console.log('📡 API Response status:', response.status);
         
         if (response.ok) {
           const data = await response.json();
-          setReviews(data.reviews || []);
+          console.log('📊 API Response data:', data);
+          
+          if (data.reviews && data.reviews.length > 0) {
+            setReviews(data.reviews);
+            console.log(`✅ Loaded ${data.reviews.length} reviews from API`);
+          } else {
+            console.log('⚠️ API returned no reviews, keeping mock data');
+          }
         } else {
-          // Keep existing mock data if API fails
-          console.log('API not available, keeping mock data');
+          const errorText = await response.text();
+          console.log('❌ API Error:', response.status, errorText);
+          console.log('⚠️ API failed, keeping mock data');
         }
       } catch (error) {
-        console.log('API not available, keeping mock data:', error);
+        console.log('❌ Network error:', error);
+        console.log('⚠️ Using mock data due to network error');
       }
       
       setLoading(false);
@@ -84,25 +96,33 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
     setSubmitting(true);
     
     try {
-      // Try to submit to API
-      const response = await fetch(`/api/shop/products/${productId}/reviews/`, {
+      const url = `/api/shop/products/${productId}/reviews/`;
+      const reviewData = {
+        user_name: newReview.user_name,
+        user_email: newReview.user_email,
+        rating: newReview.rating,
+        title: newReview.title,
+        comment: newReview.comment,
+        size_purchased: newReview.size_purchased,
+        color_purchased: newReview.color_purchased
+      };
+      
+      console.log('📝 Submitting review to:', url);
+      console.log('📋 Review data:', reviewData);
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          user_name: newReview.user_name,
-          user_email: newReview.user_email,
-          rating: newReview.rating,
-          title: newReview.title,
-          comment: newReview.comment,
-          size_purchased: newReview.size_purchased,
-          color_purchased: newReview.color_purchased
-        })
+        body: JSON.stringify(reviewData)
       });
+
+      console.log('📡 Submit response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
+        console.log('✅ Review submitted successfully:', result);
         setSubmitSuccess(true);
         
         // Refresh reviews after successful submission
@@ -110,6 +130,9 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
           window.location.reload();
         }, 2000);
       } else {
+        const errorText = await response.text();
+        console.log('❌ Submit failed:', response.status, errorText);
+        
         // Fallback to mock behavior
         const review = {
           id: Date.now().toString(),
@@ -125,7 +148,7 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
         setSubmitSuccess(true);
       }
     } catch (error) {
-      console.log('API not available, using mock submission:', error);
+      console.log('❌ Network error during submit:', error);
       
       // Fallback to mock behavior
       const review = {
