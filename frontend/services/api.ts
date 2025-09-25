@@ -134,7 +134,15 @@ export const apiService = {
     if (params?.in_stock) searchParams.append('in_stock', 'true');
     if (params?.page) searchParams.append('page', params.page.toString());
 
-    const response = await fetch(`${API_BASE_URL}/products/?${searchParams}`);
+    // Add cache busting timestamp
+    searchParams.append('_t', Date.now().toString());
+    
+    const response = await fetch(`${API_BASE_URL}/products/?${searchParams}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch products: ${response.statusText}`);
     }
@@ -156,7 +164,14 @@ export const apiService = {
   },
 
   async getFeaturedProducts(): Promise<ApiResponse<ApiProduct>> {
-    const response = await fetch(`${API_BASE_URL}/products/featured/`);
+    // Add cache busting timestamp
+    const timestamp = Date.now();
+    const response = await fetch(`${API_BASE_URL}/products/featured/?_t=${timestamp}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch featured products: ${response.statusText}`);
     }
@@ -178,7 +193,14 @@ export const apiService = {
   },
 
   async getProduct(slug: string): Promise<ApiProduct> {
-    const response = await fetch(`${API_BASE_URL}/products/${slug}/`);
+    // Add cache busting timestamp
+    const timestamp = Date.now();
+    const response = await fetch(`${API_BASE_URL}/products/${slug}/?_t=${timestamp}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch product: ${response.statusText}`);
     }
@@ -196,7 +218,14 @@ export const apiService = {
   },
 
   async searchProducts(query: string): Promise<SearchResponse> {
-    const response = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(query)}`);
+    // Add cache busting timestamp
+    const timestamp = Date.now();
+    const response = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(query)}&_t=${timestamp}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
     if (!response.ok) {
       throw new Error(`Failed to search products: ${response.statusText}`);
     }
