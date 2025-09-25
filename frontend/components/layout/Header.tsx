@@ -26,6 +26,7 @@ export default function Header() {
   const [showCategories, setShowCategories] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<string>('');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,18 +43,31 @@ export default function Header() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        console.log('🔄 Fetching categories from API...');
+        setDebugInfo('Fetching...');
         setCategoriesLoading(true);
+        
         const response = await apiService.getCategories();
+        console.log('📋 Raw API response:', response);
+        setDebugInfo(`API returned ${response.length} categories`);
+        
         const convertedCategories = response.map(convertApiCategory);
+        console.log('✅ Converted categories:', convertedCategories);
         setCategories(convertedCategories);
+        setDebugInfo(`Loaded ${convertedCategories.length} categories`);
       } catch (error) {
-        console.error('Failed to fetch categories:', error);
+        console.error('❌ Failed to fetch categories:', error);
+        setDebugInfo(`Error: ${error.message}`);
+        
         // Fallback to hardcoded categories if API fails
-        setCategories([
-          { key: 't-shirts', label: 'T-Shirts', icon: Shirt },
-          { key: 'hoodies', label: 'Hoodies', icon: Crown },
-          { key: 'accessories', label: 'Accessories', icon: Package },
-        ]);
+        const fallbackCategories = [
+          { key: 't-shirts', label: 'T-Shirts', productCount: 0 },
+          { key: 'hoodies', label: 'Hoodies', productCount: 0 },
+          { key: 'accessories', label: 'Accessories', productCount: 0 },
+        ];
+        console.log('🔄 Using fallback categories:', fallbackCategories);
+        setCategories(fallbackCategories);
+        setDebugInfo(`Using ${fallbackCategories.length} fallback categories`);
       } finally {
         setCategoriesLoading(false);
       }
@@ -182,11 +196,17 @@ export default function Header() {
                       exit={{ opacity: 0, y: 10 }}
                       className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2"
                     >
+                      <div className="px-4 py-2 text-xs text-blue-600 border-b">
+                        Debug: {debugInfo} | Loading: {categoriesLoading.toString()} | Count: {categories.length}
+                      </div>
                       {categoriesLoading ? (
                         <div className="px-4 py-3 text-gray-500 text-sm">Loading categories...</div>
+                      ) : categories.length === 0 ? (
+                        <div className="px-4 py-3 text-gray-500 text-sm">No categories found</div>
                       ) : (
                         categories.map((category) => {
                           const Icon = getCategoryIcon(category.key);
+                          console.log('🏷️ Rendering category:', category);
                           return (
                             <Link
                               key={category.key}
