@@ -318,6 +318,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",  # For local development
 ]
 
+# Temporary fix for CORS issues - enable all origins in production
+# This should be reverted to specific origins once the issue is resolved
+if not DEBUG or os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
+    CORS_ALLOW_ALL_ORIGINS = True
+    print("🌐 CORS: Allowing all origins for production deployment")
+
 # Additional CORS settings
 CORS_ALLOW_CREDENTIALS = True
 CORS_PREFLIGHT_MAX_AGE = 86400
@@ -333,6 +339,8 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-forwarded-for',
+    'x-forwarded-proto',
 ]
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -341,6 +349,12 @@ CORS_ALLOW_METHODS = [
     'PATCH',
     'POST',
     'PUT',
+]
+
+# Additional CORS settings for production
+CORS_EXPOSE_HEADERS = [
+    'content-type',
+    'x-csrftoken',
 ]
 
 # CSRF settings for Railway, Render, and Vercel
