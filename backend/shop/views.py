@@ -217,7 +217,7 @@ def simple_products(request):
                 'category_label': product.category.label if product.category else None,
                 'stock_quantity': product.stock_quantity,
                 'is_active': product.is_active,
-                'is_in_stock': product.stock_quantity > 0,
+                'is_in_stock': product.is_in_stock,
                 'is_featured': getattr(product, 'is_featured', False),
                 'tags': [],  # Default for now
                 'created_at': product.created_at.isoformat() if product.created_at else None,
