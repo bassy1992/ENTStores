@@ -151,8 +151,21 @@ class Product(models.Model):
     
     @property
     def is_in_stock(self):
-        """Check if product is in stock"""
-        return self.stock_quantity > 0
+        """Check if product is in stock (considering both main stock and variants)"""
+        # First check main product stock
+        if self.stock_quantity > 0:
+            return True
+        
+        # If main stock is 0, check if any variants are in stock
+        try:
+            # Check if any variants have stock
+            return self.variants.filter(
+                stock_quantity__gt=0,
+                is_available=True
+            ).exists()
+        except Exception:
+            # If variants table doesn't exist or there's an error, fall back to main stock
+            return self.stock_quantity > 0
 
 
 class ProductTag(models.Model):

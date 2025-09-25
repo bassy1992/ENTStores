@@ -75,7 +75,7 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='category.label', read_only=True)
     price_display = serializers.CharField(read_only=True)
-    is_in_stock = serializers.BooleanField(read_only=True)
+    is_in_stock = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
@@ -84,6 +84,11 @@ class ProductSerializer(serializers.ModelSerializer):
             'category', 'category_label', 'stock_quantity', 
             'is_active', 'is_featured', 'is_in_stock', 'created_at'
         ]
+    
+    def get_is_in_stock(self, obj):
+        """Check if product is in stock (considering both main stock and variants)"""
+        # Use the model's property which now considers variants
+        return obj.is_in_stock
     
     def to_representation(self, instance):
         """Add computed fields safely"""
@@ -119,7 +124,7 @@ class ProductFullSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='category.label', read_only=True)
     tags = serializers.SerializerMethodField()
     price_display = serializers.CharField(read_only=True)
-    is_in_stock = serializers.BooleanField(read_only=True)
+    is_in_stock = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     images = ProductImageSerializer(many=True, read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
@@ -152,6 +157,11 @@ class ProductFullSerializer(serializers.ModelSerializer):
             data['is_featured'] = False
             
         return data
+    
+    def get_is_in_stock(self, obj):
+        """Check if product is in stock (considering both main stock and variants)"""
+        # Use the model's property which now considers variants
+        return obj.is_in_stock
     
     def get_tags(self, obj):
         try:
