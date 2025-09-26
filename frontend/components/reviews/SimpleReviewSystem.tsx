@@ -43,7 +43,9 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
     const fetchReviews = async () => {
       setLoading(true);
       
-      const url = `${API_ENDPOINTS.REVIEWS(productId)}?sort=${sortBy}${filterRating ? `&rating=${filterRating}` : ''}`;
+      // Add cache busting to ensure fresh data
+      const cacheBuster = Date.now();
+      const url = `${API_ENDPOINTS.REVIEWS(productId)}?sort=${sortBy}${filterRating ? `&rating=${filterRating}` : ''}&_cb=${cacheBuster}`;
       
       console.log('🔍 LOADING REVIEWS:');
       console.log('   API Base URL:', API_BASE_URL);
@@ -54,6 +56,7 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
         const response = await fetch(url, {
           headers: {
             'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
           }
         });
         
@@ -207,12 +210,22 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Customer Reviews</span>
-            <Button 
-              onClick={() => setShowWriteReview(true)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Write a Review
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => window.location.reload()}
+                variant="outline"
+                size="sm"
+                className="text-xs"
+              >
+                Refresh
+              </Button>
+              <Button 
+                onClick={() => setShowWriteReview(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Write a Review
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
