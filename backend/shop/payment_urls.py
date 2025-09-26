@@ -20,6 +20,9 @@ urlpatterns = [
     # Exchange rate endpoint
     path('exchange-rate/', payment_views.get_exchange_rate, name='exchange-rate'),
     
+    # Debug endpoint
+    path('debug-order/', payment_views.debug_order_creation, name='debug-order'),
+    
     # Legacy endpoints (for frontend compatibility)
     path('create-checkout-session/', payment_views.create_stripe_checkout_session, name='legacy-stripe-checkout'),
     path('initiate/', payment_views.initiate_momo_payment, name='legacy-momo-initiate'),
