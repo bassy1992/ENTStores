@@ -52,11 +52,15 @@ class EmailService:
     def send_order_confirmation(order, order_items=None):
         """Send order confirmation email to customer."""
         try:
+            logger.info(f"Starting order confirmation email for order {order.id} to {order.customer_email}")
+            
             context = EmailService.get_email_context(
                 order=order,
                 order_items=order_items,
                 estimated_delivery="3-5 business days"
             )
+            
+            logger.info(f"Email context prepared for order {order.id}")
             
             # Render email templates
             try:
@@ -88,12 +92,15 @@ class EmailService:
             email.attach_alternative(html_content, "text/html")
             
             # Send email
+            logger.info(f"Attempting to send email for order {order.id} using SMTP...")
             email.send()
-            logger.info(f"Order confirmation email sent for order {order.id}")
+            logger.info(f"✅ Order confirmation email sent successfully for order {order.id}")
             return True
             
         except Exception as e:
-            logger.error(f"Failed to send order confirmation email for order {order.id}: {str(e)}")
+            logger.error(f"❌ Failed to send order confirmation email for order {order.id}: {str(e)}")
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             return False
     
     @staticmethod

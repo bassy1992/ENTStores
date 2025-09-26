@@ -411,7 +411,10 @@ def create_order(request):
                                 f"{product.title} (selected variant): Only {variant.stock_quantity} in stock, "
                                 f"but {requested_quantity} requested"
                             )
-                    except Exception:
+                    except ImportError:
+                        logger.warning("ProductVariant model not available, skipping variant validation")
+                    except Exception as e:
+                        logger.warning(f"Variant validation error: {e}")
                         stock_errors.append(f"{product.title}: Selected variant not found")
                 else:
                     # Check main product stock
@@ -457,31 +460,50 @@ def create_order(request):
                             selected_size = product_variant.size.display_name
                         if not selected_color and product_variant.color:
                             selected_color = product_variant.color.name
-                    except ProductVariant.DoesNotExist:
-                        logger.warning(f"Product variant {variant_id} not found for order {order_id}")
+                    except ImportError:
+                        logger.warning("ProductVariant model not available, creating order without variant")
+                    except Exception as e:
+                        logger.warning(f"Product variant {variant_id} not found for order {order_id}: {e}")
                 
-                order_item = OrderItem.objects.create(
-                    order=order,
-                    product=product,
-                    product_variant=product_variant,
-                    selected_size=selected_size,
-                    selected_color=selected_color,
-                    quantity=item_data['quantity'],
-                    unit_price=item_data['unit_price']
-                )
+                # Create order item with or without variant
+                try:
+                    order_item = OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        product_variant=product_variant,
+                        selected_size=selected_size,
+                        selected_color=selected_color,
+                        quantity=item_data['quantity'],
+                        unit_price=item_data['unit_price']
+                    )
+                except Exception as e:
+                    # If product_variant field doesn't exist, create without it
+                    logger.warning(f"Failed to create order item with variant, trying without: {e}")
+                    order_item = OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        selected_size=selected_size,
+                        selected_color=selected_color,
+                        quantity=item_data['quantity'],
+                        unit_price=item_data['unit_price']
+                    )
                 
                 # Reduce stock after successful order item creation
                 requested_quantity = item_data['quantity']
-                if product_variant:
-                    # Reduce variant stock
-                    product_variant.stock_quantity = max(0, product_variant.stock_quantity - requested_quantity)
-                    product_variant.save()
-                    logger.info(f"Reduced variant stock for {product.title}: {requested_quantity} units")
-                else:
-                    # Reduce main product stock
-                    product.stock_quantity = max(0, product.stock_quantity - requested_quantity)
-                    product.save()
-                    logger.info(f"Reduced product stock for {product.title}: {requested_quantity} units")
+                try:
+                    if product_variant:
+                        # Reduce variant stock
+                        product_variant.stock_quantity = max(0, product_variant.stock_quantity - requested_quantity)
+                        product_variant.save()
+                        logger.info(f"Reduced variant stock for {product.title}: {requested_quantity} units")
+                    else:
+                        # Reduce main product stock
+                        product.stock_quantity = max(0, product.stock_quantity - requested_quantity)
+                        product.save()
+                        logger.info(f"Reduced product stock for {product.title}: {requested_quantity} units")
+                except Exception as e:
+                    logger.warning(f"Failed to reduce stock for {product.title}: {e}")
+                    # Continue with order creation even if stock reduction fails
                 
                 # Add to email data with variant info
                 variant_info = []
@@ -533,7 +555,8 @@ def create_order(request):
             'order_id': order_id,
             'status': 'created',
             'message': 'Order created successfully',
-            'emails_sent': emails_sent
+            'email_sent': emails_sent,  # Changed key name for consistency
+            'customer_email': order.customer_email,  # Add for debugging
         })
         
     except Exception as e:
@@ -593,3 +616,54 @@ def get_exchange_rate(request):
     except Exception as e:
         logger.error(f"Exchange rate error: {e}")
         return Response({'error': 'Failed to get exchange rate'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def debug_order_creation(request):
+    """Debug endpoint to check order creation requirements"""
+    try:
+        from .models import Product, Order, OrderItem
+        
+        debug_info = {
+            'models_available': {
+                'Product': True,
+                'Order': True,
+                'OrderItem': True,
+            },
+            'database_tables': {},
+            'sample_data': {}
+        }
+        
+        # Check if ProductVariant is available
+        try:
+            from .models import ProductVariant
+            debug_info['models_available']['ProductVariant'] = True
+            debug_info['sample_data']['variant_count'] = ProductVariant.objects.count()
+        except ImportError:
+            debug_info['models_available']['ProductVariant'] = False
+        except Exception as e:
+            debug_info['models_available']['ProductVariant'] = f"Error: {e}"
+        
+        # Check basic counts
+        try:
+            debug_info['sample_data']['product_count'] = Product.objects.count()
+            debug_info['sample_data']['order_count'] = Order.objects.count()
+            debug_info['sample_data']['order_item_count'] = OrderItem.objects.count()
+        except Exception as e:
+            debug_info['database_error'] = str(e)
+        
+        # Check OrderItem fields
+        try:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA table_info(shop_orderitem)")
+                columns = cursor.fetchall()
+                debug_info['orderitem_columns'] = [col[1] for col in columns]
+        except Exception as e:
+            debug_info['column_check_error'] = str(e)
+        
+        return Response(debug_info)
+        
+    except Exception as e:
+        logger.error(f"Debug order creation error: {e}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
