@@ -77,19 +77,33 @@ class ProductSerializer(serializers.ModelSerializer):
     category_label = serializers.CharField(source='category.label', read_only=True)
     price_display = serializers.CharField(read_only=True)
     is_in_stock = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    total_reviews = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
         fields = [
             'id', 'title', 'slug', 'price', 'price_display', 'description', 
             'category', 'category_label', 'stock_quantity', 
-            'is_active', 'is_featured', 'is_in_stock', 'created_at'
+            'is_active', 'is_featured', 'is_in_stock', 'created_at',
+            'average_rating', 'total_reviews'
         ]
     
     def get_is_in_stock(self, obj):
         """Check if product is in stock (considering both main stock and variants)"""
         # Use the model's property which now considers variants
         return obj.is_in_stock
+    
+    def get_average_rating(self, obj):
+        """Calculate average rating for the product"""
+        from django.db.models import Avg
+        reviews = obj.reviews.filter(is_approved=True)
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0.0
+    
+    def get_total_reviews(self, obj):
+        """Get total number of approved reviews for the product"""
+        return obj.reviews.filter(is_approved=True).count()
     
     def to_representation(self, instance):
         """Add computed fields safely"""
@@ -131,6 +145,8 @@ class ProductFullSerializer(serializers.ModelSerializer):
     variants = ProductVariantSerializer(many=True, read_only=True)
     available_sizes = serializers.SerializerMethodField()
     available_colors = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    total_reviews = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
@@ -138,7 +154,7 @@ class ProductFullSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'price', 'price_display', 'description', 
             'image', 'images', 'category', 'category_label', 'stock_quantity', 
             'is_active', 'is_in_stock', 'tags', 'variants', 'available_sizes', 
-            'available_colors', 'created_at'
+            'available_colors', 'created_at', 'average_rating', 'total_reviews'
         ]
         
     def to_representation(self, instance):
@@ -233,6 +249,17 @@ class ProductFullSerializer(serializers.ModelSerializer):
         except Exception as e:
             # Tables don't exist or other error
             return []
+    
+    def get_average_rating(self, obj):
+        """Calculate average rating for the product"""
+        from django.db.models import Avg
+        reviews = obj.reviews.filter(is_approved=True)
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0.0
+    
+    def get_total_reviews(self, obj):
+        """Get total number of approved reviews for the product"""
+        return obj.reviews.filter(is_approved=True).count()
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
