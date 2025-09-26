@@ -4,8 +4,8 @@ import type { Product } from '../data/products';
 export type CartItem = {
   id: string; // product id
   title: string;
-  price: number; // cents
-  shipping_cost?: number; // dollars
+  price: number; // dollars (from API)
+  shipping_cost?: number; // dollars (from API)
   image: string;
   quantity: number;
   selectedSize?: string;
@@ -33,8 +33,8 @@ const CartContext = createContext<{
   setQty: (uniqueKey: string, qty: number) => void;
   clear: () => void;
   count: number;
-  subtotal: number; // cents
-  shipping: number; // cents
+  subtotal: number; // dollars
+  shipping: number; // dollars
   saveCheckoutData: (data: any) => void;
   getCheckoutData: () => any;
   clearCheckoutData: () => void;
@@ -220,8 +220,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const s = state.items.reduce((n, i) => n + i.price * i.quantity, 0);
     // Calculate shipping based on products in cart
     const sh = state.items.reduce((total, item) => {
-      // Get shipping cost from product (convert from dollars to cents)
-      const productShipping = (item.shipping_cost || 9.99) * 100; // Default $9.99 if not set
+      // Get shipping cost from product (in dollars, same as backend)
+      const productShipping = (item.shipping_cost || 9.99); // Default $9.99 if not set
       return total + (productShipping * item.quantity);
     }, 0);
     return { count: c, subtotal: s, shipping: sh };

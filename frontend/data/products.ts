@@ -13,8 +13,8 @@ export type Product = {
   id: string;
   title: string;
   slug: string;
-  price: number; // in cents
-  shipping_cost?: number; // in dollars
+  price: number; // in dollars (from API)
+  shipping_cost?: number; // in dollars (from API)
   description: string;
   image: string;
   category: Category;

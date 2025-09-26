@@ -79,6 +79,7 @@ export interface ApiProduct {
   slug: string;
   price: number;
   price_display: string;
+  shipping_cost: number;
   description: string;
   image: string;
   images: ApiProductImage[];
@@ -525,6 +526,7 @@ export function convertApiProduct(apiProduct: ApiProduct): any {
     title: apiProduct.title,
     slug: apiProduct.slug,
     price: apiProduct.price,
+    shipping_cost: apiProduct.shipping_cost,
     description: apiProduct.description,
     image: apiProduct.image,
     images: apiProduct.images || [],
