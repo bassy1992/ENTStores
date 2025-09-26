@@ -254,7 +254,11 @@ export const categoryModels: CategoryModel[] = [
   }
 ];
 
-export const formatPrice = (cents: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    cents / 100,
-  );
+export const formatPrice = (price: number) => {
+  // Backend is sending prices in dollars (not cents)
+  // So we format directly without dividing by 100
+  return new Intl.NumberFormat('en-US', { 
+    style: 'currency', 
+    currency: 'USD' 
+  }).format(price);
+};

@@ -303,7 +303,7 @@ export default function Checkout() {
                           Shipping to: <strong>{selectedCountry.name}</strong> ({shippingZone.name})
                         </p>
                         <p className="text-xs text-blue-600 mt-1">
-                          Free shipping on orders over ${(shippingZone.freeShippingThreshold / 100).toFixed(0)}
+                          Free shipping on orders over ${shippingZone.freeShippingThreshold.toFixed(0)}
                         </p>
                       </div>
                     )}

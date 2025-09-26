@@ -190,30 +190,30 @@ export const shippingZones = {
   'domestic': {
     name: 'Domestic (Ghana)',
     countries: ['GH'],
-    freeShippingThreshold: 7500, // $75
-    standardRate: 999, // $9.99
-    expressRate: 1999, // $19.99
+    freeShippingThreshold: 75, // $75
+    standardRate: 9.99, // $9.99
+    expressRate: 19.99, // $19.99
   },
   'west-africa': {
     name: 'West Africa',
     countries: ['NG', 'CI', 'SN', 'BF', 'ML', 'NE', 'TG', 'BJ', 'GM', 'GW', 'GN', 'SL', 'LR'],
-    freeShippingThreshold: 15000, // $150
-    standardRate: 2999, // $29.99
-    expressRate: 4999, // $49.99
+    freeShippingThreshold: 150, // $150
+    standardRate: 29.99, // $29.99
+    expressRate: 49.99, // $49.99
   },
   'africa': {
     name: 'Africa',
     countries: ['KE', 'ZA', 'EG', 'MA', 'ET', 'TZ', 'UG', 'RW', 'TD', 'CM', 'GA', 'CG', 'CD', 'CF', 'AO', 'ZM', 'ZW', 'BW', 'NA', 'SZ', 'LS', 'MW', 'MZ', 'MG', 'MU', 'SC', 'DJ', 'ER', 'SO', 'SD', 'SS', 'LY', 'TN', 'DZ', 'MR', 'CV', 'ST', 'GQ', 'KM'],
-    freeShippingThreshold: 20000, // $200
-    standardRate: 3999, // $39.99
-    expressRate: 6999, // $69.99
+    freeShippingThreshold: 200, // $200
+    standardRate: 39.99, // $39.99
+    expressRate: 69.99, // $69.99
   },
   'international': {
     name: 'International',
     countries: ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK', 'FI', 'IE', 'PT', 'GR', 'PL', 'CZ', 'HU', 'SK', 'SI', 'HR', 'RO', 'BG', 'EE', 'LV', 'LT', 'LU', 'MT', 'CY', 'JP', 'KR', 'CN', 'IN', 'SG', 'HK', 'TW', 'MY', 'TH', 'PH', 'ID', 'VN', 'BD', 'PK', 'LK', 'NP', 'BT', 'MV', 'AE', 'SA', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'IL', 'TR', 'IR', 'IQ', 'SY', 'YE', 'AF', 'UZ', 'KZ', 'KG', 'TJ', 'TM', 'MN', 'RU', 'UA', 'BY', 'MD', 'GE', 'AM', 'AZ', 'BR', 'AR', 'CL', 'CO', 'PE', 'VE', 'EC', 'BO', 'PY', 'UY', 'GY', 'SR', 'GF', 'MX', 'GT', 'BZ', 'SV', 'HN', 'NI', 'CR', 'PA', 'CU', 'JM', 'HT', 'DO', 'PR', 'TT', 'BB', 'GD', 'LC', 'VC', 'AG', 'KN', 'DM', 'BS', 'NZ', 'FJ', 'PG', 'SB', 'VU', 'NC', 'PF', 'WS', 'TO', 'TV', 'KI', 'NR', 'PW', 'FM', 'MH'],
-    freeShippingThreshold: 25000, // $250
-    standardRate: 4999, // $49.99
-    expressRate: 8999, // $89.99
+    freeShippingThreshold: 250, // $250
+    standardRate: 49.99, // $49.99
+    expressRate: 89.99, // $89.99
   }
 };
 

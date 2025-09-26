@@ -126,7 +126,7 @@ export default function Cart() {
 
   const discount = appliedPromoCode ? appliedPromoCode.discount_amount : 0;
   const freeShippingFromPromo = appliedPromoCode?.free_shipping || false;
-  const shipping = (subtotal >= 7500 || freeShippingFromPromo) ? 0 : 999; // cents
+  const shipping = (subtotal >= 75 || freeShippingFromPromo) ? 0 : 9.99; // dollars
   const tax = Math.round((subtotal - discount) * 0.07); // simple 7% tax estimate
   const total = Math.max(0, subtotal - discount) + shipping + tax;
 
@@ -407,11 +407,11 @@ export default function Cart() {
                       Proceed to Checkout
                     </button>
 
-                    {subtotal < 7500 && (
+                    {subtotal < 75 && (
                       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
                           <Truck className="w-4 h-4 inline mr-1" />
-                          Add {formatPrice(7500 - subtotal)} more for free shipping!
+                          Add {formatPrice(75 - subtotal)} more for free shipping!
                         </p>
                       </div>
                     )}

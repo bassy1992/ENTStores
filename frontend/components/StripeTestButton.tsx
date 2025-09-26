@@ -9,7 +9,7 @@ interface StripeTestButtonProps {
 }
 
 export const StripeTestButton: React.FC<StripeTestButtonProps> = ({ 
-  amount = 2500, // $25.00 in cents
+  amount = 25, // $25.00 in dollars
   productName = 'Test Product'
 }) => {
   const [loading, setLoading] = useState(false);
