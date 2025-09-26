@@ -31,7 +31,7 @@ const fetchExchangeRate = async () => {
 };
 
 export default function Checkout() {
-  const { state, subtotal, clear, saveCheckoutData, appliedPromoCode } = useCart();
+  const { state, subtotal, shipping, clear, saveCheckoutData, appliedPromoCode } = useCart();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -57,14 +57,16 @@ export default function Checkout() {
   // Always show both payment options - let users choose
   const available = { stripe: true, momo: true };
 
-  // Calculate shipping based on selected country
+  // Calculate totals with product-based shipping
   const selectedCountry = countries.find(c => c.code === form.country);
   const shippingZone = getShippingZone(form.country);
   const discount = appliedPromoCode ? appliedPromoCode.discount_amount : 0;
   const freeShippingFromPromo = appliedPromoCode?.free_shipping || false;
-  const shipping = (subtotal >= shippingZone.freeShippingThreshold || freeShippingFromPromo) ? 0 : getShippingCost(form.country, subtotal);
+  
+  // Use product-based shipping from cart, but apply free shipping if applicable
+  const finalShipping = freeShippingFromPromo ? 0 : shipping;
   const tax = Math.round((subtotal - discount) * 0.05); // 5% tax on discounted amount
-  const total = Math.max(0, subtotal - discount) + shipping + tax;
+  const total = Math.max(0, subtotal - discount) + finalShipping + tax;
 
   // Fetch exchange rate on component mount
   useEffect(() => {
@@ -93,11 +95,45 @@ export default function Checkout() {
     if (paymentMethod === 'stripe') {
       try {
         setProcessing(true);
-        const items = state.items.map((i) => ({ title: i.title, amount: i.price, quantity: i.quantity, image: i.image }));
+        const items = state.items.map((i) => ({ 
+          title: i.title, 
+          amount: i.price, 
+          quantity: i.quantity, 
+          image: i.image,
+          shipping_cost: i.shipping_cost || 9.99 // Include shipping cost per item
+        }));
+        
+        // Add shipping and tax as separate line items if they exist
+        const checkoutItems = [...items];
+        if (finalShipping > 0) {
+          checkoutItems.push({
+            title: 'Shipping',
+            amount: finalShipping,
+            quantity: 1,
+            image: '',
+            shipping_cost: 0
+          });
+        }
+        if (tax > 0) {
+          checkoutItems.push({
+            title: 'Tax (5%)',
+            amount: tax,
+            quantity: 1,
+            image: '',
+            shipping_cost: 0
+          });
+        }
+        
         const resp = await fetch(API_ENDPOINTS.STRIPE_CHECKOUT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items, success_url: `${location.origin}/stripe-success`, cancel_url: `${location.origin}/cart` }),
+          body: JSON.stringify({ 
+            items: checkoutItems, 
+            success_url: `${location.origin}/stripe-success`, 
+            cancel_url: `${location.origin}/cart`,
+            shipping_cost: finalShipping,
+            tax_amount: tax
+          }),
         });
         const data = await resp.json();
         if (data.url) {
@@ -106,7 +142,7 @@ export default function Checkout() {
             form,
             items: state.items,
             subtotal,
-            shipping,
+            shipping: finalShipping,
             tax,
             total,
             timestamp: Date.now()
@@ -729,7 +765,7 @@ export default function Checkout() {
                         )}
                       </span>
                       <span>
-                        {shipping === 0 ? (
+                        {finalShipping === 0 ? (
                           <span className="text-green-600">
                             Free {freeShippingFromPromo && appliedPromoCode && (
                               <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-1">
@@ -738,18 +774,22 @@ export default function Checkout() {
                             )}
                           </span>
                         ) : (
-                          formatPrice(shipping)
+                          formatPrice(finalShipping)
                         )}
                       </span>
                     </div>
                     
-                    {shipping === 0 ? (
+                    {finalShipping === 0 && freeShippingFromPromo ? (
                       <div className="text-xs text-green-600">
-                        🎉 Free shipping on orders over {formatPrice(shippingZone.freeShippingThreshold)}
+                        🎉 Free shipping applied with promo code
+                      </div>
+                    ) : finalShipping === 0 ? (
+                      <div className="text-xs text-green-600">
+                        🎉 Free shipping included
                       </div>
                     ) : (
                       <div className="text-xs text-gray-500">
-                        Free shipping on orders over {formatPrice(shippingZone.freeShippingThreshold)}
+                        Shipping calculated per product
                       </div>
                     )}
                     

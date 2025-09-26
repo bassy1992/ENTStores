@@ -9,7 +9,7 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, Shield, Truck, Credit
 import { apiService } from '../services/api';
 
 export default function Cart() {
-  const { state, setQty, remove, subtotal, clear, appliedPromoCode, setAppliedPromoCode } = useCart();
+  const { state, setQty, remove, subtotal, shipping, clear, appliedPromoCode, setAppliedPromoCode } = useCart();
   const navigate = useNavigate();
 
   const [coupon, setCoupon] = useState('');
@@ -126,9 +126,9 @@ export default function Cart() {
 
   const discount = appliedPromoCode ? appliedPromoCode.discount_amount : 0;
   const freeShippingFromPromo = appliedPromoCode?.free_shipping || false;
-  const shipping = (subtotal >= 75 || freeShippingFromPromo) ? 0 : 9.99; // dollars
+  const finalShipping = freeShippingFromPromo ? 0 : shipping; // Use product-based shipping from context
   const tax = Math.round((subtotal - discount) * 0.07); // simple 7% tax estimate
-  const total = Math.max(0, subtotal - discount) + shipping + tax;
+  const total = Math.max(0, subtotal - discount) + finalShipping + tax;
 
   return (
     <Layout>
@@ -371,7 +371,7 @@ export default function Cart() {
                           <span>Shipping</span>
                         </div>
                         <span className="font-medium">
-                          {shipping === 0 ? (
+                          {finalShipping === 0 ? (
                             <span className="text-green-600">
                               Free {freeShippingFromPromo && appliedPromoCode && (
                                 <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-1">
@@ -380,7 +380,7 @@ export default function Cart() {
                               )}
                             </span>
                           ) : (
-                            formatPrice(shipping)
+                            formatPrice(finalShipping)
                           )}
                         </span>
                       </div>
@@ -407,11 +407,11 @@ export default function Cart() {
                       Proceed to Checkout
                     </button>
 
-                    {subtotal < 75 && (
+                    {finalShipping > 0 && (
                       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
                           <Truck className="w-4 h-4 inline mr-1" />
-                          Add {formatPrice(75 - subtotal)} more for free shipping!
+                          Shipping calculated per product. Use promo codes for free shipping!
                         </p>
                       </div>
                     )}
@@ -463,7 +463,7 @@ export default function Cart() {
                       </div>
                       <div className="flex items-center gap-3 text-sm text-gray-600">
                         <Truck className="w-4 h-4 text-blue-500" />
-                        <span>Free shipping over $75</span>
+                        <span>Product-based shipping rates</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-gray-600">
                         <CreditCard className="w-4 h-4 text-purple-500" />

@@ -14,6 +14,7 @@ export type Product = {
   title: string;
   slug: string;
   price: number; // in cents
+  shipping_cost?: number; // in dollars
   description: string;
   image: string;
   category: Category;
@@ -22,6 +23,7 @@ export type Product = {
   is_in_stock?: boolean;
   average_rating?: number;
   total_reviews?: number;
+  variants?: any[]; // For product variants
 };
 
 // Lightweight, extendable in-memory catalog. In a real app fetch from API/DB.

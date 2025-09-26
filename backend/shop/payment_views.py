@@ -366,6 +366,19 @@ def create_order(request):
         # Generate order ID
         order_id = f"ORD{uuid.uuid4().hex[:8].upper()}"
         
+        # Calculate shipping cost from items if not provided
+        calculated_shipping = data.get('shipping_cost', 0)
+        if calculated_shipping == 0:
+            # Calculate shipping from individual products
+            items = data.get('items', [])
+            for item_data in items:
+                try:
+                    product = Product.objects.get(id=item_data['product_id'])
+                    item_shipping = getattr(product, 'shipping_cost', 9.99)  # Default $9.99
+                    calculated_shipping += item_shipping * item_data.get('quantity', 1)
+                except Product.DoesNotExist:
+                    pass
+        
         # Create order
         order = Order.objects.create(
             id=order_id,
@@ -376,7 +389,7 @@ def create_order(request):
             shipping_country=data.get('shipping_country', ''),
             shipping_postal_code=data.get('shipping_postal_code', ''),
             subtotal=data.get('subtotal', 0),
-            shipping_cost=data.get('shipping_cost', 0),
+            shipping_cost=calculated_shipping,
             tax_amount=data.get('tax_amount', 0),
             total=data.get('total', 0),
             payment_method=data.get('payment_method', ''),

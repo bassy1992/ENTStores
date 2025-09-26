@@ -5,6 +5,7 @@ export type CartItem = {
   id: string; // product id
   title: string;
   price: number; // cents
+  shipping_cost?: number; // dollars
   image: string;
   quantity: number;
   selectedSize?: string;
@@ -33,6 +34,7 @@ const CartContext = createContext<{
   clear: () => void;
   count: number;
   subtotal: number; // cents
+  shipping: number; // cents
   saveCheckoutData: (data: any) => void;
   getCheckoutData: () => any;
   clearCheckoutData: () => void;
@@ -46,6 +48,7 @@ const CartContext = createContext<{
   clear: () => {},
   count: 0,
   subtotal: 0,
+  shipping: 0,
   saveCheckoutData: () => {},
   getCheckoutData: () => null,
   clearCheckoutData: () => {},
@@ -77,6 +80,7 @@ function reducer(state: State, action: Action): State {
             id: action.product.id,
             title: action.product.title,
             price: action.product.price,
+            shipping_cost: action.product.shipping_cost,
             image: action.product.image,
             quantity: qty,
             selectedSize: action.selectedSize,
@@ -211,15 +215,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const { count, subtotal } = useMemo(() => {
+  const { count, subtotal, shipping } = useMemo(() => {
     const c = state.items.reduce((n, i) => n + i.quantity, 0);
     const s = state.items.reduce((n, i) => n + i.price * i.quantity, 0);
-    return { count: c, subtotal: s };
+    // Calculate shipping based on products in cart
+    const sh = state.items.reduce((total, item) => {
+      // Get shipping cost from product (convert from dollars to cents)
+      const productShipping = (item.shipping_cost || 9.99) * 100; // Default $9.99 if not set
+      return total + (productShipping * item.quantity);
+    }, 0);
+    return { count: c, subtotal: s, shipping: sh };
   }, [state.items]);
 
   return (
     <CartContext.Provider value={{ 
-      state, add, remove, setQty, clear, count, subtotal,
+      state, add, remove, setQty, clear, count, subtotal, shipping,
       saveCheckoutData, getCheckoutData, clearCheckoutData,
       appliedPromoCode, setAppliedPromoCode
     }}>
