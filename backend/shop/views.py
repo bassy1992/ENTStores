@@ -400,6 +400,7 @@ def simple_products(request):
 
 class ProductReviewListCreateView(generics.ListCreateAPIView):
     """List and create product reviews"""
+    pagination_class = None  # Disable pagination for reviews
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -447,37 +448,20 @@ class ProductReviewListCreateView(generics.ListCreateAPIView):
         serializer.save()
     
     def list(self, request, *args, **kwargs):
-        # Get reviews
+        # Get reviews (no pagination)
         queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
-        
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            reviews_data = serializer.data
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-            reviews_data = serializer.data
+        serializer = self.get_serializer(queryset, many=True)
+        reviews_data = serializer.data
         
         # Get review statistics
         product_id = self.kwargs['product_id']
         stats = self.get_review_stats(product_id)
         
-        # Prepare response
-        response_data = {
+        # Return custom response format
+        return Response({
             'reviews': reviews_data,
             'stats': stats,
-        }
-        
-        if page is not None:
-            response_data['pagination'] = {
-                'page': self.paginator.page.number,
-                'total_pages': self.paginator.page.paginator.num_pages,
-                'has_next': self.paginator.page.has_next(),
-                'has_previous': self.paginator.page.has_previous(),
-            }
-            return self.get_paginated_response(response_data)
-        
-        return Response(response_data)
+        })
     
     def get_review_stats(self, product_id):
         """Calculate review statistics for a product"""
