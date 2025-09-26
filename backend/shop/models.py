@@ -110,6 +110,13 @@ class Product(models.Model):
         default=0,
         help_text="Available stock quantity"
     )
+    shipping_cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=9.99,
+        validators=[MinValueValidator(0.00)],
+        help_text="Shipping cost for this product in dollars (e.g., 9.99 = $9.99)"
+    )
     is_active = models.BooleanField(
         default=True,
         help_text="Whether the product is active and available for purchase"

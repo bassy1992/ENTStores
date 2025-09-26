@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Validation Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .code {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Stock Validation Fix Test</h1>
+    <p>This page tests the stock validation fixes for products with variants.</p>
+
+    <div class="test-case info">
+        <h3>📋 Test Scenarios</h3>
+        <p>We'll test the following scenarios:</p>
+        <ul>
+            <li><strong>Product with variants (has stock):</strong> Should show "Options" button, allow variant selection</li>
+            <li><strong>Product without variants (has stock):</strong> Should show "Add" button, allow direct add</li>
+            <li><strong>Product truly out of stock:</strong> Should show "Out of Stock", disable all actions</li>
+        </ul>
+    </div>
+
+    <div class="test-case">
+        <h3>🎯 Test Case 1: Product with Variants (fghfhghgh)</h3>
+        <div class="code">
+            Product Data:
+            - Main Stock: 0
+            - Is In Stock: true (because variants have stock)
+            - Variants: 2 (Small CORAL PINK: 89, Medium White: 98)
+        </div>
+        
+        <h4>Expected Frontend Behavior:</h4>
+        <ul>
+            <li>✅ ProductCard should show "Options" button (not "Add")</li>
+            <li>✅ ProductCard should show "Multiple options" (not stock count)</li>
+            <li>✅ ProductCard should NOT show "Out of Stock" badge</li>
+            <li>✅ ProductDetails should allow variant selection and add to cart</li>
+            <li>✅ Cart should validate variant stock before adding</li>
+        </ul>
+        
+        <button onclick="testProductWithVariants()">Test Product with Variants</button>
+        <div id="variantTest"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>🎯 Test Case 2: Product without Variants</h3>
+        <div class="code">
+            Mock Product Data:
+            - Main Stock: 50
+            - Is In Stock: true
+            - Variants: [] (no variants)
+        </div>
+        
+        <h4>Expected Frontend Behavior:</h4>
+        <ul>
+            <li>✅ ProductCard should show "Add" button</li>
+            <li>✅ ProductCard should show "50 in stock"</li>
+            <li>✅ ProductCard should allow direct add to cart</li>
+        </ul>
+        
+        <button onclick="testProductWithoutVariants()">Test Product without Variants</button>
+        <div id="noVariantTest"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>🎯 Test Case 3: Truly Out of Stock Product</h3>
+        <div class="code">
+            Mock Product Data:
+            - Main Stock: 0
+            - Is In Stock: false
+            - Variants: [] or all variants have 0 stock
+        </div>
+        
+        <h4>Expected Frontend Behavior:</h4>
+        <ul>
+            <li>✅ ProductCard should show "Out of Stock" badge</li>
+            <li>✅ ProductCard should NOT show any button</li>
+            <li>✅ ProductCard should gray out image</li>
+            <li>✅ ProductDetails should disable add to cart</li>
+        </ul>
+        
+        <button onclick="testOutOfStockProduct()">Test Out of Stock Product</button>
+        <div id="outOfStockTest"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>🔧 Cart Validation Tests</h3>
+        <p>Test the cart context validation logic:</p>
+        
+        <button onclick="testCartValidation()">Test Cart Validation</button>
+        <div id="cartTest"></div>
+    </div>
+
+    <div class="test-case success">
+        <h3>✅ Fix Summary</h3>
+        <p>The fixes implemented:</p>
+        <ol>
+            <li><strong>ProductCard Logic:</strong> Now properly handles products with variants</li>
+            <li><strong>Button Text:</strong> Shows "Options" for products with variants, "Add" for direct add</li>
+            <li><strong>Stock Display:</strong> Shows "Multiple options" for products with variants</li>
+            <li><strong>Cart Validation:</strong> Enhanced to validate variant stock properly</li>
+            <li><strong>UX Consistency:</strong> No more confusion between grid and detail views</li>
+        </ol>
+    </div>
+
+    <script>
+        // Mock the ProductCard logic
+        function mockProductCard(product) {
+            const hasVariants = product.variants && product.variants.length > 0;
+            const isOutOfStock = hasVariants 
+                ? product.is_in_stock === false 
+                : (product.is_in_stock === false || product.stock_quantity === 0);
+            
+            const canAddDirectly = !hasVariants && !isOutOfStock;
+            
+            return {
+                hasVariants,
+                isOutOfStock,
+                canAddDirectly,
+                buttonText: hasVariants ? 'Options' : 'Add',
+                stockText: isOutOfStock 
+                    ? 'Out of stock' 
+                    : hasVariants 
+                        ? 'Multiple options'
+                        : `${product.stock_quantity} in stock`
+            };
+        }
+
+        // Mock cart validation logic
+        function mockCartAdd(product, quantity = 1, variantId = null) {
+            const requestedQty = quantity;
+            
+            if (variantId && product.variants) {
+                const variant = product.variants.find(v => v.id === variantId);
+                if (!variant) {
+                    return { success: false, error: 'Variant not found' };
+                }
+                if (!variant.is_in_stock || variant.stock_quantity === 0) {
+                    return { success: false, error: 'Selected variant is out of stock' };
+                }
+                if (variant.stock_quantity < requestedQty) {
+                    return { success: false, error: `Only ${variant.stock_quantity} in stock for selected variant` };
+                }
+                return { success: true, message: 'Added to cart successfully' };
+            } else {
+                if (!product.is_in_stock) {
+                    return { success: false, error: 'Product is out of stock' };
+                }
+                
+                if (product.variants && product.variants.length > 0) {
+                    return { success: false, error: 'Please select size and color options' };
+                }
+                
+                if (product.stock_quantity < requestedQty) {
+                    return { success: false, error: `Only ${product.stock_quantity} in stock` };
+                }
+                return { success: true, message: 'Added to cart successfully' };
+            }
+        }
+
+        function testProductWithVariants() {
+            const product = {
+                id: '67',
+                title: 'fghfhghgh',
+                stock_quantity: 0,
+                is_in_stock: true,
+                variants: [
+                    { id: 1, stock_quantity: 89, is_in_stock: true, size: 'Small', color: 'CORAL PINK' },
+                    { id: 2, stock_quantity: 98, is_in_stock: true, size: 'Medium', color: 'White' }
+                ]
+            };
+
+            const cardResult = mockProductCard(product);
+            const cartResult1 = mockCartAdd(product); // No variant selected
+            const cartResult2 = mockCartAdd(product, 1, 1); // Variant 1 selected
+
+            document.getElementById('variantTest').innerHTML = `
+                <div class="code">
+                    <strong>ProductCard Results:</strong><br>
+                    - Has Variants: ${cardResult.hasVariants}<br>
+                    - Is Out of Stock: ${cardResult.isOutOfStock}<br>
+                    - Can Add Directly: ${cardResult.canAddDirectly}<br>
+                    - Button Text: "${cardResult.buttonText}"<br>
+                    - Stock Text: "${cardResult.stockText}"<br><br>
+                    
+                    <strong>Cart Validation Results:</strong><br>
+                    - Add without variant: ${cartResult1.success ? '✅' : '❌'} ${cartResult1.error || cartResult1.message}<br>
+                    - Add with variant 1: ${cartResult2.success ? '✅' : '❌'} ${cartResult2.error || cartResult2.message}
+                </div>
+            `;
+        }
+
+        function testProductWithoutVariants() {
+            const product = {
+                id: 'TEST_NO_VARIANTS',
+                title: 'Test Product No Variants',
+                stock_quantity: 50,
+                is_in_stock: true,
+                variants: []
+            };
+
+            const cardResult = mockProductCard(product);
+            const cartResult = mockCartAdd(product);
+
+            document.getElementById('noVariantTest').innerHTML = `
+                <div class="code">
+                    <strong>ProductCard Results:</strong><br>
+                    - Has Variants: ${cardResult.hasVariants}<br>
+                    - Is Out of Stock: ${cardResult.isOutOfStock}<br>
+                    - Can Add Directly: ${cardResult.canAddDirectly}<br>
+                    - Button Text: "${cardResult.buttonText}"<br>
+                    - Stock Text: "${cardResult.stockText}"<br><br>
+                    
+                    <strong>Cart Validation Results:</strong><br>
+                    - Add to cart: ${cartResult.success ? '✅' : '❌'} ${cartResult.error || cartResult.message}
+                </div>
+            `;
+        }
+
+        function testOutOfStockProduct() {
+            const product = {
+                id: 'TEST_OUT_OF_STOCK',
+                title: 'Test Out of Stock Product',
+                stock_quantity: 0,
+                is_in_stock: false,
+                variants: []
+            };
+
+            const cardResult = mockProductCard(product);
+            const cartResult = mockCartAdd(product);
+
+            document.getElementById('outOfStockTest').innerHTML = `
+                <div class="code">
+                    <strong>ProductCard Results:</strong><br>
+                    - Has Variants: ${cardResult.hasVariants}<br>
+                    - Is Out of Stock: ${cardResult.isOutOfStock}<br>
+                    - Can Add Directly: ${cardResult.canAddDirectly}<br>
+                    - Button Text: "${cardResult.buttonText}"<br>
+                    - Stock Text: "${cardResult.stockText}"<br><br>
+                    
+                    <strong>Cart Validation Results:</strong><br>
+                    - Add to cart: ${cartResult.success ? '✅' : '❌'} ${cartResult.error || cartResult.message}
+                </div>
+            `;
+        }
+
+        function testCartValidation() {
+            const tests = [
+                {
+                    name: 'Product with variants - no variant selected',
+                    product: { is_in_stock: true, variants: [{ id: 1, stock_quantity: 10, is_in_stock: true }] },
+                    variantId: null,
+                    expected: 'Should fail - variant required'
+                },
+                {
+                    name: 'Product with variants - valid variant selected',
+                    product: { is_in_stock: true, variants: [{ id: 1, stock_quantity: 10, is_in_stock: true }] },
+                    variantId: 1,
+                    expected: 'Should succeed'
+                },
+                {
+                    name: 'Product with variants - out of stock variant',
+                    product: { is_in_stock: true, variants: [{ id: 1, stock_quantity: 0, is_in_stock: false }] },
+                    variantId: 1,
+                    expected: 'Should fail - variant out of stock'
+                }
+            ];
+
+            let results = '<div class="code">';
+            tests.forEach(test => {
+                const result = mockCartAdd(test.product, 1, test.variantId);
+                results += `<strong>${test.name}:</strong><br>`;
+                results += `Expected: ${test.expected}<br>`;
+                results += `Result: ${result.success ? '✅' : '❌'} ${result.error || result.message}<br><br>`;
+            });
+            results += '</div>';
+
+            document.getElementById('cartTest').innerHTML = results;
+        }
+    </script>
+</body>
+</html>

@@ -83,7 +83,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'title', 'slug', 'price', 'price_display', 'description', 
+            'id', 'title', 'slug', 'price', 'price_display', 'shipping_cost', 'description', 
             'category', 'category_label', 'stock_quantity', 
             'is_active', 'is_featured', 'is_in_stock', 'created_at',
             'average_rating', 'total_reviews'
@@ -151,7 +151,7 @@ class ProductFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'title', 'slug', 'price', 'price_display', 'description', 
+            'id', 'title', 'slug', 'price', 'price_display', 'shipping_cost', 'description', 
             'image', 'images', 'category', 'category_label', 'stock_quantity', 
             'is_active', 'is_in_stock', 'tags', 'variants', 'available_sizes', 
             'available_colors', 'created_at', 'average_rating', 'total_reviews'

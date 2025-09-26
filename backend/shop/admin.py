@@ -82,7 +82,7 @@ class ProductVariantInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
-    list_display = ['title', 'category', 'price_display', 'stock_quantity', 'is_active', 'is_featured', 'created_at']
+    list_display = ['title', 'category', 'price_display', 'shipping_cost_display', 'stock_quantity', 'is_active', 'is_featured', 'created_at']
     list_filter = ['category', 'is_active', 'is_featured', 'created_at', 'tag_assignments__tag']
     search_fields = ['title', 'id', 'description']
     readonly_fields = ['created_at', 'updated_at']
@@ -100,7 +100,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('id', 'title', 'slug', 'description')
         }),
         ('Pricing & Category', {
-            'fields': ('price', 'category')
+            'fields': ('price', 'shipping_cost', 'category')
         }),
         ('Main Image', {
             'fields': ('image',),
@@ -118,6 +118,10 @@ class ProductAdmin(admin.ModelAdmin):
     def price_display(self, obj):
         return obj.price_display
     price_display.short_description = 'Price'
+    
+    def shipping_cost_display(self, obj):
+        return f"${obj.shipping_cost:.2f}"
+    shipping_cost_display.short_description = 'Shipping'
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('category')
