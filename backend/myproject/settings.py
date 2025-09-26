@@ -410,13 +410,13 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
-# Email addresses - Using your verified Brevo sender
-DEFAULT_FROM_EMAIL = 'ENTstore <Enontinoclothing@gmail.com>'  # Use your main business email
+# Email addresses - Using verified Brevo sender
+DEFAULT_FROM_EMAIL = 'ENTstore <awuleynovember@gmail.com>'  # Use verified Brevo sender
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'Enontinoclothing@gmail.com')  # Your actual email for admin notifications
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
-# Backup sender (the SMTP login email)
-SMTP_FROM_EMAIL = 'ENTstore <81d61b003@smtp-brevo.com>'
+# Reply-to email (your business email)
+REPLY_TO_EMAIL = 'Enontinoclothing@gmail.com'
 
 # Logging configuration
 LOGGING = {

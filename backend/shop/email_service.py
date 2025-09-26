@@ -88,6 +88,7 @@ class EmailService:
                 body=f'Thank you for your order #{order.id}. Your order has been confirmed and is being processed.',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[order.customer_email],
+                reply_to=[getattr(settings, 'REPLY_TO_EMAIL', settings.ADMIN_EMAIL)],
             )
             email.attach_alternative(html_content, "text/html")
             
@@ -133,6 +134,7 @@ class EmailService:
                 body=f'A new order #{order.id} has been placed by {order.customer_name} for ${total:.2f}.',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[settings.ADMIN_EMAIL],
+                reply_to=[getattr(settings, 'REPLY_TO_EMAIL', settings.ADMIN_EMAIL)],
             )
             email.attach_alternative(html_content, "text/html")
             
@@ -197,6 +199,7 @@ class EmailService:
                 body=f'Great news! Your order #{order.id} has been shipped and is on its way to you. {f"Track it here: {tracking_url}" if tracking_url else ""}',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[order.customer_email],
+                reply_to=[getattr(settings, 'REPLY_TO_EMAIL', settings.ADMIN_EMAIL)],
             )
             email.attach_alternative(html_content, "text/html")
             
