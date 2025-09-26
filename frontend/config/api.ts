@@ -16,8 +16,9 @@ export const API_ENDPOINTS = {
   CREATE_ORDER: `${API_BASE_URL}/api/payments/create-order/`,
   
   // Add other endpoints as needed
-  PRODUCTS: `${API_BASE_URL}/api/products/`,
-  CATEGORIES: `${API_BASE_URL}/api/categories/`,
+  PRODUCTS: `${API_BASE_URL}/api/shop/products/`,
+  CATEGORIES: `${API_BASE_URL}/api/shop/categories/`,
+  REVIEWS: (productId: string) => `${API_BASE_URL}/api/shop/products/${productId}/reviews/`,
 } as const;
 
 // Helper function to build API URLs
