@@ -21,26 +21,12 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful'>('newest');
   const [filterRating, setFilterRating] = useState<number | null>(null);
-  const [reviews, setReviews] = useState([
-    {
-      id: '1',
-      user_name: 'Sarah M.',
-      rating: 5,
-      title: 'Amazing quality!',
-      comment: 'This product exceeded my expectations. The material is soft and comfortable, and the fit is perfect.',
-      created_at: '2024-01-15T10:30:00Z',
-      verified_purchase: true
-    },
-    {
-      id: '2',
-      user_name: 'Mike R.',
-      rating: 4,
-      title: 'Good value for money',
-      comment: 'Nice product overall. The color is exactly as shown in the pictures.',
-      created_at: '2024-01-10T14:20:00Z',
-      verified_purchase: true
-    }
-  ]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({
+    average_rating: 0,
+    total_reviews: 0,
+    rating_distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  });
 
   // Write review form state
   const [newReview, setNewReview] = useState({
@@ -77,20 +63,26 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
           const data = await response.json();
           console.log('📊 API Response:', data);
           
-          if (data.reviews && data.reviews.length > 0) {
+          if (data.reviews) {
             setReviews(data.reviews);
-            console.log(`✅ SUCCESS! Loaded ${data.reviews.length} reviews from production database`);
+            console.log(`✅ SUCCESS! Loaded ${data.reviews.length} reviews from backend`);
           } else {
-            console.log('⚠️ API returned 0 reviews - keeping mock data for display');
+            setReviews([]);
+            console.log('⚠️ API returned no reviews data');
+          }
+          
+          if (data.stats) {
+            setReviewStats(data.stats);
+            console.log('📊 Review stats loaded:', data.stats);
           }
         } else {
           const errorText = await response.text();
           console.error('❌ API Error:', response.status, errorText);
-          console.log('⚠️ Using mock data due to API error');
+          setReviews([]);
         }
       } catch (error) {
         console.error('❌ Network Error:', error);
-        console.log('⚠️ Using mock data due to network error');
+        setReviews([]);
       }
       
       setLoading(false);
@@ -205,10 +197,8 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
     );
   }
 
-  // Calculate average rating
-  const avgRating = reviews.length > 0 
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
-    : 0;
+  // Use dynamic stats instead of calculating from reviews
+  const avgRating = reviewStats.average_rating;
 
   return (
     <div className="space-y-6">
@@ -245,7 +235,7 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
                     ))}
                   </div>
                   <p className="text-sm text-gray-600">
-                    Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                    Based on {reviewStats.total_reviews} review{reviewStats.total_reviews !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>
@@ -254,8 +244,8 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
             {/* Rating Distribution */}
             <div className="space-y-2">
               {[5, 4, 3, 2, 1].map(rating => {
-                const count = reviews.filter(r => r.rating === rating).length;
-                const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                const count = reviewStats.rating_distribution[rating] || 0;
+                const percentage = reviewStats.total_reviews > 0 ? (count / reviewStats.total_reviews) * 100 : 0;
                 
                 return (
                   <div key={rating} className="flex items-center gap-2 text-sm">
@@ -448,7 +438,23 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
 
       {/* Reviews List */}
       <div className="space-y-4">
-        {reviews.map((review) => (
+        {reviews.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <div className="text-gray-500">
+                <h3 className="text-lg font-medium mb-2">No reviews yet</h3>
+                <p className="text-sm">Be the first to review this product!</p>
+                <button
+                  onClick={() => setShowWriteReview(true)}
+                  className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Write the First Review
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          reviews.map((review) => (
           <Card key={review.id}>
             <CardContent className="p-6">
               <div className="space-y-4">
@@ -491,7 +497,8 @@ export default function SimpleReviewSystem({ productId, productSlug }: SimpleRev
               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

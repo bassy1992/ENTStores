@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
-import { API_ENDPOINTS, apiRequest } from '../../utils/api-config';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface ReviewSummaryProps {
   productId: string;
@@ -22,13 +22,23 @@ export default function ReviewSummary({ productId, className = '' }: ReviewSumma
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const data = await apiRequest(API_ENDPOINTS.productReviews(productId));
-        if (data.stats) {
-          setStats(data.stats);
-          console.log('✅ Review stats loaded:', data.stats);
+        const response = await fetch(API_ENDPOINTS.REVIEWS(productId), {
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.stats) {
+            setStats(data.stats);
+            console.log('✅ Review stats loaded:', data.stats);
+          }
+        } else {
+          console.log('⚠️ API error fetching review stats:', response.status);
         }
       } catch (error) {
-        console.log('⚠️ Error fetching review stats, using defaults:', error);
+        console.log('⚠️ Error fetching review stats:', error);
       }
       setLoading(false);
     };

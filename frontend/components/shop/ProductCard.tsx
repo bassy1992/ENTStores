@@ -3,6 +3,7 @@ import type { Product } from '../../data/products';
 import { formatPrice } from '../../data/products';
 import { useCart } from '../../context/cart';
 import { getProductImageUrl } from '../../lib/media';
+import StarRating from '../ui/star-rating';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
@@ -76,7 +77,25 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="p-4">
         <h3 className="font-medium line-clamp-1">{product.title}</h3>
-        <div className="flex items-center justify-between mt-1">
+        
+        {/* Rating */}
+        {product.average_rating && product.average_rating > 0 ? (
+          <div className="mt-1">
+            <StarRating 
+              rating={product.average_rating} 
+              size="sm" 
+              showValue={true}
+              showCount={true}
+              reviewCount={product.total_reviews}
+            />
+          </div>
+        ) : (
+          <div className="mt-1">
+            <span className="text-xs text-gray-400">No reviews yet</span>
+          </div>
+        )}
+        
+        <div className="flex items-center justify-between mt-2">
           <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
           {product.stock_quantity !== undefined && (
             <p className={`text-xs ${isOutOfStock ? 'text-red-600' : 'text-green-600'}`}>

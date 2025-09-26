@@ -20,6 +20,8 @@ export type Product = {
   tags?: string[];
   stock_quantity?: number;
   is_in_stock?: boolean;
+  average_rating?: number;
+  total_reviews?: number;
 };
 
 // Lightweight, extendable in-memory catalog. In a real app fetch from API/DB.
