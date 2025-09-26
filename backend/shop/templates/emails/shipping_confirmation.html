@@ -1,284 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
     <title>Order Shipped - {{ order_id }}</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            background-color: #f4f6f8;
-            padding: 20px;
-        }
-
-        .email-container {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            max-width: 650px;
-            margin: 0 auto;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .header {
-            background: linear-gradient(135deg, #E53935, #1E3D8F);
-            color: #fff;
-            text-align: center;
-            padding: 30px 20px;
-        }
-
-
-
-        .header h1 {
-            margin: 0;
-            font-size: 26px;
-        }
-
-        .header p {
-            margin: 8px 0 0;
-            font-size: 15px;
-            opacity: 0.95;
-        }
-
-        .shipping-info {
-            padding: 30px;
-        }
-
-        .shipping-info h2 {
-            margin-bottom: 20px;
-            color: #1E3D8F;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 8px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        table th,
-        table td {
-            padding: 12px 10px;
-            text-align: left;
-        }
-
-        table th {
-            background: #f8f9fa;
-            font-weight: 600;
-        }
-
-        table tr:nth-child(even) td {
-            background: #fafafa;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            background: #E53935;
-            color: white;
-        }
-
-        .tracking-box {
-            background: #f9f9f9;
-            border-left: 4px solid #1E3D8F;
-            border-radius: 6px;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .tracking-number {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1E3D8F;
-            margin: 10px 0;
-            display: inline-block;
-        }
-
-        .track-button {
-            display: inline-block;
-            background: #1E3D8F;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .track-button:hover {
-            background: #152c66;
-        }
-
-        .delivery-info {
-            background: #f8f9fa;
-            padding: 20px 30px;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .delivery-info h3 {
-            margin-top: 0;
-            margin-bottom: 12px;
-            color: #1E3D8F;
-        }
-
-        .footer {
-            background: #fff;
-            text-align: center;
-            padding: 20px;
-            font-size: 13px;
-            color: #666;
-            border-top: 1px solid #eee;
-        }
-
-
-
-        .footer a {
-            color: #1E3D8F;
-            text-decoration: none;
-            font-weight: 500;
-        }
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #17a2b8; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .tracking-info { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; text-align: center; }
+        .tracking-button { background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; }
     </style>
 </head>
-
 <body>
-    <div class="email-container">
-
-        <!-- Header -->
+    <div class="container">
         <div class="header">
-            <h1>📦 Your Order is On Its Way!</h1>
-            <p>Hi {{ customer_name }}, your order has been shipped and is heading your way!</p>
+            <h1>📦 Your Order Has Shipped!</h1>
+            <h2>Order #{{ order_id }}</h2>
         </div>
-
-        <!-- Shipping Information -->
-        <div class="shipping-info">
-            <h2>Shipping Details</h2>
-            <table>
-                <tr>
-                    <th>Order ID</th>
-                    <td>{{ order_id }}</td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td><span class="status-badge">Shipped</span></td>
-                </tr>
-                <tr>
-                    <th>Shipped Date</th>
-                    <td>{{ shipped_date|date:"F d, Y g:i A" }}</td>
-                </tr>
-                <tr>
-                    <th>Carrier</th>
-                    <td>{{ shipping_carrier|default:"Standard Shipping" }}</td>
-                </tr>
-                <tr>
-                    <th>Estimated Delivery</th>
-                    <td>{{ estimated_delivery_date|date:"F d, Y"|default:"3-5 business days" }}</td>
-                </tr>
-            </table>
-
-            <!-- Tracking Information -->
+        
+        <div class="content">
+            <h3>Great news, {{ customer_name }}!</h3>
+            <p>Your order is on its way to you.</p>
+            
             {% if tracking_number %}
-            <div class="tracking-box">
-                <h3>📍 Track Your Package</h3>
-                <p>Your tracking number is:</p>
-                <div class="tracking-number">{{ tracking_number }}</div>
+            <div class="tracking-info">
+                <h4>Tracking Information</h4>
+                <p><strong>Tracking Number:</strong> {{ tracking_number }}</p>
+                <p><strong>Carrier:</strong> {{ shipping_carrier }}</p>
+                <p><strong>Estimated Delivery:</strong> {{ estimated_delivery_date|date:"F d, Y" }}</p>
                 {% if tracking_url %}
-                <a href="{{ tracking_url }}" class="track-button" target="_blank" rel="noopener">Track Package</a>
-                {% else %}
-                <p style="font-size: 14px; color: #666; margin-top: 10px;">
-                    You can track your package using this number on {{ shipping_carrier|default:"your carrier's" }}
-                    website.
-                </p>
+                <p><a href="{{ tracking_url }}" class="tracking-button">Track Your Package</a></p>
                 {% endif %}
-                <p style="font-size: 12px; color: #888; margin-top: 15px;">
-                    💡 Tip: Tracking information may take 24-48 hours to become active.
-                </p>
             </div>
             {% endif %}
-
-            <!-- Shipping Address -->
+            
+            <p><strong>Delivery Instructions:</strong> {{ delivery_instructions }}</p>
+            
             {% if shipping_address %}
-            <h3>Shipping To</h3>
-            <p>
-                {{ shipping_address.name }}<br>
-                {{ shipping_address.address_line_1 }}<br>
-                {% if shipping_address.address_line_2 %}{{ shipping_address.address_line_2 }}<br>{% endif %}
-                {{ shipping_address.city }}, {{ shipping_address.state }} {{ shipping_address.postal_code }}<br>
-                {{ shipping_address.country }}
-            </p>
-            {% endif %}
-
-            <!-- Order Items Summary -->
-            {% if order_items %}
-            <h3>Items in This Shipment</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in order_items %}
-                    <tr>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.quantity }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
-        </div>
-
-        <!-- Delivery Information -->
-        <div class="delivery-info">
-            <h3>Delivery Information</h3>
-            <p>📅 <strong>Estimated Delivery:</strong> {{ estimated_delivery_date|date:"F d, Y"|default:"3-5 business
-                days" }}</p>
-            <p>🏠 <strong>Delivery Instructions:</strong> {{ delivery_instructions|default:"Package will be left at your
-                door if no one is available to receive it." }}</p>
-
-            <!-- Delivery Tips -->
-            <div
-                style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin: 15px 0;">
-                <h4 style="margin: 0 0 10px 0; color: #856404; font-size: 14px;">📋 Delivery Tips</h4>
-                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #856404;">
-                    <li>Someone should be available to receive the package</li>
-                    <li>Check your tracking regularly for updates</li>
-                    <li>Contact the carrier directly if you need to reschedule delivery</li>
-                    <li>Packages may require signature confirmation</li>
-                </ul>
+            <div class="order-details">
+                <h4>Shipping Address</h4>
+                <p>{{ shipping_address.name }}</p>
+                <p>{{ shipping_address.address_line_1 }}</p>
+                <p>{{ shipping_address.city }}, {{ shipping_address.country }} {{ shipping_address.postal_code }}</p>
             </div>
-
-            <p>📞 <strong>Need help?</strong> Contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a>
-                or call {{ support_phone|default:"our support line" }}.</p>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>&copy; {{ current_year }} {{ store_name }}. All rights reserved.</p>
-            <p><a href="{{ store_url }}">Visit Store</a> | <a href="mailto:{{ support_email }}">{{ support_email }}</a>
-            </p>
-            <p style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
-                This shipping notification was sent to {{ customer_email }} regarding order {{ order_id }}.
-            </p>
-            {% if unsubscribe_url %}
-            <p style="font-size: 11px; opacity: 0.7; margin-top: 5px;">
-                <a href="{{ unsubscribe_url }}" style="color: #999;">Unsubscribe from shipping notifications</a>
-            </p>
             {% endif %}
         </div>
-
+        
+        <div class="footer">
+            <p>Questions? Contact us at {{ support_email }}</p>
+        </div>
     </div>
 </body>
-
 </html>
