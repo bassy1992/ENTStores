@@ -411,7 +411,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 # Email addresses - Using your verified Brevo sender
-DEFAULT_FROM_EMAIL = 'ENTstore <awuleynovember@gmail.com>'  # Your verified sender
+DEFAULT_FROM_EMAIL = 'ENTstore <Enontinoclothing@gmail.com>'  # Use your main business email
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'Enontinoclothing@gmail.com')  # Your actual email for admin notifications
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
