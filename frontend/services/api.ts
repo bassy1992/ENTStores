@@ -93,6 +93,8 @@ export interface ApiProduct {
   available_sizes: ApiProductSize[];
   available_colors: ApiProductColor[];
   created_at: string;
+  average_rating?: number;
+  total_reviews?: number;
 }
 
 export interface ApiCategory {
@@ -537,6 +539,8 @@ export function convertApiProduct(apiProduct: ApiProduct): any {
     variants: apiProduct.variants || [],
     available_sizes: apiProduct.available_sizes || [],
     available_colors: apiProduct.available_colors || [],
+    average_rating: (apiProduct as any).average_rating || 0,
+    total_reviews: (apiProduct as any).total_reviews || 0,
   };
 }
 

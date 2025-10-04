@@ -73,13 +73,22 @@ function reducer(state: State, action: Action): State {
         };
       }
       
+      // Determine the correct price to use
+      let itemPrice = action.product.price;
+      if (action.variantId && action.product.variants) {
+        const variant = action.product.variants.find(v => v.id === action.variantId);
+        if (variant && variant.final_price) {
+          itemPrice = variant.final_price;
+        }
+      }
+      
       return {
         items: [
           ...state.items,
           {
             id: action.product.id,
             title: action.product.title,
-            price: action.product.price,
+            price: itemPrice,
             shipping_cost: action.product.shipping_cost,
             image: action.product.image,
             quantity: qty,

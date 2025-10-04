@@ -367,6 +367,13 @@ def simple_products(request):
                 except:
                     pass
             
+            # Calculate review data
+            from django.db.models import Avg
+            reviews = product.reviews.filter(is_approved=True)
+            avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+            average_rating = round(avg_rating, 1) if avg_rating else 0.0
+            total_reviews = reviews.count()
+            
             simple_data.append({
                 'id': product.id,
                 'title': product.title,
@@ -383,6 +390,8 @@ def simple_products(request):
                 'is_featured': getattr(product, 'is_featured', False),
                 'tags': [],  # Default for now
                 'created_at': product.created_at.isoformat() if product.created_at else None,
+                'average_rating': average_rating,
+                'total_reviews': total_reviews,
             })
         
         return Response({
