@@ -345,14 +345,142 @@ def check_momo_status(request, reference):
 
 
 @api_view(['POST'])
+def create_free_order(request):
+    """Create an order without payment for specific countries"""
+    try:
+        data = request.data
+        shipping_country = data.get('shipping_country', '')
+        
+        logger.info(f"Free order request for country: {shipping_country}")
+        
+        # Define countries that require payment
+        PAYMENT_REQUIRED_COUNTRIES = ['US', 'GH', 'GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK', 'FI', 'IE', 'PT', 'GR', 'PL', 'CZ', 'HU', 'SK', 'SI', 'HR', 'RO', 'BG', 'EE', 'LV', 'LT', 'LU', 'MT', 'CY']
+        
+        # Check if this country qualifies for free checkout
+        if shipping_country in PAYMENT_REQUIRED_COUNTRIES:
+            return Response({
+                'error': 'This country requires payment',
+                'message': f'Country {shipping_country} must complete payment to place order'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Generate order ID
+        order_id = f"ORD{uuid.uuid4().hex[:8].upper()}"
+        
+        # Set free checkout details
+        payment_method = 'free_checkout'
+        payment_reference = f"FREE_{order_id}_{int(timezone.now().timestamp())}"
+        
+        # Create order with confirmed status
+        order = Order.objects.create(
+            id=order_id,
+            customer_email=data.get('customer_email', ''),
+            customer_name=data.get('customer_name', ''),
+            shipping_address=data.get('shipping_address', ''),
+            shipping_city=data.get('shipping_city', ''),
+            shipping_country=shipping_country,
+            shipping_postal_code=data.get('shipping_postal_code', ''),
+            subtotal=data.get('subtotal', 0),
+            shipping_cost=data.get('shipping_cost', 9.99),
+            tax_amount=data.get('tax_amount', 0),
+            total=data.get('total', 0),
+            payment_method=payment_method,
+            payment_reference=payment_reference,
+            status='confirmed'
+        )
+        
+        # Create order items (simplified - no complex validation)
+        items = data.get('items', [])
+        order_items = []
+        
+        for item_data in items:
+            try:
+                # Try to get product for name, but don't fail if not found
+                product_name = f"Product {item_data.get('product_id', 'Unknown')}"
+                product = None
+                
+                try:
+                    product = Product.objects.get(id=item_data['product_id'])
+                    product_name = product.title
+                except Product.DoesNotExist:
+                    pass  # Use placeholder name
+                
+                # Create order item
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    selected_size=item_data.get('selected_size', ''),
+                    selected_color=item_data.get('selected_color', ''),
+                    quantity=item_data.get('quantity', 1),
+                    unit_price=item_data.get('unit_price', 0)
+                )
+                
+                # Add to email data
+                variant_info = []
+                if item_data.get('selected_size'):
+                    variant_info.append(f"Size: {item_data.get('selected_size')}")
+                if item_data.get('selected_color'):
+                    variant_info.append(f"Color: {item_data.get('selected_color')}")
+                
+                if variant_info:
+                    product_name += f" ({', '.join(variant_info)})"
+                
+                order_items.append({
+                    'name': product_name,
+                    'quantity': item_data.get('quantity', 1),
+                    'price': f"${item_data.get('unit_price', 0):.2f}",
+                    'total': f"${item_data.get('quantity', 1) * item_data.get('unit_price', 0):.2f}"
+                })
+                
+            except Exception as e:
+                logger.error(f"Error creating order item: {e}")
+                continue
+        
+        # Try to send email notification (don't fail if it doesn't work)
+        emails_sent = False
+        try:
+            if order.customer_email:
+                emails_sent = send_order_confirmation_email(order, order_items)
+        except Exception as e:
+            logger.error(f"Email notification failed: {e}")
+        
+        logger.info(f"Free checkout order created: {order_id} for {shipping_country}")
+        
+        return Response({
+            'order_id': order_id,
+            'status': 'confirmed',
+            'message': 'Order confirmed successfully - No payment required',
+            'email_sent': emails_sent,
+            'customer_email': order.customer_email,
+            'payment_method': 'free_checkout',
+            'shipping_country': shipping_country
+        })
+        
+    except Exception as e:
+        logger.error(f"Free order creation error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return Response({
+            'error': 'Failed to create free order',
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
 def create_order(request):
-    """Create an order after successful payment"""
+    """Create an order after successful payment or for countries with free checkout"""
     try:
         data = request.data
         payment_reference = data.get('payment_reference', '')
+        shipping_country = data.get('shipping_country', '')
         
-        # Check if order already exists for this payment reference
-        if payment_reference:
+        # Define countries that require payment
+        PAYMENT_REQUIRED_COUNTRIES = ['US', 'GH', 'GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK', 'FI', 'IE', 'PT', 'GR', 'PL', 'CZ', 'HU', 'SK', 'SI', 'HR', 'RO', 'BG', 'EE', 'LV', 'LT', 'LU', 'MT', 'CY']
+        
+        # Check if this country requires payment
+        requires_payment = shipping_country in PAYMENT_REQUIRED_COUNTRIES
+        
+        # For countries that require payment, check if order already exists for this payment reference
+        if requires_payment and payment_reference:
             existing_order = Order.objects.filter(payment_reference=payment_reference).first()
             if existing_order:
                 logger.info(f"Order already exists for payment reference {payment_reference}: {existing_order.id}")
@@ -379,6 +507,17 @@ def create_order(request):
                 except Product.DoesNotExist:
                     pass
         
+        # Set payment method and reference based on country
+        if not requires_payment:
+            payment_method = 'free_checkout'
+            payment_reference = f"FREE_{order_id}_{int(timezone.now().timestamp())}"
+            order_status = 'confirmed'  # Skip processing for free countries
+            logger.info(f"Creating free checkout order for country {shipping_country}: {order_id}")
+        else:
+            payment_method = data.get('payment_method', '')
+            payment_reference = data.get('payment_reference', '')
+            order_status = 'processing'
+        
         # Create order
         order = Order.objects.create(
             id=order_id,
@@ -386,15 +525,15 @@ def create_order(request):
             customer_name=data.get('customer_name', ''),
             shipping_address=data.get('shipping_address', ''),
             shipping_city=data.get('shipping_city', ''),
-            shipping_country=data.get('shipping_country', ''),
+            shipping_country=shipping_country,
             shipping_postal_code=data.get('shipping_postal_code', ''),
             subtotal=data.get('subtotal', 0),
             shipping_cost=calculated_shipping,
             tax_amount=data.get('tax_amount', 0),
             total=data.get('total', 0),
-            payment_method=data.get('payment_method', ''),
-            payment_reference=data.get('payment_reference', ''),
-            status='processing'
+            payment_method=payment_method,
+            payment_reference=payment_reference,
+            status=order_status
         )
         
         # Validate stock before creating order items
@@ -570,6 +709,9 @@ def create_order(request):
             'message': 'Order created successfully',
             'email_sent': emails_sent,  # Changed key name for consistency
             'customer_email': order.customer_email,  # Add for debugging
+            'requires_payment': requires_payment,
+            'payment_method': payment_method,
+            'order_status': order_status
         })
         
     except Exception as e:

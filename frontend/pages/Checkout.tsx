@@ -15,6 +15,7 @@ import PageTransition from '../components/ui/PageTransition';
 import { motion } from 'framer-motion';
 import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
 import { countries, getShippingCost, getShippingZone } from '../data/countries';
+import { requiresPayment, getCheckoutFlow, getCheckoutMessage } from '../utils/countryPaymentRules';
 
 // Fetch exchange rate when component mounts
 const fetchExchangeRate = async () => {
@@ -54,8 +55,16 @@ export default function Checkout() {
   const [exchangeRate, setExchangeRate] = useState<any>(null);
   const [momoConversion, setMomoConversion] = useState<any>(null);
 
-  // Always show both payment options - let users choose
-  const available = { stripe: true, momo: true };
+  // Check if current country requires payment
+  const countryRequiresPayment = requiresPayment(form.country);
+  const checkoutFlow = getCheckoutFlow(form.country);
+  const checkoutMessage = getCheckoutMessage(form.country);
+
+  // Show payment options only for countries that require payment
+  const available = { 
+    stripe: countryRequiresPayment, 
+    momo: countryRequiresPayment && form.country === 'GH' // MoMo only for Ghana
+  };
 
   // Calculate totals with product-based shipping
   const selectedCountry = countries.find(c => c.code === form.country);
@@ -86,9 +95,77 @@ export default function Checkout() {
       return;
     }
 
-    // Validate payment method selection
-    if (!paymentMethod) {
+    // Validate payment method selection for countries that require payment
+    if (countryRequiresPayment && !paymentMethod) {
       alert('Please select a payment method (Credit Card or MTN MoMo)');
+      return;
+    }
+
+    // Handle free checkout for countries that don't require payment
+    if (!countryRequiresPayment) {
+      try {
+        setProcessing(true);
+        
+        const orderData = {
+          customer_email: form.email,
+          customer_name: form.name,
+          shipping_address: `${form.address}${form.addressLine2 ? ', ' + form.addressLine2 : ''}`,
+          shipping_city: form.city,
+          shipping_country: form.country,
+          shipping_postal_code: form.postal,
+          subtotal: subtotal,
+          shipping_cost: finalShipping,
+          tax_amount: tax,
+          total: total,
+          items: state.items.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price,
+            selected_size: item.selectedSize || '',
+            selected_color: item.selectedColor || '',
+            variant_id: item.variantId || null
+          }))
+        };
+
+        const response = await fetch(API_ENDPOINTS.CREATE_FREE_ORDER, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Clear cart and navigate to confirmation
+          const orderSummary = {
+            id: result.order_id,
+            total: total,
+            items: state.items.map(item => ({
+              id: item.id,
+              title: item.title,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.image,
+              selectedSize: item.selectedSize,
+              selectedColor: item.selectedColor,
+              variantId: item.variantId
+            })),
+            paymentMethod: 'free_checkout',
+            shippingCountry: form.country
+          };
+          
+          clear();
+          navigate('/order-confirmation', { state: orderSummary });
+        } else {
+          console.error('Free order creation failed:', result);
+          alert(result.message || 'Failed to create order. Please try again.');
+        }
+      } catch (error) {
+        console.error('Free checkout error:', error);
+        alert('Failed to process order. Please try again.');
+      } finally {
+        setProcessing(false);
+      }
       return;
     }
 
@@ -436,33 +513,62 @@ export default function Checkout() {
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                       <span className="text-blue-600 font-semibold text-sm">3</span>
                     </div>
-                    Choose Payment Method
+                    {countryRequiresPayment ? 'Choose Payment Method' : 'Order Confirmation'}
                   </CardTitle>
                   <p className="text-sm text-gray-600 mt-2">
-                    Select how you'd like to pay for your order. Both options are secure and reliable.
+                    {countryRequiresPayment 
+                      ? 'Select how you\'d like to pay for your order. Both options are secure and reliable.'
+                      : checkoutMessage
+                    }
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {!paymentMethod && (
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <AlertCircle className="w-5 h-5" />
-                          <span className="font-medium">Choose your preferred payment method</span>
+                  {!countryRequiresPayment ? (
+                    // Free checkout message for countries that don't require payment
+                    <div className="space-y-4">
+                      <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-3 text-green-800 mb-3">
+                          <CheckCircle className="w-6 h-6" />
+                          <span className="font-bold text-lg">No Payment Required!</span>
                         </div>
-                        <p className="text-sm text-blue-700 mt-1">Select either card payment or mobile money to continue</p>
+                        <p className="text-green-700 mb-4">
+                          Great news! Orders to <strong>{selectedCountry?.name}</strong> don't require upfront payment. 
+                          Your order will be confirmed immediately and we'll contact you for payment arrangements.
+                        </p>
+                        <div className="bg-white p-4 rounded-md border border-green-200">
+                          <h4 className="font-medium text-green-800 mb-2">What happens next:</h4>
+                          <ul className="text-sm text-green-700 space-y-1">
+                            <li>• Your order will be confirmed immediately</li>
+                            <li>• We'll send you an order confirmation email</li>
+                            <li>• Our team will contact you within 24 hours</li>
+                            <li>• Payment arrangements will be made before shipping</li>
+                          </ul>
+                        </div>
                       </div>
-                    )}
+                    </div>
+                  ) : (
+                    // Payment method selection for countries that require payment
+                    <div className="space-y-4">
+                      {!paymentMethod && (
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2 text-blue-800">
+                            <AlertCircle className="w-5 h-5" />
+                            <span className="font-medium">Choose your preferred payment method</span>
+                          </div>
+                          <p className="text-sm text-blue-700 mt-1">Select either card payment or mobile money to continue</p>
+                        </div>
+                      )}
 
-                    <div className="grid gap-4">
-                      {/* Stripe Payment Option */}
-                      <div
-                        className={`p-5 border-2 rounded-xl cursor-pointer transition-all duration-200 ${paymentMethod === 'stripe'
-                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 shadow-md'
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25 hover:shadow-sm'
-                          }`}
-                        onClick={() => setPaymentMethod('stripe')}
-                      >
+                      <div className="grid gap-4">
+                        {/* Stripe Payment Option - only show if available */}
+                        {available.stripe && (
+                          <div
+                            className={`p-5 border-2 rounded-xl cursor-pointer transition-all duration-200 ${paymentMethod === 'stripe'
+                                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 shadow-md'
+                                : 'border-gray-200 hover:border-blue-300 hover:bg-blue-25 hover:shadow-sm'
+                              }`}
+                            onClick={() => setPaymentMethod('stripe')}
+                          >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${paymentMethod === 'stripe' ? 'bg-blue-100' : 'bg-gray-100'
@@ -492,18 +598,20 @@ export default function Checkout() {
                                 <CheckCircle className="w-4 h-4 text-white" />
                               )}
                             </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                        )}
 
-                      {/* MTN MoMo Payment Option */}
-                      <div
-                        className={`p-5 border-2 rounded-xl cursor-pointer transition-all duration-200 ${paymentMethod === 'momo'
-                            ? 'border-yellow-500 bg-yellow-50 ring-2 ring-yellow-200 shadow-md'
-                            : 'border-gray-200 hover:border-yellow-300 hover:bg-yellow-25 hover:shadow-sm'
-                          }`}
-                        onClick={() => setPaymentMethod('momo')}
-                      >
+                        {/* MTN MoMo Payment Option - only show if available */}
+                        {available.momo && (
+                          <div
+                            className={`p-5 border-2 rounded-xl cursor-pointer transition-all duration-200 ${paymentMethod === 'momo'
+                                ? 'border-yellow-500 bg-yellow-50 ring-2 ring-yellow-200 shadow-md'
+                                : 'border-gray-200 hover:border-yellow-300 hover:bg-yellow-25 hover:shadow-sm'
+                              }`}
+                            onClick={() => setPaymentMethod('momo')}
+                          >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${paymentMethod === 'momo' ? 'bg-yellow-100' : 'bg-gray-100'
@@ -532,40 +640,42 @@ export default function Checkout() {
                                 <CheckCircle className="w-4 h-4 text-white" />
                               )}
                             </div>
+                            </div>
                           </div>
                         </div>
+                        )}
                       </div>
-                    </div>
 
-                    {/* Payment Method Benefits */}
-                    {paymentMethod && (
-                      <div className="mt-4 p-4 rounded-lg bg-gray-50 border">
-                        <div className="text-sm font-medium text-gray-900 mb-2">
-                          {paymentMethod === 'stripe' ? '💳 Card Payment Benefits:' : '📱 MoMo Payment Benefits:'}
+                      {/* Payment Method Benefits */}
+                      {paymentMethod && (
+                        <div className="mt-4 p-4 rounded-lg bg-gray-50 border">
+                          <div className="text-sm font-medium text-gray-900 mb-2">
+                            {paymentMethod === 'stripe' ? '💳 Card Payment Benefits:' : '📱 MoMo Payment Benefits:'}
+                          </div>
+                          <ul className="text-xs text-gray-600 space-y-1">
+                            {paymentMethod === 'stripe' ? (
+                              <>
+                                <li>• Instant payment confirmation</li>
+                                <li>• International cards accepted</li>
+                                <li>• Bank-level security encryption</li>
+                                <li>• Automatic receipt via email</li>
+                              </>
+                            ) : (
+                              <>
+                                <li>• No need for bank cards</li>
+                                <li>• Pay directly from your phone</li>
+                                <li>• Familiar MTN MoMo interface</li>
+                                <li>• Supports all MTN Ghana numbers</li>
+                              </>
+                            )}
+                          </ul>
                         </div>
-                        <ul className="text-xs text-gray-600 space-y-1">
-                          {paymentMethod === 'stripe' ? (
-                            <>
-                              <li>• Instant payment confirmation</li>
-                              <li>• International cards accepted</li>
-                              <li>• Bank-level security encryption</li>
-                              <li>• Automatic receipt via email</li>
-                            </>
-                          ) : (
-                            <>
-                              <li>• No need for bank cards</li>
-                              <li>• Pay directly from your phone</li>
-                              <li>• Familiar MTN MoMo interface</li>
-                              <li>• Supports all MTN Ghana numbers</li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
 
-                  {/* MTN MoMo Phone Input */}
-                  {paymentMethod === 'momo' && (
+                  {/* MTN MoMo Phone Input - only show for payment required countries */}
+                  {countryRequiresPayment && paymentMethod === 'momo' && (
                     <div className="mt-6 space-y-4">
                       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <Label htmlFor="momoPhone" className="text-sm font-medium text-gray-700">
@@ -585,7 +695,7 @@ export default function Checkout() {
                       </div>
                       
                       {/* Currency Conversion Display */}
-                      {exchangeRate && (
+                      {countryRequiresPayment && exchangeRate && (
                         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
@@ -616,7 +726,7 @@ export default function Checkout() {
                   )}
 
                   {/* MoMo Status Display */}
-                  {momoRef && (
+                  {countryRequiresPayment && momoRef && (
                     <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckCircle className="w-5 h-5 text-blue-600" />
@@ -641,9 +751,9 @@ export default function Checkout() {
                     </div>
                   )}
 
-                  {/* Payment Button */}
+                  {/* Payment/Confirmation Button */}
                   <div className="mt-6 space-y-3">
-                    {!paymentMethod && (
+                    {countryRequiresPayment && !paymentMethod && (
                       <div className="text-center text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
                         👆 Choose your preferred payment method above to continue
                       </div>
@@ -651,19 +761,27 @@ export default function Checkout() {
 
                     <Button
                       onClick={handlePay}
-                      disabled={processing || !paymentMethod || !form.email || !form.address}
-                      className={`w-full h-12 text-lg font-medium transition-all duration-200 ${!paymentMethod
-                          ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed'
-                          : paymentMethod === 'stripe'
-                            ? 'bg-blue-600 hover:bg-blue-700'
-                            : 'bg-yellow-600 hover:bg-yellow-700'
+                      disabled={processing || (countryRequiresPayment && !paymentMethod) || !form.email || !form.address}
+                      className={`w-full h-12 text-lg font-medium transition-all duration-200 ${
+                        !countryRequiresPayment
+                          ? 'bg-green-600 hover:bg-green-700'
+                          : !paymentMethod
+                            ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed'
+                            : paymentMethod === 'stripe'
+                              ? 'bg-blue-600 hover:bg-blue-700'
+                              : 'bg-yellow-600 hover:bg-yellow-700'
                         }`}
                       size="lg"
                     >
                       {processing ? (
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Processing Payment...
+                          {countryRequiresPayment ? 'Processing Payment...' : 'Confirming Order...'}
+                        </div>
+                      ) : !countryRequiresPayment ? (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Confirm Order - No Payment Required
                         </div>
                       ) : !paymentMethod ? (
                         <div className="flex items-center gap-2">
@@ -684,16 +802,19 @@ export default function Checkout() {
                     </Button>
 
                     {/* Payment method specific info */}
-                    {paymentMethod === 'stripe' && (
+                    {!countryRequiresPayment ? (
+                      <div className="text-xs text-center text-green-600 bg-green-50 p-2 rounded">
+                        🎉 Your order will be confirmed immediately without payment
+                      </div>
+                    ) : paymentMethod === 'stripe' ? (
                       <div className="text-xs text-center text-gray-500">
                         You'll be redirected to Stripe's secure payment page
                       </div>
-                    )}
-                    {paymentMethod === 'momo' && (
+                    ) : paymentMethod === 'momo' ? (
                       <div className="text-xs text-center text-gray-500">
                         You'll receive a prompt on your MTN phone to authorize payment
                       </div>
-                    )}
+                    ) : null}
                   </div>
                   </CardContent>
                 </Card>

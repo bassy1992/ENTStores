@@ -13,6 +13,7 @@ urlpatterns = [
     
     # Order creation
     path('create-order/', payment_views.create_order, name='create-order'),
+    path('create-free-order/', payment_views.create_free_order, name='create-free-order'),
     
     # Test endpoint
     path('test/', payment_views.test_payments, name='test-payments'),

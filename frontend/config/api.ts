@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   MOMO_INITIATE: `${API_BASE_URL}/api/payments/momo/initiate/`,
   MOMO_STATUS: `${API_BASE_URL}/api/payments/momo/status/`,
   CREATE_ORDER: `${API_BASE_URL}/api/payments/create-order/`,
+  CREATE_FREE_ORDER: `${API_BASE_URL}/api/payments/create-free-order/`,
   
   // Add other endpoints as needed
   PRODUCTS: `${API_BASE_URL}/api/shop/products/`,
