@@ -14,12 +14,10 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['key', 'label', 'description', 'image', 'featured', 'product_count']
     
     def get_image(self, obj):
-        if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
-        return None
+        try:
+            return obj.get_image_url()
+        except Exception:
+            return None
 
 
 class ProductTagSerializer(serializers.ModelSerializer):
@@ -118,16 +116,9 @@ class ProductSerializer(serializers.ModelSerializer):
         # Add tags field
         data['tags'] = []  # Default to empty list for now
         
-        # Add image field
+        # Add image field using the model's get_image_url method
         try:
-            if instance.image:
-                request = self.context.get('request')
-                if request:
-                    data['image'] = request.build_absolute_uri(instance.image.url)
-                else:
-                    data['image'] = instance.image.url
-            else:
-                data['image'] = "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+            data['image'] = instance.get_image_url()
         except Exception:
             data['image'] = "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
         
@@ -206,17 +197,11 @@ class ProductFullSerializer(serializers.ModelSerializer):
                     # ProductImage table might not exist, continue to fallback
                     pass
             
-            # Fallback to the main image field
-            if obj.image:
-                request = self.context.get('request')
-                if request:
-                    return request.build_absolute_uri(obj.image.url)
-                return obj.image.url
+            # Use the model's get_image_url method which handles both uploaded files and URLs
+            return obj.get_image_url()
         except Exception as e:
             # If there's any error with images, return placeholder
-            pass
-        
-        return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+            return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
     
     def get_available_sizes(self, obj):
         try:

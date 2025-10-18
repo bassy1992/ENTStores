@@ -162,13 +162,13 @@ elif DATABASE_URL:
         else:
             print("Development: Using PostgreSQL from DATABASE_URL")
             
-        print(f"✅ Connected to PostgreSQL database: {DATABASES['default']['NAME']}")
+        print(f"Connected to PostgreSQL database: {DATABASES['default']['NAME']}")
         print(f"   Host: {DATABASES['default']['HOST']}")
         print(f"   Port: {DATABASES['default']['PORT']}")
         
     except Exception as e:
-        print(f"❌ Failed to connect to PostgreSQL: {e}")
-        print("🔄 Falling back to SQLite for now")
+        print(f"Failed to connect to PostgreSQL: {e}")
+        print("Falling back to SQLite for now")
         # Keep SQLite as fallback
         DATABASES = {
             'default': {

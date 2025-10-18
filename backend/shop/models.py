@@ -41,6 +41,11 @@ class Category(models.Model):
         null=True,
         help_text="Category image file"
     )
+    image_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Category image URL (alternative to uploading files)"
+    )
     featured = models.BooleanField(
         default=False,
         help_text="Whether this category is featured on the homepage"
@@ -63,6 +68,15 @@ class Category(models.Model):
         """Update the product count for this category"""
         self.product_count = self.products.count()
         self.save(update_fields=['product_count'])
+    
+    def get_image_url(self):
+        """Get the image URL, prioritizing uploaded file over URL field"""
+        if self.image:
+            return self.image.url
+        elif self.image_url:
+            return self.image_url
+        else:
+            return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
 
 
 class Product(models.Model):
