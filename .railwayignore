@@ -1,0 +1,62 @@
+# Railway ignore file
+# Files and directories to ignore during Railway deployment
+
+# Environment files with secrets
+.env
+.env.local
+.env.production
+
+# Development files
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Media files (if using cloud storage)
+media/
+
+# Node modules (if any)
+node_modules/
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Documentation
+*.md
+docs/
+
+# Backup files
+*.bak
+backup_*/
+production_backups/
