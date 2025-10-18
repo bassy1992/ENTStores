@@ -31,6 +31,7 @@ momo_transactions = {}
 
 
 @api_view(['POST'])
+@csrf_exempt
 def create_stripe_checkout_session(request):
     """Create a Stripe Checkout session"""
     try:
@@ -110,6 +111,7 @@ def create_stripe_checkout_session(request):
 
 
 @api_view(['GET'])
+@csrf_exempt
 def verify_stripe_session(request, session_id):
     """Verify Stripe checkout session and return session details"""
     try:
@@ -194,6 +196,7 @@ def verify_stripe_session(request, session_id):
 
 
 @api_view(['POST'])
+@csrf_exempt
 def stripe_webhook(request):
     """Handle Stripe webhooks"""
     payload = request.body
@@ -218,6 +221,7 @@ def stripe_webhook(request):
 
 
 @api_view(['POST'])
+@csrf_exempt
 def initiate_momo_payment(request):
     """Initiate MTN MoMo payment with currency conversion to GHS"""
     try:
@@ -320,6 +324,7 @@ def initiate_momo_payment(request):
 
 
 @api_view(['GET'])
+@csrf_exempt
 def check_momo_status(request, reference):
     """Check MTN MoMo payment status"""
     try:
@@ -345,6 +350,7 @@ def check_momo_status(request, reference):
 
 
 @api_view(['POST'])
+@csrf_exempt
 def create_free_order(request):
     """Create an order without payment for specific countries"""
     try:
@@ -466,6 +472,7 @@ def create_free_order(request):
 
 
 @api_view(['POST'])
+@csrf_exempt
 def create_order(request):
     """Create an order after successful payment or for countries with free checkout"""
     try:

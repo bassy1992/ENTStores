@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q, Avg, Count
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from .models import Category, Product, ProductTag, Order, ProductVariant, PromoCode, ProductReview, ReviewHelpfulVote
 from .serializers import (
     CategorySerializer, ProductSerializer, ProductFullSerializer, ProductTagSerializer,
@@ -255,6 +256,7 @@ class PromoCodeListView(generics.ListAPIView):
 
 
 @api_view(['GET'])
+@csrf_exempt
 def shop_stats(request):
     """Get shop statistics"""
     total_products = Product.objects.filter(is_active=True).count()
@@ -275,6 +277,7 @@ def shop_stats(request):
 
 
 @api_view(['GET'])
+@csrf_exempt
 def product_search(request):
     """Search products"""
     query = request.GET.get('q', '')
@@ -295,6 +298,7 @@ def product_search(request):
 
 
 @api_view(['GET'])
+@csrf_exempt
 def debug_products(request):
     """Debug products API issues"""
     try:
@@ -343,6 +347,7 @@ def debug_products(request):
 
 
 @api_view(['GET'])
+@csrf_exempt
 def simple_products(request):
     """Simple products endpoint without complex serialization"""
     try:
@@ -524,6 +529,7 @@ class ProductReviewListCreateView(generics.ListCreateAPIView):
 
 
 @api_view(['POST'])
+@csrf_exempt
 def vote_on_review(request, review_id):
     """Vote on whether a review is helpful"""
     try:

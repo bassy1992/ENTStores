@@ -26,9 +26,11 @@ from django.views.generic import TemplateView
 from django.views.static import serve
 from shop import payment_views
 
+@csrf_exempt
 def health_check(request):
     return JsonResponse({"status": "ok", "message": "ENTstore API is running", "cors_enabled": True, "timestamp": "2025-09-19-23:30"})
 
+@csrf_exempt
 def root_view(request):
     """Root endpoint showing available API endpoints"""
     return JsonResponse({
@@ -75,6 +77,7 @@ def csrf_test(request):
             "message": "POST request successful - CSRF validation passed"
         })
 
+@csrf_exempt
 def cors_test(request):
     """Test endpoint to check CORS configuration"""
     from django.conf import settings
@@ -87,6 +90,7 @@ def cors_test(request):
         "message": "CORS configuration test"
     })
 
+@csrf_exempt
 def debug_media(request):
     """Debug endpoint to check media configuration"""
     from django.conf import settings
@@ -118,6 +122,7 @@ def debug_media(request):
         "message": "Media configuration debug"
     })
 
+@csrf_exempt
 def debug_static(request):
     """Debug endpoint to check static files configuration"""
     from django.conf import settings
@@ -148,6 +153,7 @@ def debug_static(request):
         "message": "Static files configuration debug"
     })
 
+@csrf_exempt
 def debug_env(request):
     """Debug endpoint to check environment variables"""
     import os
@@ -175,6 +181,7 @@ def debug_env(request):
         "message": "Environment variables debug"
     })
 
+@csrf_exempt
 def test_email(request):
     """Test email functionality"""
     from shop.email_service import EmailService
