@@ -318,6 +318,8 @@ else:
         "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
         "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
         "https://ent-stores.vercel.app",
+        "https://ent-stores-git-main-bassys-projects-fca17413.vercel.app",
+        "https://ent-stores-jdo7tlnez-bassys-projects-fca17413.vercel.app",
     ]
     print("🌐 CORS: Using specific allowed origins for production")
 
@@ -372,6 +374,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
     "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
     "https://ent-stores.vercel.app",
+    "https://ent-stores-git-main-bassys-projects-fca17413.vercel.app",
+    "https://ent-stores-jdo7tlnez-bassys-projects-fca17413.vercel.app",
     # Local development
     "http://localhost:8080",
     "http://127.0.0.1:8080",
