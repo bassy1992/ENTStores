@@ -127,7 +127,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['title', 'id', 'description']
     readonly_fields = ['created_at', 'updated_at']
     prepopulated_fields = {'slug': ('title',)}
-    inlines = [ProductTagAssignmentInline, ProductVariantInline]
+    inlines = [ProductTagAssignmentInline, ProductImageInline, ProductVariantInline]
     
     class Media:
         css = {
