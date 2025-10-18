@@ -50,15 +50,30 @@ def root_view(request):
         "timestamp": "2025-09-19"
     })
 
-@csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.middleware.csrf import get_token
+
+@ensure_csrf_cookie
 @require_http_methods(["GET", "POST"])
 def csrf_test(request):
-    return JsonResponse({
-        "method": request.method,
-        "csrf_cookie": request.META.get('CSRF_COOKIE'),
-        "has_csrf_token": 'csrfmiddlewaretoken' in request.POST,
-        "message": "CSRF test endpoint"
-    })
+    """Test endpoint for CSRF functionality"""
+    if request.method == "GET":
+        # Return CSRF token for testing
+        csrf_token = get_token(request)
+        return JsonResponse({
+            "status": "success",
+            "csrf_token": csrf_token,
+            "method": request.method,
+            "message": "CSRF token generated successfully"
+        })
+    elif request.method == "POST":
+        # Test POST request with CSRF
+        return JsonResponse({
+            "status": "success",
+            "method": request.method,
+            "csrf_token_received": request.META.get('HTTP_X_CSRFTOKEN', 'Not provided'),
+            "message": "POST request successful - CSRF validation passed"
+        })
 
 def cors_test(request):
     """Test endpoint to check CORS configuration"""

@@ -41,22 +41,16 @@ RAILWAY_PUBLIC_DOMAIN = os.getenv('RAILWAY_PUBLIC_DOMAIN')
 if RAILWAY_PUBLIC_DOMAIN:
     ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
 
-# Add known Railway and Render domains
+# Add known Railway domains
 ALLOWED_HOSTS.extend([
     'enontino-production.up.railway.app',
+    'encc-production.up.railway.app',  # New Railway domain
     '*.railway.app',
     '*.up.railway.app',
-    '*.onrender.com',
-    'entstores.onrender.com',  # Specific Render domain
     'testserver'  # For testing
 ])
 
-# Ensure Render domain is always allowed
-RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-# Allow all hosts in production (Railway and Render will handle the routing)
+# Allow all hosts in production (Railway will handle the routing)
 if not DEBUG:
     ALLOWED_HOSTS = ['*']
 
@@ -130,55 +124,60 @@ DATABASES = {
     }
 }
 
-# Railway PostgreSQL Database (Postgres-kz93)
+# Railway PostgreSQL Database Configuration
 DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_INTERNAL_URL = os.getenv('DATABASE_INTERNAL_URL')
 USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() == 'true'
 
-# Production Database Configuration
-if not DEBUG or 'RENDER' in os.environ:
-    # Force PostgreSQL in production or on Render
-    DATABASE_URL = os.getenv('DATABASE_URL')
-    USE_SQLITE = False
-    print("Production environment detected - forcing PostgreSQL")
-    
-    if DATABASE_URL:
-        try:
-            import dj_database_url
-            DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
-            
-            # Add production database settings
+# Determine which database URL to use
+def get_database_url():
+    """Get the appropriate database URL based on environment"""
+    if os.getenv('RAILWAY_ENVIRONMENT'):
+        # Use internal URL when running on Railway
+        return DATABASE_INTERNAL_URL or DATABASE_URL
+    else:
+        # Use public URL for local development
+        return DATABASE_URL
+
+# Database configuration logic
+if USE_SQLITE:
+    # Explicitly use SQLite
+    print(f"Development: Using SQLite database at: {DATABASES['default']['NAME']}")
+elif DATABASE_URL:
+    # Use PostgreSQL
+    try:
+        import dj_database_url
+        db_url = get_database_url()
+        DATABASES['default'] = dj_database_url.parse(db_url)
+        
+        # Add production database settings for Railway deployment
+        if not DEBUG or os.getenv('RAILWAY_ENVIRONMENT'):
             DATABASES['default'].update({
                 'CONN_MAX_AGE': 600,  # Connection pooling
                 'OPTIONS': {
                     'sslmode': 'require',  # Require SSL for production
                 },
             })
+            print("Production: Using PostgreSQL with SSL and connection pooling")
+        else:
+            print("Development: Using PostgreSQL from DATABASE_URL")
             
-            print(f"✅ Connected to PostgreSQL database: {DATABASES['default']['NAME']}")
-            print(f"   Host: {DATABASES['default']['HOST']}")
-            print(f"   Port: {DATABASES['default']['PORT']}")
-            
-        except Exception as e:
-            print(f"❌ Failed to connect to PostgreSQL: {e}")
-            print("🔄 This will cause deployment to fail - check DATABASE_URL")
-            raise e
-    else:
-        print("❌ DATABASE_URL not found in environment variables")
-        print("🔄 This will cause deployment to fail - set DATABASE_URL in Render")
-        if not DEBUG:
-            raise ValueError("DATABASE_URL is required in production")
-
-elif DATABASE_URL and not USE_SQLITE:
-    # Development with PostgreSQL
-    try:
-        import dj_database_url
-        DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
-        print("Development: Using PostgreSQL from DATABASE_URL")
+        print(f"✅ Connected to PostgreSQL database: {DATABASES['default']['NAME']}")
+        print(f"   Host: {DATABASES['default']['HOST']}")
+        print(f"   Port: {DATABASES['default']['PORT']}")
+        
     except Exception as e:
-        print(f"⚠️  Failed to connect to PostgreSQL: {e}")
-        print(f"🔄 Falling back to SQLite database at: {DATABASES['default']['NAME']}")
+        print(f"❌ Failed to connect to PostgreSQL: {e}")
+        print("🔄 Falling back to SQLite for now")
+        # Keep SQLite as fallback
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 else:
-    # Development with SQLite
+    # No DATABASE_URL provided, use SQLite
     print(f"Development: Using SQLite database at: {DATABASES['default']['NAME']}")
 
 
@@ -251,10 +250,10 @@ CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', '')
 CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '')
 CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME', 'entstore')
 
-# Media root configuration
-if os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
-    # Render deployment - use persistent disk
-    MEDIA_ROOT = '/opt/render/project/data/media'
+# Media root configuration for production
+if not DEBUG:
+    # Production deployment - use appropriate media path
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     print(f"📁 Render: Media root set to: {MEDIA_ROOT}")
     
     # Ensure all media directories exist
@@ -302,27 +301,32 @@ REST_FRAMEWORK = {
 
 # CORS settings moved below - using CORS_ALLOW_ALL_ORIGINS for now
 
-# CORS allowed origins - specific domains for security
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "https://www.enontinoclothingstore.com",
-    "https://enontinoclothingstore.com",
-    "https://enontino-production.up.railway.app",
-    "https://enintino.vercel.app",
-    "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
-    "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
-    "https://entstore-backend.onrender.com",
-    "https://entstore-frontend.onrender.com",
-    "https://ent-stores.vercel.app",
-    "http://localhost:8080",  # For local development
-    "http://127.0.0.1:8080",  # For local development
-]
-
-# Temporary fix for CORS issues - enable all origins in production
-# This should be reverted to specific origins once the issue is resolved
-if not DEBUG or os.getenv('RENDER') or 'onrender.com' in os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''):
+# CORS Configuration
+if DEBUG:
+    # Development: Allow all origins for easier testing
     CORS_ALLOW_ALL_ORIGINS = True
-    print("🌐 CORS: Allowing all origins for production deployment")
+    print("🌐 CORS: Allowing all origins for development")
+else:
+    # Production: Specific domains for security
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        "https://www.enontinoclothingstore.com",
+        "https://enontinoclothingstore.com",
+        "https://enontino-production.up.railway.app",
+        "https://encc-production.up.railway.app",  # New Railway domain
+        "https://enintino.vercel.app",
+        "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
+        "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
+        "https://ent-stores.vercel.app",
+    ]
+    print("🌐 CORS: Using specific allowed origins for production")
+
+# Always allow local development origins
+CORS_ALLOWED_ORIGINS_REGEXES = [
+    r"^http://localhost:\d+$",
+    r"^http://127\.0\.0\.1:\d+$",
+    r"^http://192\.168\.\d+\.\d+:\d+$",  # Local network
+]
 
 # Additional CORS settings
 CORS_ALLOW_CREDENTIALS = True
@@ -357,20 +361,24 @@ CORS_EXPOSE_HEADERS = [
     'x-csrftoken',
 ]
 
-# CSRF settings for Railway, Render, and Vercel
+# CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
+    # Production domains
     "https://www.enontinoclothingstore.com",
     "https://enontinoclothingstore.com",
     "https://enontino-production.up.railway.app",
-    "https://enintino.vercel.app",  # Main production frontend
+    "https://encc-production.up.railway.app",  # New Railway domain
+    "https://enintino.vercel.app",
     "https://enintino-a8265asrd-bassys-projects-fca17413.vercel.app",
     "https://enintino-1b440svfd-bassys-projects-fca17413.vercel.app",
-    # Add Render domains
-    "https://entstore-backend.onrender.com",
-    "https://entstore-frontend.onrender.com",
-    # Add Vercel domains
-    "https://*.vercel.app",
     "https://ent-stores.vercel.app",
+    # Local development
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
 ]
 
 # Add frontend domain to CSRF trusted origins
@@ -378,12 +386,23 @@ FRONTEND_URL = os.getenv('FRONTEND_URL')
 if FRONTEND_URL:
     CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
-# Additional CSRF settings for Railway deployment
-CSRF_COOKIE_SECURE = not DEBUG  # Use secure cookies in production
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access to CSRF cookie
-CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests
-CSRF_COOKIE_DOMAIN = None  # Let Django handle the domain automatically
-CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF
+# CSRF settings optimized for development and production
+if DEBUG:
+    # Development: More permissive CSRF settings
+    CSRF_COOKIE_SECURE = False  # Allow non-HTTPS in development
+    CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access
+    CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests
+    CSRF_COOKIE_DOMAIN = None  # Auto-detect domain
+    CSRF_USE_SESSIONS = False  # Use cookies for CSRF tokens
+    # Disable CSRF for API endpoints in development (if needed)
+    # CSRF_EXEMPT_URLS = [r'^/api/.*$']  # Uncomment if you have API endpoints
+else:
+    # Production: Secure CSRF settings
+    CSRF_COOKIE_SECURE = True  # Require HTTPS
+    CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access for frontend
+    CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests
+    CSRF_COOKIE_DOMAIN = None  # Let Django handle domain
+    CSRF_USE_SESSIONS = False  # Use cookies for CSRF tokens
 
 # Session settings
 SESSION_COOKIE_SECURE = not DEBUG

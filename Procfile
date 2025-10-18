@@ -1,1 +1,1 @@
-web: gunicorn app:app --host 0.0.0.0 --port $PORT
+web: cd backend && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT

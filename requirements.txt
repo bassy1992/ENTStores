@@ -1,12 +1,30 @@
-# Requirements for Railway deployment with PostgreSQL
+# ENNC Shop - Railway Deployment Requirements
+# Django Framework
 Django==5.2.4
 djangorestframework==3.15.2
 django-cors-headers==4.4.0
+
+# Image Processing
 Pillow==10.4.0
+
+# Payment Processing
 stripe==12.5.1
+
+# HTTP Requests
 requests==2.31.0
+
+# Environment Variables
 python-dotenv==1.0.0
+
+# Production Server
 gunicorn==21.2.0
+
+# Database
 psycopg[binary]==3.2.3
-whitenoise==6.5.0
 dj-database-url==2.1.0
+
+# Static Files
+whitenoise==6.5.0
+
+# Additional Production Dependencies
+psycopg2-binary==2.9.9
