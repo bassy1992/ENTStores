@@ -1,0 +1,1298 @@
+[
+{
+  "model": "shop.category",
+  "pk": 1,
+  "fields": {
+    "key": "t-shirts",
+    "label": "T-Shirts",
+    "description": "Premium cotton t-shirts",
+    "image": "categories/2.jpg",
+    "featured": true,
+    "product_count": 7,
+    "created_at": "2025-09-19T15:23:36.150Z",
+    "updated_at": "2025-09-23T14:29:57.389Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 2,
+  "fields": {
+    "key": "polos",
+    "label": "Polos",
+    "description": "Classic polo shirts",
+    "image": "",
+    "featured": false,
+    "product_count": 0,
+    "created_at": "2025-09-23T14:29:57.400Z",
+    "updated_at": "2025-09-23T14:29:57.400Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 3,
+  "fields": {
+    "key": "hoodies",
+    "label": "Hoodies",
+    "description": "Comfortable hoodies",
+    "image": "",
+    "featured": true,
+    "product_count": 3,
+    "created_at": "2025-09-23T14:29:57.404Z",
+    "updated_at": "2025-09-23T14:29:57.404Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 4,
+  "fields": {
+    "key": "jeans",
+    "label": "Jeans",
+    "description": "Denim jeans",
+    "image": "",
+    "featured": false,
+    "product_count": 1,
+    "created_at": "2025-09-23T14:29:57.410Z",
+    "updated_at": "2025-09-23T14:29:57.410Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 5,
+  "fields": {
+    "key": "accessories",
+    "label": "Accessories",
+    "description": "Fashion accessories",
+    "image": "",
+    "featured": false,
+    "product_count": 0,
+    "created_at": "2025-09-23T14:29:57.415Z",
+    "updated_at": "2025-09-23T14:29:57.415Z"
+  }
+},
+{
+  "model": "shop.category",
+  "pk": 6,
+  "fields": {
+    "key": "shoes",
+    "label": "Shoes",
+    "description": "Footwear collection",
+    "image": "",
+    "featured": false,
+    "product_count": 0,
+    "created_at": "2025-09-23T14:29:57.418Z",
+    "updated_at": "2025-09-23T14:29:57.418Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "1",
+  "fields": {
+    "title": "okil",
+    "slug": "oke",
+    "price": "5.00",
+    "description": "ghghgghgfhghgf",
+    "image": "products/5.jpg",
+    "image_url": null,
+    "category": "t-shirts",
+    "stock_quantity": 25,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-09-19T17:40:47.578Z",
+    "updated_at": "2025-09-23T19:49:28.816Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "ennc-classic-tee-black",
+  "fields": {
+    "title": "ENNC Classic Tee — Black",
+    "slug": "ennc-classic-tee-black",
+    "price": "28.00",
+    "description": "Premium cotton t-shirt with signature ENNC logo. Comfortable fit and durable construction.",
+    "image": "",
+    "image_url": null,
+    "category": "t-shirts",
+    "stock_quantity": 25,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-09-23T16:14:30.740Z",
+    "updated_at": "2025-09-23T19:49:28.794Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "ennc-classic-tee-white",
+  "fields": {
+    "title": "ENNC Classic Tee — White",
+    "slug": "ennc-classic-tee-white",
+    "price": "28.00",
+    "description": "Clean white t-shirt with minimalist ENNC branding. Perfect for everyday wear.",
+    "image": "",
+    "image_url": null,
+    "category": "t-shirts",
+    "stock_quantity": 25,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-09-23T16:14:30.805Z",
+    "updated_at": "2025-09-23T19:49:28.784Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "ennc-essential-hoodie-black",
+  "fields": {
+    "title": "ENNC Essential Hoodie — Black",
+    "slug": "ennc-essential-hoodie-black",
+    "price": "65.00",
+    "description": "Classic black hoodie with premium fleece lining and embroidered logo.",
+    "image": "",
+    "image_url": null,
+    "category": "hoodies",
+    "stock_quantity": 0,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": true,
+    "created_at": "2025-09-23T16:14:30.816Z",
+    "updated_at": "2025-09-25T14:50:22.720Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "ennc-essential-hoodie-grey",
+  "fields": {
+    "title": "ENNC Essential Hoodie — Grey",
+    "slug": "ennc-essential-hoodie-grey",
+    "price": "65.00",
+    "description": "Heavyweight cotton hoodie with kangaroo pocket and adjustable drawstring hood.",
+    "image": "",
+    "image_url": null,
+    "category": "hoodies",
+    "stock_quantity": 23,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-09-23T16:14:30.809Z",
+    "updated_at": "2025-10-04T12:15:09.307Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "fhghfghfg",
+  "fields": {
+    "title": "gfgfgfh",
+    "slug": "gfgfgfh",
+    "price": "5.00",
+    "description": "ghghgghgfhghgf",
+    "image": "products/4.jpg",
+    "image_url": null,
+    "category": "t-shirts",
+    "stock_quantity": 25,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-09-19T15:27:25.682Z",
+    "updated_at": "2025-09-23T19:49:28.828Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "hoodie-001",
+  "fields": {
+    "title": "Premium Pullover Hoodie",
+    "slug": "premium-pullover-hoodie",
+    "price": "59.99",
+    "description": "Warm and cozy hoodie made from premium cotton blend.",
+    "image": "",
+    "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",
+    "category": "hoodies",
+    "stock_quantity": 30,
+    "shipping_cost": "12.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-10-17T23:19:13.075Z",
+    "updated_at": "2025-10-17T23:19:13.075Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "jeans-001",
+  "fields": {
+    "title": "Slim Fit Denim Jeans",
+    "slug": "slim-fit-denim-jeans",
+    "price": "79.99",
+    "description": "Modern slim fit jeans with premium denim fabric.",
+    "image": "",
+    "image_url": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",
+    "category": "jeans",
+    "stock_quantity": 25,
+    "shipping_cost": "14.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-10-17T23:19:13.087Z",
+    "updated_at": "2025-10-17T23:19:13.087Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "jkjkh",
+  "fields": {
+    "title": "jkhjkhjk",
+    "slug": "jkhjkhjk",
+    "price": "86.66",
+    "description": "kjhjkhkjhjkhkjh",
+    "image": "products/5_ZWnxo41.jpg",
+    "image_url": null,
+    "category": "t-shirts",
+    "stock_quantity": 25,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-09-23T14:45:26.642Z",
+    "updated_at": "2025-09-23T19:49:28.798Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "test-06679d83",
+  "fields": {
+    "title": "Test Product",
+    "slug": "test-product-33107d13",
+    "price": "25.00",
+    "description": "Test product description",
+    "image": "",
+    "image_url": null,
+    "category": "t-shirts",
+    "stock_quantity": 25,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-09-23T14:31:39.529Z",
+    "updated_at": "2025-09-23T19:49:28.807Z"
+  }
+},
+{
+  "model": "shop.product",
+  "pk": "tshirt-001",
+  "fields": {
+    "title": "Classic Cotton T-Shirt",
+    "slug": "classic-cotton-t-shirt",
+    "price": "25.99",
+    "description": "Comfortable 100% cotton t-shirt perfect for everyday wear.",
+    "image": "",
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+    "category": "t-shirts",
+    "stock_quantity": 50,
+    "shipping_cost": "9.99",
+    "is_active": true,
+    "is_featured": false,
+    "created_at": "2025-10-17T23:19:13.059Z",
+    "updated_at": "2025-10-17T23:19:13.059Z"
+  }
+},
+{
+  "model": "shop.order",
+  "pk": "",
+  "fields": {
+    "customer_email": "commey120jo@gmail.com",
+    "customer_name": "Test Customer",
+    "shipping_address": "123 Test Street",
+    "shipping_city": "Test City",
+    "shipping_country": "US",
+    "shipping_postal_code": "12345",
+    "subtotal": "5.00",
+    "shipping_cost": "5.00",
+    "tax_amount": "0.25",
+    "total": "10.25",
+    "status": "shipped",
+    "tracking_number": "",
+    "payment_method": "test",
+    "payment_reference": "test_123",
+    "created_at": "2025-09-19T19:27:16.076Z",
+    "updated_at": "2025-09-19T19:30:23.143Z"
+  }
+},
+{
+  "model": "shop.order",
+  "pk": "ORD083C4784",
+  "fields": {
+    "customer_email": "wyarquah@gmail.com",
+    "customer_name": "jkljklj",
+    "shipping_address": "kljkljklj kljklj kljklj kljkljkl kljklj lkj lkjkl ",
+    "shipping_city": "5454",
+    "shipping_country": "FR",
+    "shipping_postal_code": "5454",
+    "subtotal": "1646.54",
+    "shipping_cost": "0.00",
+    "tax_amount": "82.33",
+    "total": "1728.87",
+    "status": "processing",
+    "tracking_number": "",
+    "payment_method": "stripe",
+    "payment_reference": "cs_test_a1Ms2a9SZVzd1U0x6QKUWebD9dnUIwIjUhX6OAuBbp9qdeskxO1353X34z",
+    "created_at": "2025-09-23T15:39:21.297Z",
+    "updated_at": "2025-09-23T15:39:21.297Z"
+  }
+},
+{
+  "model": "shop.order",
+  "pk": "ORD27215133",
+  "fields": {
+    "customer_email": "wyarquah@gmail.com",
+    "customer_name": "kjhjh kjhkjh jk",
+    "shipping_address": "hiuyuiyuiyui, nvbnv",
+    "shipping_city": "iuyui",
+    "shipping_country": "FJ",
+    "shipping_postal_code": "uiyuiyui",
+    "subtotal": "65.00",
+    "shipping_cost": "9.99",
+    "tax_amount": "3.00",
+    "total": "77.99",
+    "status": "confirmed",
+    "tracking_number": "",
+    "payment_method": "free_checkout",
+    "payment_reference": "FREE_ORD27215133_1759580106",
+    "created_at": "2025-10-04T12:15:06.207Z",
+    "updated_at": "2025-10-04T12:15:06.207Z"
+  }
+},
+{
+  "model": "shop.order",
+  "pk": "ORD6209DC6E",
+  "fields": {
+    "customer_email": "test@example.com",
+    "customer_name": "Test User",
+    "shipping_address": "123 Test Street",
+    "shipping_city": "Test City",
+    "shipping_country": "NG",
+    "shipping_postal_code": "12345",
+    "subtotal": "50.00",
+    "shipping_cost": "29.99",
+    "tax_amount": "2.50",
+    "total": "82.49",
+    "status": "confirmed",
+    "tracking_number": "",
+    "payment_method": "free_checkout",
+    "payment_reference": "FREE_ORD6209DC6E_1759580825",
+    "created_at": "2025-10-04T12:27:05.385Z",
+    "updated_at": "2025-10-04T12:27:05.385Z"
+  }
+},
+{
+  "model": "shop.order",
+  "pk": "ORD991132E9",
+  "fields": {
+    "customer_email": "wyarquah@gmail.com",
+    "customer_name": "kjhjh kjhkjh jk",
+    "shipping_address": "hiuyuiyuiyui, nvbnv",
+    "shipping_city": "iuyui",
+    "shipping_country": "FJ",
+    "shipping_postal_code": "uiyuiyui",
+    "subtotal": "65.00",
+    "shipping_cost": "9.99",
+    "tax_amount": "3.00",
+    "total": "77.99",
+    "status": "shipped",
+    "tracking_number": "ENTORD991132E920251004",
+    "payment_method": "free_checkout",
+    "payment_reference": "FREE_ORD991132E9_1759581154",
+    "created_at": "2025-10-04T12:32:34.265Z",
+    "updated_at": "2025-10-04T12:41:02.504Z"
+  }
+},
+{
+  "model": "shop.order",
+  "pk": "ORDC4C13F99",
+  "fields": {
+    "customer_email": "wyarquah@gmail",
+    "customer_name": "kljlkjlk lkjkljkl jlkj lkl",
+    "shipping_address": "l;kl;kjkjlk kjklj kl;jkljkl lkjkljlk lkjklj ",
+    "shipping_city": "kjkljkl kl",
+    "shipping_country": "PF",
+    "shipping_postal_code": "30115",
+    "subtotal": "173.32",
+    "shipping_cost": "49.99",
+    "tax_amount": "8.67",
+    "total": "231.98",
+    "status": "processing",
+    "tracking_number": "",
+    "payment_method": "stripe",
+    "payment_reference": "cs_test_a1x52zc9AdmeLIKuiJLwaJlxt2DTrI2HUhod5DjHnGY1hIsMdeGH9DIxbm",
+    "created_at": "2025-09-23T15:40:49.813Z",
+    "updated_at": "2025-09-23T15:40:49.813Z"
+  }
+},
+{
+  "model": "shop.orderitem",
+  "pk": 7,
+  "fields": {
+    "order": "",
+    "product": "1",
+    "product_variant": null,
+    "selected_size": "",
+    "selected_color": "",
+    "quantity": 1,
+    "unit_price": "5.00",
+    "total_price": "5.00",
+    "created_at": "2025-09-19T19:27:21.869Z"
+  }
+},
+{
+  "model": "shop.orderitem",
+  "pk": 30,
+  "fields": {
+    "order": "ORD083C4784",
+    "product": "jkjkh",
+    "product_variant": 26,
+    "selected_size": "Large",
+    "selected_color": "Blue",
+    "quantity": 19,
+    "unit_price": "86.66",
+    "total_price": "1646.54",
+    "created_at": "2025-09-23T15:39:23.507Z"
+  }
+},
+{
+  "model": "shop.orderitem",
+  "pk": 31,
+  "fields": {
+    "order": "ORDC4C13F99",
+    "product": "jkjkh",
+    "product_variant": 27,
+    "selected_size": "2X Large",
+    "selected_color": "Gray",
+    "quantity": 2,
+    "unit_price": "86.66",
+    "total_price": "173.32",
+    "created_at": "2025-09-23T15:40:52.016Z"
+  }
+},
+{
+  "model": "shop.orderitem",
+  "pk": 33,
+  "fields": {
+    "order": "ORD27215133",
+    "product": "ennc-essential-hoodie-grey",
+    "product_variant": null,
+    "selected_size": "",
+    "selected_color": "",
+    "quantity": 1,
+    "unit_price": "65.00",
+    "total_price": "65.00",
+    "created_at": "2025-10-04T12:15:09.233Z"
+  }
+},
+{
+  "model": "shop.orderitem",
+  "pk": 34,
+  "fields": {
+    "order": "ORD6209DC6E",
+    "product": "1",
+    "product_variant": null,
+    "selected_size": "M",
+    "selected_color": "Blue",
+    "quantity": 1,
+    "unit_price": "50.00",
+    "total_price": "50.00",
+    "created_at": "2025-10-04T12:27:08.395Z"
+  }
+},
+{
+  "model": "shop.orderitem",
+  "pk": 35,
+  "fields": {
+    "order": "ORD991132E9",
+    "product": "ennc-essential-hoodie-grey",
+    "product_variant": null,
+    "selected_size": "",
+    "selected_color": "",
+    "quantity": 1,
+    "unit_price": "65.00",
+    "total_price": "65.00",
+    "created_at": "2025-10-04T12:32:36.439Z"
+  }
+},
+{
+  "model": "shop.productimage",
+  "pk": 1,
+  "fields": {
+    "product": "jkjkh",
+    "image": "products/3.jpg",
+    "alt_text": "",
+    "is_primary": false,
+    "order": 0,
+    "created_at": "2025-09-23T14:45:26.651Z"
+  }
+},
+{
+  "model": "shop.productimage",
+  "pk": 2,
+  "fields": {
+    "product": "jkjkh",
+    "image": "products/5_uQrDr7O.jpg",
+    "alt_text": "",
+    "is_primary": false,
+    "order": 0,
+    "created_at": "2025-09-23T14:45:26.654Z"
+  }
+},
+{
+  "model": "shop.productimage",
+  "pk": 3,
+  "fields": {
+    "product": "jkjkh",
+    "image": "products/4_mNvGgG6.jpg",
+    "alt_text": "",
+    "is_primary": false,
+    "order": 0,
+    "created_at": "2025-09-23T14:45:26.657Z"
+  }
+},
+{
+  "model": "shop.productimage",
+  "pk": 4,
+  "fields": {
+    "product": "tshirt-001",
+    "image": "",
+    "alt_text": "T-shirt back view",
+    "is_primary": false,
+    "order": 1,
+    "created_at": "2025-10-17T23:19:13.098Z"
+  }
+},
+{
+  "model": "shop.productimage",
+  "pk": 5,
+  "fields": {
+    "product": "tshirt-001",
+    "image": "",
+    "alt_text": "T-shirt detail view",
+    "is_primary": false,
+    "order": 2,
+    "created_at": "2025-10-17T23:19:13.103Z"
+  }
+},
+{
+  "model": "shop.productimage",
+  "pk": 6,
+  "fields": {
+    "product": "hoodie-001",
+    "image": "",
+    "alt_text": "Hoodie side view",
+    "is_primary": false,
+    "order": 1,
+    "created_at": "2025-10-17T23:19:13.109Z"
+  }
+},
+{
+  "model": "shop.productsize",
+  "pk": 1,
+  "fields": {
+    "name": "XS",
+    "display_name": "Extra Small",
+    "order": 1
+  }
+},
+{
+  "model": "shop.productsize",
+  "pk": 2,
+  "fields": {
+    "name": "S",
+    "display_name": "Small",
+    "order": 2
+  }
+},
+{
+  "model": "shop.productsize",
+  "pk": 3,
+  "fields": {
+    "name": "M",
+    "display_name": "Medium",
+    "order": 3
+  }
+},
+{
+  "model": "shop.productsize",
+  "pk": 4,
+  "fields": {
+    "name": "L",
+    "display_name": "Large",
+    "order": 4
+  }
+},
+{
+  "model": "shop.productsize",
+  "pk": 5,
+  "fields": {
+    "name": "XL",
+    "display_name": "Extra Large",
+    "order": 5
+  }
+},
+{
+  "model": "shop.productsize",
+  "pk": 6,
+  "fields": {
+    "name": "XXL",
+    "display_name": "2X Large",
+    "order": 6
+  }
+},
+{
+  "model": "shop.productcolor",
+  "pk": 1,
+  "fields": {
+    "name": "Black",
+    "hex_code": "#000000",
+    "order": 1
+  }
+},
+{
+  "model": "shop.productcolor",
+  "pk": 2,
+  "fields": {
+    "name": "White",
+    "hex_code": "#FFFFFF",
+    "order": 2
+  }
+},
+{
+  "model": "shop.productcolor",
+  "pk": 3,
+  "fields": {
+    "name": "Navy",
+    "hex_code": "#1E3A8A",
+    "order": 3
+  }
+},
+{
+  "model": "shop.productcolor",
+  "pk": 4,
+  "fields": {
+    "name": "Gray",
+    "hex_code": "#6B7280",
+    "order": 4
+  }
+},
+{
+  "model": "shop.productcolor",
+  "pk": 5,
+  "fields": {
+    "name": "Red",
+    "hex_code": "#DC2626",
+    "order": 5
+  }
+},
+{
+  "model": "shop.productcolor",
+  "pk": 6,
+  "fields": {
+    "name": "Blue",
+    "hex_code": "#2563EB",
+    "order": 6
+  }
+},
+{
+  "model": "shop.productcolor",
+  "pk": 7,
+  "fields": {
+    "name": "Green",
+    "hex_code": "#059669",
+    "order": 7
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 1,
+  "fields": {
+    "product": "1",
+    "size": 1,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 2,
+  "fields": {
+    "product": "1",
+    "size": 1,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 3,
+  "fields": {
+    "product": "1",
+    "size": 1,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 4,
+  "fields": {
+    "product": "1",
+    "size": 2,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 5,
+  "fields": {
+    "product": "1",
+    "size": 2,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 6,
+  "fields": {
+    "product": "1",
+    "size": 2,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 7,
+  "fields": {
+    "product": "1",
+    "size": 3,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 8,
+  "fields": {
+    "product": "1",
+    "size": 3,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 9,
+  "fields": {
+    "product": "1",
+    "size": 3,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 10,
+  "fields": {
+    "product": "1",
+    "size": 4,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 11,
+  "fields": {
+    "product": "1",
+    "size": 4,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 12,
+  "fields": {
+    "product": "1",
+    "size": 4,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 13,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 1,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 14,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 1,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 15,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 1,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 16,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 2,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 17,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 2,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 18,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 2,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 19,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 3,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 20,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 3,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 21,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 3,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 22,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 4,
+    "color": 1,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 23,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 4,
+    "color": 2,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 24,
+  "fields": {
+    "product": "fhghfghfg",
+    "size": 4,
+    "color": 3,
+    "stock_quantity": 10,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 25,
+  "fields": {
+    "product": "jkjkh",
+    "size": 2,
+    "color": 1,
+    "stock_quantity": 545,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 26,
+  "fields": {
+    "product": "jkjkh",
+    "size": 4,
+    "color": 6,
+    "stock_quantity": 800,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.productvariant",
+  "pk": 27,
+  "fields": {
+    "product": "jkjkh",
+    "size": 6,
+    "color": 4,
+    "stock_quantity": 900,
+    "price_adjustment": "0.00",
+    "is_available": true
+  }
+},
+{
+  "model": "shop.promocode",
+  "pk": 1,
+  "fields": {
+    "code": "ENNC10",
+    "description": "10% off your entire order",
+    "discount_type": "percentage",
+    "discount_value": "10.00",
+    "minimum_order_amount": "0.00",
+    "maximum_discount_amount": "50.00",
+    "usage_limit": null,
+    "usage_count": 0,
+    "is_active": true,
+    "valid_from": "2025-09-25T19:08:56.264Z",
+    "valid_until": "2026-09-25T19:08:56.264Z",
+    "created_at": "2025-09-25T16:50:57.879Z",
+    "updated_at": "2025-09-25T19:08:56.333Z"
+  }
+},
+{
+  "model": "shop.promocode",
+  "pk": 2,
+  "fields": {
+    "code": "WELCOME20",
+    "description": "20% off for new customers",
+    "discount_type": "percentage",
+    "discount_value": "20.00",
+    "minimum_order_amount": "50.00",
+    "maximum_discount_amount": "100.00",
+    "usage_limit": 100,
+    "usage_count": 0,
+    "is_active": true,
+    "valid_from": "2025-09-25T19:08:56.264Z",
+    "valid_until": "2025-12-24T19:08:56.264Z",
+    "created_at": "2025-09-25T16:50:57.886Z",
+    "updated_at": "2025-09-25T19:08:56.341Z"
+  }
+},
+{
+  "model": "shop.promocode",
+  "pk": 3,
+  "fields": {
+    "code": "SAVE15",
+    "description": "$15 off orders over $75",
+    "discount_type": "fixed",
+    "discount_value": "15.00",
+    "minimum_order_amount": "75.00",
+    "maximum_discount_amount": null,
+    "usage_limit": null,
+    "usage_count": 0,
+    "is_active": true,
+    "valid_from": "2025-09-25T19:08:56.264Z",
+    "valid_until": "2026-03-24T19:08:56.264Z",
+    "created_at": "2025-09-25T16:50:57.891Z",
+    "updated_at": "2025-09-25T19:08:56.344Z"
+  }
+},
+{
+  "model": "shop.promocode",
+  "pk": 4,
+  "fields": {
+    "code": "FREESHIP",
+    "description": "Free shipping on any order",
+    "discount_type": "free_shipping",
+    "discount_value": "0.00",
+    "minimum_order_amount": "0.00",
+    "maximum_discount_amount": null,
+    "usage_limit": null,
+    "usage_count": 0,
+    "is_active": true,
+    "valid_from": "2025-09-25T19:08:56.264Z",
+    "valid_until": "2025-10-25T19:08:56.264Z",
+    "created_at": "2025-09-25T16:50:57.895Z",
+    "updated_at": "2025-09-25T19:08:56.349Z"
+  }
+},
+{
+  "model": "shop.promocode",
+  "pk": 5,
+  "fields": {
+    "code": "SUMMER25",
+    "description": "25% off summer collection",
+    "discount_type": "percentage",
+    "discount_value": "25.00",
+    "minimum_order_amount": "100.00",
+    "maximum_discount_amount": "75.00",
+    "usage_limit": 50,
+    "usage_count": 0,
+    "is_active": true,
+    "valid_from": "2025-09-25T19:08:56.264Z",
+    "valid_until": "2025-11-24T19:08:56.264Z",
+    "created_at": "2025-09-25T16:50:57.901Z",
+    "updated_at": "2025-09-25T19:08:56.355Z"
+  }
+},
+{
+  "model": "shop.promocode",
+  "pk": 6,
+  "fields": {
+    "code": "EXPIRED10",
+    "description": "Expired 10% off code (for testing)",
+    "discount_type": "percentage",
+    "discount_value": "10.00",
+    "minimum_order_amount": "0.00",
+    "maximum_discount_amount": null,
+    "usage_limit": null,
+    "usage_count": 0,
+    "is_active": true,
+    "valid_from": "2025-08-26T19:08:56.264Z",
+    "valid_until": "2025-09-24T19:08:56.264Z",
+    "created_at": "2025-09-25T16:50:57.906Z",
+    "updated_at": "2025-09-25T19:08:56.358Z"
+  }
+},
+{
+  "model": "shop.productreview",
+  "pk": 1,
+  "fields": {
+    "product": "ennc-essential-hoodie-black",
+    "user_name": "Sarah M.",
+    "user_email": "sarah.m@example.com",
+    "rating": 5,
+    "title": "Amazing quality!",
+    "comment": "This product exceeded my expectations. The material is soft and comfortable, and the fit is perfect. I've washed it several times and it still looks brand new. Highly recommend!",
+    "verified_purchase": true,
+    "order": null,
+    "size_purchased": "M",
+    "color_purchased": "Green",
+    "is_approved": true,
+    "is_featured": false,
+    "created_at": "2025-09-15T22:43:15.833Z",
+    "updated_at": "2025-09-25T22:43:15.836Z",
+    "helpful_count": 0,
+    "not_helpful_count": 0
+  }
+},
+{
+  "model": "shop.productreview",
+  "pk": 2,
+  "fields": {
+    "product": "ennc-essential-hoodie-black",
+    "user_name": "Mike R.",
+    "user_email": "mike.r@example.com",
+    "rating": 4,
+    "title": "Good value for money",
+    "comment": "Nice product overall. The color is exactly as shown in the pictures. Only minor complaint is that it runs slightly small, so consider sizing up.",
+    "verified_purchase": true,
+    "order": null,
+    "size_purchased": "L",
+    "color_purchased": "Green",
+    "is_approved": true,
+    "is_featured": false,
+    "created_at": "2025-09-16T22:43:15.892Z",
+    "updated_at": "2025-09-25T22:43:15.894Z",
+    "helpful_count": 0,
+    "not_helpful_count": 0
+  }
+},
+{
+  "model": "shop.productreview",
+  "pk": 3,
+  "fields": {
+    "product": "ennc-essential-hoodie-black",
+    "user_name": "Jennifer K.",
+    "user_email": "jennifer.k@example.com",
+    "rating": 5,
+    "title": "Perfect fit and style",
+    "comment": "Love this! The design is exactly what I was looking for. Fast shipping and great customer service too.",
+    "verified_purchase": true,
+    "order": null,
+    "size_purchased": "S",
+    "color_purchased": "Green",
+    "is_approved": true,
+    "is_featured": false,
+    "created_at": "2025-09-17T22:43:15.898Z",
+    "updated_at": "2025-09-25T22:43:15.901Z",
+    "helpful_count": 0,
+    "not_helpful_count": 0
+  }
+},
+{
+  "model": "shop.productreview",
+  "pk": 4,
+  "fields": {
+    "product": "ennc-essential-hoodie-black",
+    "user_name": "David L.",
+    "user_email": "david.l@example.com",
+    "rating": 3,
+    "title": "Decent but not exceptional",
+    "comment": "It's okay. The quality is decent for the price, but I've seen better. The color faded a bit after a few washes.",
+    "verified_purchase": false,
+    "order": null,
+    "size_purchased": "XL",
+    "color_purchased": "Green",
+    "is_approved": true,
+    "is_featured": false,
+    "created_at": "2025-09-18T22:43:15.907Z",
+    "updated_at": "2025-09-25T22:43:15.911Z",
+    "helpful_count": 0,
+    "not_helpful_count": 0
+  }
+},
+{
+  "model": "shop.productreview",
+  "pk": 5,
+  "fields": {
+    "product": "ennc-essential-hoodie-black",
+    "user_name": "Emma S.",
+    "user_email": "emma.s@example.com",
+    "rating": 5,
+    "title": "Excellent purchase!",
+    "comment": "Really happy with this purchase. The fabric feels premium and the fit is true to size. Will definitely buy more colors.",
+    "verified_purchase": true,
+    "order": null,
+    "size_purchased": "M",
+    "color_purchased": "Green",
+    "is_approved": true,
+    "is_featured": false,
+    "created_at": "2025-09-19T22:43:15.915Z",
+    "updated_at": "2025-09-25T22:43:15.917Z",
+    "helpful_count": 0,
+    "not_helpful_count": 0
+  }
+},
+{
+  "model": "shop.productreview",
+  "pk": 6,
+  "fields": {
+    "product": "ennc-essential-hoodie-black",
+    "user_name": "Test User API",
+    "user_email": "testapi@example.com",
+    "rating": 4,
+    "title": "API Test Review",
+    "comment": "This is a test review created via the Django management command to test the API endpoints.",
+    "verified_purchase": false,
+    "order": null,
+    "size_purchased": "L",
+    "color_purchased": "Red",
+    "is_approved": true,
+    "is_featured": false,
+    "created_at": "2025-09-25T22:57:37.158Z",
+    "updated_at": "2025-09-25T22:57:37.158Z",
+    "helpful_count": 0,
+    "not_helpful_count": 0
+  }
+},
+{
+  "model": "shop.productreview",
+  "pk": 7,
+  "fields": {
+    "product": "ennc-essential-hoodie-grey",
+    "user_name": "uytyut yutyut yutyut uy",
+    "user_email": "",
+    "rating": 5,
+    "title": "tyutuytuytyutyutuytyutyutyut",
+    "comment": "uytyuuytuyt iytyutyutut uyyuty uy",
+    "verified_purchase": false,
+    "order": null,
+    "size_purchased": "",
+    "color_purchased": "",
+    "is_approved": true,
+    "is_featured": false,
+    "created_at": "2025-10-04T09:32:55.309Z",
+    "updated_at": "2025-10-04T09:32:55.309Z",
+    "helpful_count": 0,
+    "not_helpful_count": 0
+  }
+}
+]

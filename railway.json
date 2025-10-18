@@ -4,7 +4,7 @@
     "builder": "nixpacks"
   },
   "deploy": {
-    "startCommand": "cd backend && python manage.py migrate && python manage.py collectstatic --noinput && python create_superuser_railway.py && gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT",
+    "startCommand": "cd backend && python manage.py migrate && python manage.py collectstatic --noinput && python create_superuser_railway.py && python ../deploy_production_data.py && gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT",
     "healthcheckPath": "/api/shop/products/",
     "healthcheckTimeout": 100,
     "restartPolicyType": "on_failure",
