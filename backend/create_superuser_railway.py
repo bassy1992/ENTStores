@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """
-Railway Superuser Creation Script
+Railway Superuser Creation Script for Backend Directory
 This script creates a Django superuser for Railway deployment.
-Run this after deploying to Railway to create an admin user.
 """
 
 import os
@@ -13,13 +12,7 @@ from django.conf import settings
 def create_superuser():
     """Create or update superuser for Railway deployment"""
     
-    # Change to backend directory where Django project is located
-    backend_dir = os.path.join(os.path.dirname(__file__), 'backend')
-    if os.path.exists(backend_dir):
-        os.chdir(backend_dir)
-        sys.path.insert(0, os.getcwd())
-    
-    # Setup Django
+    # Setup Django (we're already in the backend directory)
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
     django.setup()
     
@@ -27,7 +20,7 @@ def create_superuser():
     
     # Get credentials from environment or use defaults
     username = os.environ.get('ADMIN_USERNAME', 'admin')
-    email = os.environ.get('ADMIN_EMAIL', 'admin@entstore.com')
+    email = os.environ.get('ADMIN_EMAIL', 'Enontinoclothing@gmail.com')
     password = os.environ.get('ADMIN_PASSWORD', 'EntStore2024!')
     
     print("🚂 Railway Superuser Creation")
@@ -50,8 +43,6 @@ def create_superuser():
             user.save()
             
             print(f"✅ Updated existing superuser '{username}'")
-            print(f"📧 Email: {email}")
-            print(f"🔑 Password: {password}")
             
         else:
             # Create new superuser
@@ -62,18 +53,14 @@ def create_superuser():
             )
             
             print(f"✅ Created new superuser '{username}'")
-            print(f"📧 Email: {email}")
-            print(f"🔑 Password: {password}")
         
-        print("\n🎉 Superuser setup complete!")
-        print(f"🌐 Access admin at: https://your-app.up.railway.app/admin/")
-        print(f"👤 Login with: {username} / {password}")
-        
+        print("🎉 Superuser setup complete!")
         return True
         
     except Exception as e:
         print(f"❌ Error creating superuser: {e}")
-        return False
+        # Don't fail the deployment if superuser creation fails
+        return True
 
 if __name__ == '__main__':
     success = create_superuser()
