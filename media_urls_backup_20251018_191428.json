@@ -1,0 +1,119 @@
+{
+  "timestamp": "2025-10-18T19:14:21.466185",
+  "products": [
+    {
+      "id": "jeans-001",
+      "title": "Slim Fit Denim Jeans",
+      "image_url": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "hoodie-001",
+      "title": "Premium Pullover Hoodie",
+      "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "tshirt-001",
+      "title": "Classic Cotton T-Shirt",
+      "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "ent-tracksuit-001",
+      "title": "ENT Complete Tracksuit",
+      "image_url": "https://images.unsplash.com/photo-1506629905607-d9f02a6a0e7b?w=400&h=400&fit=crop&crop=center"
+    },
+    {
+      "id": "ent-cap-001",
+      "title": "ENT Baseball Cap",
+      "image_url": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop&crop=center"
+    },
+    {
+      "id": "ent-shorts-001",
+      "title": "ENT Summer Shorts",
+      "image_url": "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop&crop=center"
+    },
+    {
+      "id": "ent-jacket-001",
+      "title": "ENT Winter Jacket",
+      "image_url": "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=400&h=400&fit=crop&crop=center"
+    },
+    {
+      "id": "ent-polo-001",
+      "title": "ENT Business Polo",
+      "image_url": "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400&h=400&fit=crop&crop=center"
+    },
+    {
+      "id": "ent-hoodie-001",
+      "title": "ENT Premium Hoodie",
+      "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&crop=center"
+    },
+    {
+      "id": "ent-tshirt-002",
+      "title": "ENT White Logo T-Shirt",
+      "image_url": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop&crop=center"
+    },
+    {
+      "id": "ent-tshirt-001",
+      "title": "ENT Classic Black T-Shirt",
+      "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center"
+    }
+  ],
+  "categories": [],
+  "product_images": [
+    {
+      "id": 1,
+      "product_id": "jeans-001",
+      "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center",
+      "is_primary": true,
+      "order": 0
+    },
+    {
+      "id": 2,
+      "product_id": "jeans-001",
+      "image_url": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop&crop=center",
+      "is_primary": false,
+      "order": 1
+    },
+    {
+      "id": 4,
+      "product_id": "demo-multi-image-product",
+      "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center",
+      "is_primary": true,
+      "order": 1
+    },
+    {
+      "id": 3,
+      "product_id": "jeans-001",
+      "image_url": "https://images.unsplash.com/photo-1583743814966-8936f37f4678?w=400&h=400&fit=crop&crop=center",
+      "is_primary": false,
+      "order": 2
+    },
+    {
+      "id": 5,
+      "product_id": "demo-multi-image-product",
+      "image_url": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop&crop=center",
+      "is_primary": false,
+      "order": 2
+    },
+    {
+      "id": 6,
+      "product_id": "demo-multi-image-product",
+      "image_url": "https://images.unsplash.com/photo-1583743814966-8936f37f4678?w=400&h=400&fit=crop&crop=center",
+      "is_primary": false,
+      "order": 3
+    },
+    {
+      "id": 7,
+      "product_id": "demo-multi-image-product",
+      "image_url": "https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=400&h=400&fit=crop&crop=center",
+      "is_primary": false,
+      "order": 4
+    },
+    {
+      "id": 8,
+      "product_id": "demo-multi-image-product",
+      "image_url": "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=400&h=400&fit=crop&crop=center",
+      "is_primary": false,
+      "order": 5
+    }
+  ]
+}

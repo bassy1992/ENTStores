@@ -4,6 +4,18 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
+
+# Import media URL constants
+try:
+    from .media_url_constants import get_product_image_url, get_category_image_url, get_product_image_by_id
+except ImportError:
+    # Fallback if constants file doesn't exist
+    def get_product_image_url(product_id):
+        return None
+    def get_category_image_url(category_key):
+        return None
+    def get_product_image_by_id(image_id):
+        return None
 from django.utils import timezone
 
 
