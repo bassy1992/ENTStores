@@ -2,6 +2,7 @@
   "name": "fusion-starter",
   "private": true,
   "type": "module",
+  "_deployment_trigger": "force-redeploy-with-railway-url",
   "pkg": {
     "assets": [
       "dist/spa/*"
