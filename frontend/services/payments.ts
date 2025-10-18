@@ -4,8 +4,8 @@
 const _env = (import.meta as any).env;
 const API_BASE_URL = _env.VITE_API_BASE_URL || (_env.DEV ? 'http://localhost:8000/api/payments' : 'https://entstores.onrender.com/api/payments');
 
-// Stripe configuration - use environment variable or fallback to test key
-export const STRIPE_PUBLISHABLE_KEY = _env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51S8JhCPc249cE7TRlO5jHggCQiBAt31e1rKCioN5KlmCkh03q5pBpWZIKjyFS6hj8rZQ1DlMeQU6DHqoXUubcl4Y00wRmW9uId';
+// Stripe configuration - use environment variable or fallback to placeholder
+export const STRIPE_PUBLISHABLE_KEY = _env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
 
 export interface PaymentItem {
   title: string;
