@@ -397,6 +397,18 @@ if RAILWAY_PUBLIC_DOMAIN:
     if railway_public_https not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(railway_public_https)
 
+# Add all Railway app domains dynamically
+railway_env = os.getenv('RAILWAY_ENVIRONMENT')
+if railway_env:
+    # Add common Railway patterns
+    railway_patterns = [
+        "https://*.up.railway.app",
+        "https://*.railway.app"
+    ]
+    for pattern in railway_patterns:
+        if pattern not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(pattern)
+
 # CSRF settings optimized for development and production
 if DEBUG:
     # Development: More permissive CSRF settings
@@ -414,6 +426,8 @@ else:
     CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests
     CSRF_COOKIE_DOMAIN = None  # Let Django handle domain
     CSRF_USE_SESSIONS = False  # Use cookies for CSRF tokens
+    CSRF_COOKIE_AGE = 31449600  # 1 year
+    CSRF_COOKIE_PATH = '/'  # Available for entire site
 
 # Session settings
 SESSION_COOKIE_SECURE = not DEBUG
