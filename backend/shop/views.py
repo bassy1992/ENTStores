@@ -364,13 +364,14 @@ def simple_products(request):
         
         simple_data = []
         for product in products:
-            # Build image URL
-            image_url = "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
-            if product.image:
-                try:
-                    image_url = request.build_absolute_uri(product.image.url)
-                except:
-                    pass
+            # Build image URL using the new method
+            try:
+                image_url = product.get_image_url()
+                # If it's a relative URL (uploaded file), make it absolute
+                if image_url.startswith('/'):
+                    image_url = request.build_absolute_uri(image_url)
+            except:
+                image_url = "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
             
             # Calculate review data
             from django.db.models import Avg
@@ -409,6 +410,185 @@ def simple_products(request):
         return Response({
             'error': str(e),
             'message': 'Simple products failed'
+        }, status=500)
+
+
+@api_view(['POST'])
+@csrf_exempt
+def add_product_with_url(request):
+    """Add a single product with image URL"""
+    try:
+        data = request.data
+        
+        # Validate required fields
+        required_fields = ['id', 'title', 'price', 'description', 'image_url', 'category']
+        for field in required_fields:
+            if field not in data:
+                return Response({
+                    'error': f'Missing required field: {field}',
+                    'required_fields': required_fields
+                }, status=400)
+        
+        # Get or create category
+        category, created = Category.objects.get_or_create(
+            key=data['category'],
+            defaults={
+                'label': data['category'].replace('-', ' ').title(),
+                'description': f'{data["category"].replace("-", " ").title()} category'
+            }
+        )
+        
+        # Create or update product
+        product, created = Product.objects.get_or_create(
+            id=data['id'],
+            defaults={
+                'title': data['title'],
+                'price': data['price'],
+                'description': data['description'],
+                'image_url': data['image_url'],
+                'category': category,
+                'stock_quantity': data.get('stock_quantity', 10),
+                'is_featured': data.get('is_featured', False),
+                'is_active': True
+            }
+        )
+        
+        if not created:
+            # Update existing product
+            product.title = data['title']
+            product.price = data['price']
+            product.description = data['description']
+            product.image_url = data['image_url']
+            product.category = category
+            product.stock_quantity = data.get('stock_quantity', product.stock_quantity)
+            product.is_featured = data.get('is_featured', product.is_featured)
+            product.save()
+        
+        return Response({
+            'success': True,
+            'created': created,
+            'product': {
+                'id': product.id,
+                'title': product.title,
+                'price': str(product.price),
+                'image_url': product.get_image_url(),
+                'category': product.category.key,
+                'stock_quantity': product.stock_quantity,
+                'is_featured': product.is_featured
+            },
+            'message': f'Product {"created" if created else "updated"} successfully'
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'message': 'Failed to add product'
+        }, status=500)
+
+
+@api_view(['POST'])
+@csrf_exempt
+def bulk_add_products_with_urls(request):
+    """Add multiple products with image URLs"""
+    try:
+        products_data = request.data.get('products', [])
+        
+        if not products_data:
+            return Response({
+                'error': 'No products data provided',
+                'expected_format': {
+                    'products': [
+                        {
+                            'id': 'product-id',
+                            'title': 'Product Title',
+                            'price': '25.99',
+                            'description': 'Product description',
+                            'image_url': 'https://example.com/image.jpg',
+                            'category': 'category-key',
+                            'stock_quantity': 10,
+                            'is_featured': False
+                        }
+                    ]
+                }
+            }, status=400)
+        
+        results = []
+        errors = []
+        
+        for product_data in products_data:
+            try:
+                # Validate required fields
+                required_fields = ['id', 'title', 'price', 'description', 'image_url', 'category']
+                missing_fields = [field for field in required_fields if field not in product_data]
+                
+                if missing_fields:
+                    errors.append({
+                        'product_id': product_data.get('id', 'unknown'),
+                        'error': f'Missing fields: {", ".join(missing_fields)}'
+                    })
+                    continue
+                
+                # Get or create category
+                category, created = Category.objects.get_or_create(
+                    key=product_data['category'],
+                    defaults={
+                        'label': product_data['category'].replace('-', ' ').title(),
+                        'description': f'{product_data["category"].replace("-", " ").title()} category'
+                    }
+                )
+                
+                # Create or update product
+                product, created = Product.objects.get_or_create(
+                    id=product_data['id'],
+                    defaults={
+                        'title': product_data['title'],
+                        'price': product_data['price'],
+                        'description': product_data['description'],
+                        'image_url': product_data['image_url'],
+                        'category': category,
+                        'stock_quantity': product_data.get('stock_quantity', 10),
+                        'is_featured': product_data.get('is_featured', False),
+                        'is_active': True
+                    }
+                )
+                
+                if not created:
+                    # Update existing product
+                    product.title = product_data['title']
+                    product.price = product_data['price']
+                    product.description = product_data['description']
+                    product.image_url = product_data['image_url']
+                    product.category = category
+                    product.stock_quantity = product_data.get('stock_quantity', product.stock_quantity)
+                    product.is_featured = product_data.get('is_featured', product.is_featured)
+                    product.save()
+                
+                results.append({
+                    'id': product.id,
+                    'title': product.title,
+                    'created': created,
+                    'status': 'success'
+                })
+                
+            except Exception as e:
+                errors.append({
+                    'product_id': product_data.get('id', 'unknown'),
+                    'error': str(e)
+                })
+        
+        return Response({
+            'success': True,
+            'processed': len(results),
+            'errors': len(errors),
+            'results': results,
+            'errors_detail': errors,
+            'message': f'Processed {len(results)} products successfully, {len(errors)} errors'
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'message': 'Failed to bulk add products'
         }, status=500)
 
 

@@ -97,6 +97,11 @@ class Product(models.Model):
         null=True,
         help_text="Product image file"
     )
+    image_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Product image URL (alternative to uploading files)"
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
@@ -156,6 +161,20 @@ class Product(models.Model):
         """Return formatted price as currency"""
         return f"${self.price:.2f}"
     
+    def get_image_url(self):
+        """Get the image URL, prioritizing uploaded file over URL field"""
+        if self.image:
+            return self.image.url
+        elif self.image_url:
+            return self.image_url
+        else:
+            return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
+    
+    @property
+    def display_image_url(self):
+        """Property to get the display image URL"""
+        return self.get_image_url()
+
     @property
     def is_in_stock(self):
         """Check if product is in stock (considering both main stock and variants)"""

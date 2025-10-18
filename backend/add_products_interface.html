@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Products with Image URLs - ENT Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .bulk-button {
+            background-color: #28a745;
+        }
+        .bulk-button:hover {
+            background-color: #1e7e34;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .bulk-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        .sample-data {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ Add Products with Image URLs</h1>
+        
+        <!-- Single Product Form -->
+        <form id="singleProductForm">
+            <div class="form-group">
+                <label for="productId">Product ID *</label>
+                <input type="text" id="productId" name="id" required placeholder="e.g., ent-tshirt-001">
+            </div>
+            
+            <div class="form-group">
+                <label for="title">Product Title *</label>
+                <input type="text" id="title" name="title" required placeholder="e.g., ENT Classic T-Shirt">
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price *</label>
+                <input type="number" id="price" name="price" step="0.01" required placeholder="e.g., 25.99">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" required placeholder="Product description..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="imageUrl">Image URL *</label>
+                <input type="url" id="imageUrl" name="image_url" required placeholder="https://example.com/image.jpg">
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" name="category" required>
+                    <option value="">Select a category</option>
+                    <option value="t-shirts">T-Shirts</option>
+                    <option value="polos">Polos</option>
+                    <option value="hoodies">Hoodies / Crewnecks</option>
+                    <option value="sweatshirts">Sweatshirts</option>
+                    <option value="tracksuits">Tracksuits</option>
+                    <option value="jackets">Jackets</option>
+                    <option value="shorts">Shorts</option>
+                    <option value="headwear">Headwear</option>
+                    <option value="accessories">Accessories</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="stockQuantity">Stock Quantity</label>
+                <input type="number" id="stockQuantity" name="stock_quantity" value="10" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="isFeatured" name="is_featured"> Featured Product
+                </label>
+            </div>
+            
+            <button type="submit">Add Product</button>
+        </form>
+        
+        <div id="singleResult" class="result"></div>
+        
+        <!-- Bulk Add Section -->
+        <div class="bulk-section">
+            <h2>📦 Bulk Add Products</h2>
+            <p>Add multiple products at once using JSON format:</p>
+            
+            <div class="form-group">
+                <label for="bulkData">Products JSON Data</label>
+                <textarea id="bulkData" rows="10" placeholder="Paste JSON data here..."></textarea>
+            </div>
+            
+            <button type="button" class="bulk-button" onclick="loadSampleData()">Load Sample Data</button>
+            <button type="button" class="bulk-button" onclick="bulkAddProducts()">Bulk Add Products</button>
+            
+            <div class="sample-data">
+                <strong>Sample JSON Format:</strong><br>
+                {<br>
+                &nbsp;&nbsp;"products": [<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id": "ent-tshirt-001",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"title": "ENT Classic T-Shirt",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price": "25.99",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"description": "Premium cotton t-shirt",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"image_url": "https://example.com/image.jpg",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"category": "t-shirts",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"stock_quantity": 50,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"is_featured": true<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;]<br>
+                }
+            </div>
+        </div>
+        
+        <div id="bulkResult" class="result"></div>
+    </div>
+
+    <script>
+        // API Base URL - Update this to match your deployment
+        const API_BASE = window.location.origin;
+        
+        // Single product form submission
+        document.getElementById('singleProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert checkbox to boolean
+            data.is_featured = document.getElementById('isFeatured').checked;
+            
+            // Convert price and stock to numbers
+            data.price = parseFloat(data.price);
+            data.stock_quantity = parseInt(data.stock_quantity);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/shop/add-product-url/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showResult('singleResult', result, response.ok);
+                
+                if (response.ok) {
+                    e.target.reset();
+                }
+                
+            } catch (error) {
+                showResult('singleResult', {error: error.message}, false);
+            }
+        });
+        
+        // Bulk add products
+        async function bulkAddProducts() {
+            const bulkData = document.getElementById('bulkData').value;
+            
+            if (!bulkData.trim()) {
+                showResult('bulkResult', {error: 'Please enter JSON data'}, false);
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(bulkData);
+                
+                const response = await fetch(`${API_BASE}/api/shop/bulk-add-products/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showResult('bulkResult', result, response.ok);
+                
+            } catch (error) {
+                showResult('bulkResult', {error: error.message}, false);
+            }
+        }
+        
+        // Load sample data
+        function loadSampleData() {
+            const sampleData = {
+                "products": [
+                    {
+                        "id": "ent-tshirt-sample",
+                        "title": "ENT Sample T-Shirt",
+                        "price": "25.99",
+                        "description": "Sample product with image URL",
+                        "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center",
+                        "category": "t-shirts",
+                        "stock_quantity": 50,
+                        "is_featured": true
+                    }
+                ]
+            };
+            
+            document.getElementById('bulkData').value = JSON.stringify(sampleData, null, 2);
+        }
+        
+        // Show result message
+        function showResult(elementId, result, isSuccess) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.className = `result ${isSuccess ? 'success' : 'error'}`;
+            resultDiv.style.display = 'block';
+            
+            if (isSuccess) {
+                resultDiv.innerHTML = `
+                    <strong>✅ Success!</strong><br>
+                    ${result.message || 'Operation completed successfully'}<br>
+                    ${result.processed ? `Processed: ${result.processed} products` : ''}
+                    ${result.errors ? `<br>Errors: ${result.errors}` : ''}
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <strong>❌ Error!</strong><br>
+                    ${result.error || result.message || 'Unknown error occurred'}
+                `;
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                resultDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

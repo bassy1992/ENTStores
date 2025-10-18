@@ -42,4 +42,8 @@ urlpatterns = [
     # Debug
     path('debug-products/', views.debug_products, name='debug-products'),
     path('simple-products/', views.simple_products, name='simple-products'),
+    
+    # Product management with URLs
+    path('add-product-url/', views.add_product_with_url, name='add-product-url'),
+    path('bulk-add-products/', views.bulk_add_products_with_urls, name='bulk-add-products'),
 ]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "ent-tshirt-001",
+    "title": "ENT Classic Black T-Shirt",
+    "price": "25.99",
+    "description": "Premium cotton t-shirt with ENT logo. Comfortable fit and high-quality print that lasts.",
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center",
+    "category": "t-shirts",
+    "stock_quantity": 50,
+    "is_featured": true
+  },
+  {
+    "id": "ent-tshirt-002",
+    "title": "ENT White Logo T-Shirt",
+    "price": "24.99",
+    "description": "Clean white t-shirt with subtle ENT branding. Perfect for everyday wear.",
+    "image_url": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop&crop=center",
+    "category": "t-shirts",
+    "stock_quantity": 45,
+    "is_featured": false
+  },
+  {
+    "id": "ent-hoodie-001",
+    "title": "ENT Premium Hoodie",
+    "price": "59.99",
+    "description": "Comfortable hoodie perfect for any weather. Made with premium materials for maximum comfort.",
+    "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&crop=center",
+    "category": "hoodies",
+    "stock_quantity": 25,
+    "is_featured": true
+  },
+  {
+    "id": "ent-polo-001",
+    "title": "ENT Business Polo",
+    "price": "39.99",
+    "description": "Professional polo shirt perfect for business casual or smart casual occasions.",
+    "image_url": "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400&h=400&fit=crop&crop=center",
+    "category": "polos",
+    "stock_quantity": 30,
+    "is_featured": false
+  },
+  {
+    "id": "ent-jacket-001",
+    "title": "ENT Winter Jacket",
+    "price": "89.99",
+    "description": "Warm and stylish winter jacket with ENT branding. Perfect for cold weather.",
+    "image_url": "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=400&h=400&fit=crop&crop=center",
+    "category": "jackets",
+    "stock_quantity": 15,
+    "is_featured": true
+  },
+  {
+    "id": "ent-shorts-001",
+    "title": "ENT Summer Shorts",
+    "price": "29.99",
+    "description": "Comfortable shorts for summer activities. Lightweight and breathable fabric.",
+    "image_url": "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop&crop=center",
+    "category": "shorts",
+    "stock_quantity": 40,
+    "is_featured": false
+  },
+  {
+    "id": "ent-cap-001",
+    "title": "ENT Baseball Cap",
+    "price": "19.99",
+    "description": "Classic baseball cap with ENT logo. Adjustable fit for maximum comfort.",
+    "image_url": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop&crop=center",
+    "category": "headwear",
+    "stock_quantity": 60,
+    "is_featured": false
+  },
+  {
+    "id": "ent-tracksuit-001",
+    "title": "ENT Complete Tracksuit",
+    "price": "79.99",
+    "description": "Complete tracksuit set including jacket and pants. Perfect for sports and casual wear.",
+    "image_url": "https://images.unsplash.com/photo-1506629905607-d9f02a6a0e7b?w=400&h=400&fit=crop&crop=center",
+    "category": "tracksuits",
+    "stock_quantity": 20,
+    "is_featured": true
+  }
+]
