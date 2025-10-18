@@ -167,6 +167,8 @@ def debug_env(request):
             "DJANGO_SECRET_KEY": "Set" if os.environ.get('DJANGO_SECRET_KEY') else 'Not set',
             "EMAIL_HOST_USER": os.environ.get('EMAIL_HOST_USER', 'Not set'),
             "EMAIL_HOST_PASSWORD": "Set" if os.environ.get('EMAIL_HOST_PASSWORD') else 'Not set',
+            "RAILWAY_STATIC_URL": os.environ.get('RAILWAY_STATIC_URL', 'Not set'),
+            "RAILWAY_PUBLIC_DOMAIN": os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'Not set'),
         },
         "django_settings": {
             "DEBUG": settings.DEBUG,
@@ -177,8 +179,51 @@ def debug_env(request):
             "EMAIL_PORT": settings.EMAIL_PORT,
             "EMAIL_USE_TLS": settings.EMAIL_USE_TLS,
             "DEFAULT_FROM_EMAIL": settings.DEFAULT_FROM_EMAIL,
+            "ALLOWED_HOSTS": settings.ALLOWED_HOSTS,
+            "CSRF_TRUSTED_ORIGINS": settings.CSRF_TRUSTED_ORIGINS,
+            "CSRF_COOKIE_SECURE": settings.CSRF_COOKIE_SECURE,
+            "CSRF_COOKIE_SAMESITE": settings.CSRF_COOKIE_SAMESITE,
+        },
+        "request_info": {
+            "host": request.get_host(),
+            "is_secure": request.is_secure(),
+            "scheme": request.scheme,
+            "origin": request.META.get('HTTP_ORIGIN', 'No origin header'),
+            "referer": request.META.get('HTTP_REFERER', 'No referer header'),
         },
         "message": "Environment variables debug"
+    })
+
+@csrf_exempt
+def debug_csrf(request):
+    """Debug CSRF configuration"""
+    from django.conf import settings
+    from django.middleware.csrf import get_token
+    
+    # Get CSRF token
+    csrf_token = get_token(request)
+    
+    return JsonResponse({
+        "csrf_settings": {
+            "CSRF_TRUSTED_ORIGINS": settings.CSRF_TRUSTED_ORIGINS,
+            "CSRF_COOKIE_SECURE": settings.CSRF_COOKIE_SECURE,
+            "CSRF_COOKIE_HTTPONLY": settings.CSRF_COOKIE_HTTPONLY,
+            "CSRF_COOKIE_SAMESITE": settings.CSRF_COOKIE_SAMESITE,
+            "CSRF_COOKIE_DOMAIN": getattr(settings, 'CSRF_COOKIE_DOMAIN', None),
+            "CSRF_USE_SESSIONS": getattr(settings, 'CSRF_USE_SESSIONS', False),
+        },
+        "request_info": {
+            "host": request.get_host(),
+            "is_secure": request.is_secure(),
+            "scheme": request.scheme,
+            "full_url": request.build_absolute_uri(),
+            "origin": request.META.get('HTTP_ORIGIN', 'No origin header'),
+            "referer": request.META.get('HTTP_REFERER', 'No referer header'),
+            "user_agent": request.META.get('HTTP_USER_AGENT', 'No user agent'),
+        },
+        "csrf_token": csrf_token,
+        "cookies": dict(request.COOKIES),
+        "message": "CSRF configuration debug"
     })
 
 @csrf_exempt
@@ -244,6 +289,7 @@ urlpatterns = [
     path('api/debug-media/', debug_media, name='debug-media'),
     path('api/debug-static/', debug_static, name='debug-static'),
     path('api/debug-env/', debug_env, name='debug-env'),
+    path('api/debug-csrf/', debug_csrf, name='debug-csrf'),
     path('api/test-email/', test_email, name='test-email'),
     path('admin/', admin.site.urls),
     path('api/shop/', include('shop.urls')),

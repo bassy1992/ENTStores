@@ -386,6 +386,17 @@ FRONTEND_URL = os.getenv('FRONTEND_URL')
 if FRONTEND_URL:
     CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 
+# Add Railway domains to CSRF trusted origins
+if RAILWAY_STATIC_URL:
+    railway_https_url = f"https://{RAILWAY_STATIC_URL}"
+    if railway_https_url not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(railway_https_url)
+
+if RAILWAY_PUBLIC_DOMAIN:
+    railway_public_https = f"https://{RAILWAY_PUBLIC_DOMAIN}"
+    if railway_public_https not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(railway_public_https)
+
 # CSRF settings optimized for development and production
 if DEBUG:
     # Development: More permissive CSRF settings
