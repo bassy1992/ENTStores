@@ -4,7 +4,7 @@ import { CategoryModel, Category } from '../data/products';
 // Use explicit VITE_SHOP_API_BASE_URL when provided. During local development
 // use relative URLs to leverage Vite proxy. In production use the full URL.
 const _env = (import.meta as any).env;
-const API_BASE_URL = _env.VITE_SHOP_API_BASE_URL || (_env.DEV ? '/api/shop' : 'https://entstores.onrender.com/api/shop');
+const API_BASE_URL = _env.VITE_SHOP_API_BASE_URL || (_env.DEV ? '/api/shop' : 'https://entstores-production.up.railway.app/api/shop');
 
 // Helper function to process image URLs for development and production
 function processImageUrl(imageUrl: string): string {
@@ -22,7 +22,7 @@ function processImageUrl(imageUrl: string): string {
   
   // In production, if we get a relative URL, convert to full production URL
   if (!_env.DEV && imageUrl.startsWith('/media/')) {
-    return `https://entstores.onrender.com${imageUrl}`;
+    return `https://entstores-production.up.railway.app${imageUrl}`;
   }
   
   // If it's already a full URL, return as is
@@ -32,7 +32,7 @@ function processImageUrl(imageUrl: string): string {
   
   // Fallback: assume it's a relative path and prepend production URL
   if (!_env.DEV) {
-    return `https://entstores.onrender.com/media/${imageUrl}`;
+    return `https://entstores-production.up.railway.app/media/${imageUrl}`;
   }
   
   return imageUrl;

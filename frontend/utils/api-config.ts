@@ -5,7 +5,7 @@ const _env = (import.meta as any).env;
 
 // API Base URL configuration
 export const API_BASE_URL = _env.VITE_SHOP_API_BASE_URL || 
-  (_env.DEV ? '/api/shop' : 'https://entstores.onrender.com/api/shop');
+  (_env.DEV ? '/api/shop' : 'https://entstores-production.up.railway.app/api/shop');
 
 // Environment detection
 export const isDevelopment = _env.DEV;

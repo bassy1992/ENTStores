@@ -2,7 +2,7 @@
 
 // Prefer VITE_API_BASE_URL when provided. In development, default to local backend.
 const _env = (import.meta as any).env;
-const API_BASE_URL = _env.VITE_API_BASE_URL || (_env.DEV ? 'http://localhost:8000/api/payments' : 'https://entstores.onrender.com/api/payments');
+const API_BASE_URL = _env.VITE_API_BASE_URL || (_env.DEV ? 'http://localhost:8000/api/payments' : 'https://entstores-production.up.railway.app/api/payments');
 
 // Stripe configuration - use environment variable or fallback to placeholder
 export const STRIPE_PUBLISHABLE_KEY = _env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
