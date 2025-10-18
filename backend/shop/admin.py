@@ -8,8 +8,31 @@ from .models import (
 )
 
 
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = '__all__'
+        widgets = {
+            'image_url': forms.URLInput(attrs={
+                'placeholder': 'https://images.unsplash.com/photo-123?w=400&h=400&fit=crop',
+                'size': 80,
+                'style': 'width: 100%;'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'image_url' in self.fields:
+            self.fields['image_url'].help_text = (
+                'Paste an image URL here for the category. '
+                'This will be used instead of uploading a file. '
+                'Recommended size: 400x400 pixels'
+            )
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    form = CategoryForm
     list_display = ['label', 'key', 'featured', 'product_count', 'created_at']
     list_filter = ['featured', 'created_at']
     search_fields = ['label', 'key', 'description']
@@ -20,7 +43,8 @@ class CategoryAdmin(admin.ModelAdmin):
             'fields': ('key', 'label', 'description')
         }),
         ('Display', {
-            'fields': ('image', 'featured')
+            'fields': ('image', 'image_url', 'featured'),
+            'description': 'Upload an image file OR provide an image URL. URL images are recommended for better performance.'
         }),
         ('Statistics', {
             'fields': ('product_count',),
@@ -40,6 +64,13 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
+        widgets = {
+            'image_url': forms.URLInput(attrs={
+                'placeholder': 'https://images.unsplash.com/photo-123?w=400&h=400&fit=crop',
+                'size': 80,
+                'style': 'width: 100%;'
+            }),
+        }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,6 +78,14 @@ class ProductForm(forms.ModelForm):
         if 'category' in self.fields:
             self.fields['category'].queryset = Category.objects.all()
             self.fields['category'].empty_label = "Select a category"
+        
+        # Add help text for image fields
+        if 'image_url' in self.fields:
+            self.fields['image_url'].help_text = (
+                'Paste an image URL here for faster loading. '
+                'Recommended: Use Unsplash, Cloudinary, or other CDN services. '
+                'Format: https://images.unsplash.com/photo-123?w=400&h=400&fit=crop'
+            )
 
 
 class ProductTagAssignmentInline(admin.TabularInline):
@@ -82,7 +121,7 @@ class ProductVariantInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
-    list_display = ['title', 'category', 'price_display', 'shipping_cost_display', 'stock_quantity', 'is_active', 'is_featured', 'created_at']
+    list_display = ['title', 'category', 'price_display', 'image_source', 'stock_quantity', 'is_active', 'is_featured', 'created_at']
     list_filter = ['category', 'is_active', 'is_featured', 'created_at', 'tag_assignments__tag']
     search_fields = ['title', 'id', 'description']
     readonly_fields = ['created_at', 'updated_at']
@@ -102,9 +141,9 @@ class ProductAdmin(admin.ModelAdmin):
         ('Pricing & Category', {
             'fields': ('price', 'shipping_cost', 'category')
         }),
-        ('Main Image', {
-            'fields': ('image',),
-            'description': 'Upload a main product image. You can add more images in the "Product Images" section below.'
+        ('Images', {
+            'fields': ('image', 'image_url'),
+            'description': 'Upload a main product image OR provide an image URL. URL images load faster and don\'t use server storage. You can add more images in the "Product Images" section below.'
         }),
         ('Inventory & Settings', {
             'fields': ('stock_quantity', 'is_active', 'is_featured')
@@ -122,6 +161,15 @@ class ProductAdmin(admin.ModelAdmin):
     def shipping_cost_display(self, obj):
         return f"${obj.shipping_cost:.2f}"
     shipping_cost_display.short_description = 'Shipping'
+    
+    def image_source(self, obj):
+        if obj.image_url:
+            return format_html('<span style="color: #10b981;">🌐 URL</span>')
+        elif obj.image:
+            return format_html('<span style="color: #3b82f6;">📁 File</span>')
+        else:
+            return format_html('<span style="color: #6b7280;">❌ None</span>')
+    image_source.short_description = 'Image'
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('category')
