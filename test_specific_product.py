@@ -9,7 +9,7 @@ def test_fghfhghgh_product():
     print("URL: https://www.enontinoclothingstore.com/product/fghfhghgh")
     
     # Test product detail API
-    detail_url = "https://entstores.onrender.com/api/shop/products/fghfhghgh/"
+    detail_url = "https://entstores-production.up.railway.app/api/shop/products/fghfhghgh/"
     
     try:
         response = requests.get(detail_url)
@@ -89,7 +89,7 @@ def test_fghfhghgh_product():
 def test_shop_page_for_product(slug):
     """Test how the product appears in shop page API"""
     try:
-        response = requests.get("https://entstores.onrender.com/api/shop/products/")
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/")
         if response.status_code == 200:
             data = response.json()
             products = data.get('results', [])

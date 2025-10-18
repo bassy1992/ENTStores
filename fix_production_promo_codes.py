@@ -13,7 +13,7 @@ def fix_production_promo_codes():
     print("=" * 50)
     
     # Since we can't directly access the production database, let's check what we can do
-    base_url = "https://entstores.onrender.com/api/shop"
+    base_url = "https://entstores-production.up.railway.app/api/shop"
     
     # First, let's see what promo codes exist
     print("\n1️⃣ Checking current production promo codes...")
@@ -30,7 +30,7 @@ def fix_production_promo_codes():
         print(f"   Exception: {e}")
     
     print("\n💡 To fix the production promo codes, you need to:")
-    print("   1. Access the Django admin at: https://entstores.onrender.com/admin/")
+    print("   1. Access the Django admin at: https://entstores-production.up.railway.app/admin/")
     print("   2. Go to Shop > Promo codes")
     print("   3. Edit the ENNC10 promo code:")
     print("      - Change description from 'hghjgjhg' to '10% off your entire order'")

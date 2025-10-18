@@ -9,7 +9,7 @@ import json
 def test_promo_code_api():
     """Test the promo code validation API"""
     
-    base_url = "https://entstores.onrender.com/api/shop"
+    base_url = "https://entstores-production.up.railway.app/api/shop"
     
     print("🧪 Testing Promo Code API")
     print("=" * 50)

@@ -3,7 +3,7 @@ import requests
 import json
 
 # Test the production API
-production_url = "https://entstores.onrender.com/api/shop/products/shorts-coral-pink/"
+production_url = "https://entstores-production.up.railway.app/api/shop/products/shorts-coral-pink/"
 
 try:
     print("Testing production API...")
@@ -35,7 +35,7 @@ except Exception as e:
 try:
     print("\n" + "="*50)
     print("Testing products list API...")
-    list_url = "https://entstores.onrender.com/api/shop/products/"
+    list_url = "https://entstores-production.up.railway.app/api/shop/products/"
     response = requests.get(list_url)
     print(f"Status Code: {response.status_code}")
     

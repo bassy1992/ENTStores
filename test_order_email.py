@@ -39,7 +39,7 @@ def test_order_email():
     try:
         print("Creating test order...")
         response = requests.post(
-            "https://entstores.onrender.com/api/payments/create-order/",
+            "https://entstores-production.up.railway.app/api/payments/create-order/",
             json=order_data,
             timeout=30
         )

@@ -11,7 +11,7 @@ def update_stock_via_admin():
     """
     Instructions to update stock via Django admin:
     
-    1. Go to https://entstores.onrender.com/admin/
+    1. Go to https://entstores-production.up.railway.app/admin/
     2. Login with admin credentials
     3. Go to Shop > Products
     4. Click on the product "gjgjkhjgjkhjg"
@@ -21,7 +21,7 @@ def update_stock_via_admin():
     This will immediately update the stock and make the product show as "in stock"
     """
     print("To fix the stock issue:")
-    print("1. Go to https://entstores.onrender.com/admin/")
+    print("1. Go to https://entstores-production.up.railway.app/admin/")
     print("2. Login with admin credentials")
     print("3. Navigate to Shop > Products")
     print("4. Edit the product and set stock_quantity to 25")
@@ -37,7 +37,7 @@ def update_stock_via_admin():
 def test_api_after_fix():
     """Test the API to see if stock is updated"""
     try:
-        response = requests.get("https://entstores.onrender.com/api/shop/products/")
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/")
         if response.status_code == 200:
             data = response.json()
             if data.get('results'):

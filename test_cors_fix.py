@@ -11,7 +11,7 @@ def test_cors_configuration():
     print("🧪 Testing CORS Configuration Fix")
     print("=" * 50)
     
-    backend_url = "https://entstores.onrender.com"
+    backend_url = "https://entstores-production.up.railway.app"
     frontend_origin = "https://www.enontinoclothingstore.com"
     
     # Test 1: CORS test endpoint
@@ -118,7 +118,7 @@ def test_cors_configuration():
     print(f"   - Backend URL: {backend_url}")
     print(f"   - Frontend Origin: {frontend_origin}")
     print(f"   - CORS should now be configured to allow all origins in production")
-    print(f"   - If issues persist, check Render deployment logs")
+    print(f"   - If issues persist, check Railway deployment logs")
 
 def test_from_browser():
     """Instructions for testing from browser"""
@@ -128,7 +128,7 @@ def test_from_browser():
     print(f"2. Go to Console tab")
     print(f"3. Run this JavaScript:")
     print(f"""
-fetch('https://entstores.onrender.com/api/shop/categories/')
+fetch('https://entstores-production.up.railway.app/api/shop/categories/')
   .then(response => response.json())
   .then(data => console.log('✅ CORS working:', data))
   .catch(error => console.error('❌ CORS error:', error));

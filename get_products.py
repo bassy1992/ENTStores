@@ -9,7 +9,7 @@ import json
 def get_products():
     """Get products from API"""
     try:
-        response = requests.get("https://entstores.onrender.com/api/shop/products/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/", timeout=30)
         if response.status_code == 200:
             data = response.json()
             products = data.get('results', [])

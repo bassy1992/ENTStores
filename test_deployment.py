@@ -12,7 +12,7 @@ def test_deployment():
     time.sleep(10)
     
     # Test the production API
-    production_url = "https://entstores.onrender.com/api/shop/products/shorts-coral-pink/"
+    production_url = "https://entstores-production.up.railway.app/api/shop/products/shorts-coral-pink/"
     
     try:
         print(f"📡 Testing: {production_url}")
@@ -58,7 +58,7 @@ def test_shop_page():
     print("\n🛍️  Testing shop page API...")
     
     try:
-        list_url = "https://entstores.onrender.com/api/shop/products/"
+        list_url = "https://entstores-production.up.railway.app/api/shop/products/"
         response = requests.get(list_url)
         
         if response.status_code == 200:

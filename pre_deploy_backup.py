@@ -25,7 +25,7 @@ def backup_production_media():
     try:
         # Get list of media files from production
         print("🔍 Getting media file list from production...")
-        response = requests.get("https://entstores.onrender.com/api/debug-media/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/debug-media/", timeout=30)
         
         if response.status_code != 200:
             print(f"❌ Failed to get media list (Status: {response.status_code})")
@@ -47,7 +47,7 @@ def backup_production_media():
             
             for file_info in media_files:
                 file_path = file_info['file']
-                file_url = f"https://entstores.onrender.com/media/{file_path}"
+                file_url = f"https://entstores-production.up.railway.app/media/{file_path}"
                 
                 try:
                     print(f"   📥 Downloading: {file_path}")
@@ -71,7 +71,7 @@ def backup_production_media():
                 "total_files": len(media_files),
                 "downloaded": downloaded,
                 "failed": failed,
-                "source": "https://entstores.onrender.com"
+                "source": "https://entstores-production.up.railway.app"
             }
             zipf.writestr("backup_metadata.json", json.dumps(metadata, indent=2))
         

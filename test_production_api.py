@@ -6,7 +6,7 @@ import requests
 import json
 
 # Production API base URL
-API_BASE_URL = "https://entstores.onrender.com/api/shop"
+API_BASE_URL = "https://entstores-production.up.railway.app/api/shop"
 
 def test_endpoint(url, description):
     """Test a single API endpoint"""
@@ -61,7 +61,7 @@ def main():
     print("=" * 60)
     
     # Test basic health check
-    health_success, _ = test_endpoint("https://entstores.onrender.com/api/health/", "Health Check")
+    health_success, _ = test_endpoint("https://entstores-production.up.railway.app/api/health/", "Health Check")
     
     if not health_success:
         print("\n❌ Health check failed - API might be down")

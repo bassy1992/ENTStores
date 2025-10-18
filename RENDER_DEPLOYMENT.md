@@ -1,6 +1,8 @@
-# Render Deployment Guide
+# ⚠️ DEPRECATED - Render Deployment Guide (Use Railway Instead)
 
 ## Overview
+⚠️ **DEPRECATED**: This project now uses Railway for deployment. See RAILWAY_DASHBOARD_SETUP.md instead.
+
 Deploy your ENTstore Django backend to Render with PostgreSQL database.
 
 ## Prerequisites

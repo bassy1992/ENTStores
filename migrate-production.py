@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Production Database Migration Script for Render
+Production Database Migration Script for Railway
 This script helps migrate your local data to the production PostgreSQL database
 """
 
@@ -103,11 +103,11 @@ def main():
     
     print("\n🎉 Production database setup completed!")
     print("\n📋 Next steps:")
-    print("1. Deploy to Render with the updated configuration")
+    print("1. Deploy to Railway with the updated configuration")
     print("2. Test the API endpoints:")
-    print("   - https://your-app.onrender.com/api/health/")
-    print("   - https://your-app.onrender.com/api/shop/categories/")
-    print("   - https://your-app.onrender.com/admin/")
+    print("   - https://your-app.up.railway.app/api/health/")
+    print("   - https://your-app.up.railway.app/api/shop/categories/")
+    print("   - https://your-app.up.railway.app/admin/")
     print("3. Change the admin password after first login")
     print("4. Upload your product images and data through the admin panel")
 

@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuration
-PRODUCTION_URL = "https://entstores.onrender.com/api/shop"
+PRODUCTION_URL = "https://entstores-production.up.railway.app/api/shop"
 
 def simulate_out_of_stock():
     """Simulate an out of stock scenario by temporarily reducing stock"""

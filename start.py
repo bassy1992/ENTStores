@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Startup script for Render deployment
+⚠️ DEPRECATED: Startup script for Render deployment (now using Railway)
 This ensures we're in the right directory and using the correct WSGI application
 """
 import os

@@ -12,7 +12,7 @@ def test_production_order_email():
     print("🔍 Testing Real Order Email Flow on Production...")
     
     # Production API base URL
-    base_url = "https://entstore-backend.onrender.com"
+    base_url = "https://entstores-production.up.railway.app"
     
     try:
         # Test 1: Check if API is accessible

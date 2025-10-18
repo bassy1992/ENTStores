@@ -13,7 +13,7 @@ def wait_and_test():
         try:
             # Test with cache busting
             timestamp = int(time.time())
-            url = f"https://entstores.onrender.com/api/shop/products/?_t={timestamp}"
+            url = f"https://entstores-production.up.railway.app/api/shop/products/?_t={timestamp}"
             
             response = requests.get(url)
             if response.status_code == 200:

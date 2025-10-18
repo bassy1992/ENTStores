@@ -67,7 +67,7 @@ def test_verified_email():
         
         try:
             response = requests.post(
-                "https://entstores.onrender.com/api/payments/create-order/",
+                "https://entstores-production.up.railway.app/api/payments/create-order/",
                 json=order_data,
                 timeout=30
             )

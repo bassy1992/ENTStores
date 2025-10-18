@@ -18,7 +18,7 @@ def test_shipping_field():
     # Test production API
     try:
         print("\n🌐 Testing production API...")
-        response = requests.get("https://entstores.onrender.com/api/shop/products/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/", timeout=30)
         
         if response.status_code == 200:
             products = response.json()
@@ -56,7 +56,7 @@ def test_admin_access():
     """Test if admin page is accessible"""
     try:
         print("\n🔐 Testing admin page access...")
-        response = requests.get("https://entstores.onrender.com/admin/shop/product/add/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/admin/shop/product/add/", timeout=30)
         
         if response.status_code in [200, 302]:  # 302 is redirect to login
             print("✅ Admin page is accessible")
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     if api_success:
         print("\n🎉 SUCCESS! Shipping cost field is working!")
         print("\n📋 Next steps:")
-        print("1. Go to: https://entstores.onrender.com/admin/shop/product/add/")
+        print("1. Go to: https://entstores-production.up.railway.app/admin/shop/product/add/")
         print("2. Log in with your admin credentials")
         print("3. Look for 'Shipping cost' field in the 'Pricing & Category' section")
         print("4. Set shipping costs for your products (default is $9.99)")

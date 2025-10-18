@@ -14,7 +14,7 @@ def test_out_of_stock_scenarios():
     # Get list of all products to find one that's actually out of stock
     print("\n2️⃣ Finding products that are actually out of stock:")
     try:
-        response = requests.get("https://entstores.onrender.com/api/shop/products/")
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/")
         if response.status_code == 200:
             data = response.json()
             products = data.get('results', [])
@@ -46,7 +46,7 @@ def test_product_stock(slug):
     """Test a specific product's stock status"""
     try:
         # Test product detail API
-        detail_url = f"https://entstores.onrender.com/api/shop/products/{slug}/"
+        detail_url = f"https://entstores-production.up.railway.app/api/shop/products/{slug}/"
         response = requests.get(detail_url)
         
         if response.status_code == 200:

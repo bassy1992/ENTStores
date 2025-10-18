@@ -8,7 +8,7 @@ def find_truly_out_of_stock():
     print("🔍 Analyzing all products for true out of stock scenarios...")
     
     try:
-        response = requests.get("https://entstores.onrender.com/api/shop/products/")
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/")
         if response.status_code == 200:
             data = response.json()
             products = data.get('results', [])
@@ -57,7 +57,7 @@ def find_truly_out_of_stock():
 def analyze_product_details(slug):
     """Get detailed product info including variants"""
     try:
-        detail_url = f"https://entstores.onrender.com/api/shop/products/{slug}/"
+        detail_url = f"https://entstores-production.up.railway.app/api/shop/products/{slug}/"
         response = requests.get(detail_url)
         
         if response.status_code == 200:

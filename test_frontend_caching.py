@@ -32,7 +32,7 @@ def test_caching_issues():
 def test_api_direct():
     """Test direct API call"""
     try:
-        url = "https://entstores.onrender.com/api/shop/products/fghfhghgh/"
+        url = "https://entstores-production.up.railway.app/api/shop/products/fghfhghgh/"
         response = requests.get(url)
         
         if response.status_code == 200:
@@ -57,7 +57,7 @@ def test_api_cache_busting():
     """Test API with cache busting parameters"""
     try:
         timestamp = int(time.time())
-        url = f"https://entstores.onrender.com/api/shop/products/fghfhghgh/?_t={timestamp}&_cb={timestamp}"
+        url = f"https://entstores-production.up.railway.app/api/shop/products/fghfhghgh/?_t={timestamp}&_cb={timestamp}"
         
         response = requests.get(url, headers={
             'Cache-Control': 'no-cache',
@@ -83,7 +83,7 @@ def test_api_consistency():
     for i in range(3):
         try:
             timestamp = int(time.time()) + i
-            url = f"https://entstores.onrender.com/api/shop/products/fghfhghgh/?_t={timestamp}"
+            url = f"https://entstores-production.up.railway.app/api/shop/products/fghfhghgh/?_t={timestamp}"
             response = requests.get(url)
             
             if response.status_code == 200:
@@ -116,8 +116,8 @@ def test_api_consistency():
 def test_different_endpoints():
     """Test different API endpoints"""
     endpoints = [
-        ("Product Detail", "https://entstores.onrender.com/api/shop/products/fghfhghgh/"),
-        ("Products List", "https://entstores.onrender.com/api/shop/products/"),
+        ("Product Detail", "https://entstores-production.up.railway.app/api/shop/products/fghfhghgh/"),
+        ("Products List", "https://entstores-production.up.railway.app/api/shop/products/"),
     ]
     
     for name, base_url in endpoints:

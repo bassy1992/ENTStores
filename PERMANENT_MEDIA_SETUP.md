@@ -19,8 +19,8 @@ This is the **FINAL SOLUTION** for media file persistence. Files will be stored 
 6. Click "Generate token"
 7. **COPY THE TOKEN** (you won't see it again)
 
-### Step 3: Add Token to Render
-1. Go to your Render dashboard
+### Step 3: Add Token to Railway
+1. Go to your Railway dashboard
 2. Select your ENTstore service
 3. Go to "Environment" tab
 4. Add new environment variable:
@@ -64,8 +64,8 @@ python manage.py migrate_to_permanent --verify
 ## 🧪 Testing
 
 After setup, test these URLs:
-- `https://entstores.onrender.com/api/shop/products/`
-- `https://entstores.onrender.com/media/products/IMG_0102.jpg`
+- `https://entstores-production.up.railway.app/api/shop/products/`
+- `https://entstores-production.up.railway.app/media/products/IMG_0102.jpg`
 - `https://raw.githubusercontent.com/YOUR_USERNAME/ENTstore-media/main/products/IMG_0102.jpg`
 
 ## 🎯 Result

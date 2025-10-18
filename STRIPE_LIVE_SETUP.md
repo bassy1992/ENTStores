@@ -8,8 +8,8 @@
 
 ## 🚀 Deployment Steps
 
-### 1. Set Environment Variables in Render (Backend)
-Go to your Render dashboard > Backend service > Environment:
+### 1. Set Environment Variables in Railway (Backend)
+Go to your Railway dashboard > Backend service > Variables:
 
 ```
 STRIPE_PUBLISHABLE_KEY=pk_live_YOUR_ACTUAL_LIVE_PUBLISHABLE_KEY
@@ -27,13 +27,13 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_live_YOUR_ACTUAL_LIVE_PUBLISHABLE_KEY
 1. Go to [Stripe Dashboard](https://dashboard.stripe.com) (Live mode)
 2. Go to **Developers > Webhooks**
 3. Click **Add endpoint**
-4. **Endpoint URL**: `https://entstores.onrender.com/api/payments/stripe/webhook/`
+4. **Endpoint URL**: `https://entstores-production.up.railway.app/api/payments/stripe/webhook/`
 5. **Events**:
    - `checkout.session.completed`
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
 6. Copy the **Signing secret** (starts with `whsec_`)
-7. Add to Render environment: `STRIPE_WEBHOOK_SECRET=whsec_...`
+7. Add to Railway environment: `STRIPE_WEBHOOK_SECRET=whsec_...`
 
 ## ⚠️ Important Security Notes
 
@@ -45,7 +45,7 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_live_YOUR_ACTUAL_LIVE_PUBLISHABLE_KEY
 ## 🧪 Testing Checklist
 
 ### Before Going Live:
-- [ ] Environment variables set in Render
+- [ ] Environment variables set in Railway
 - [ ] Environment variables set in Vercel
 - [ ] Live webhook configured and working
 - [ ] Test payment with real card (small amount)

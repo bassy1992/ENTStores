@@ -31,7 +31,7 @@ def test_email_service():
     # Test 1: Check email configuration endpoint
     print("\n🔧 Testing email configuration...")
     try:
-        response = requests.get("https://entstores.onrender.com/api/debug-env/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/debug-env/", timeout=30)
         if response.status_code == 200:
             data = response.json()
             env_vars = data.get('environment_variables', {})
@@ -55,7 +55,7 @@ def test_email_service():
     # Test 2: Test email functionality
     print("\n📨 Testing email functionality...")
     try:
-        response = requests.get("https://entstores.onrender.com/api/test-email/", timeout=60)
+        response = requests.get("https://entstores-production.up.railway.app/api/test-email/", timeout=60)
         if response.status_code == 200:
             data = response.json()
             email_tests = data.get('email_tests', {})
@@ -387,7 +387,7 @@ if __name__ == "__main__":
         print("\n🎯 Next Steps:")
         print("1. Check your email (Enontinoclothing@gmail.com) for test emails")
         print("2. Test order creation to verify email notifications")
-        print("3. Check Render logs for any email-related errors")
+        print("3. Check Railway logs for any email-related errors")
         
     except KeyboardInterrupt:
         print("\n⚠️ Diagnostic interrupted by user")

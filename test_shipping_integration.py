@@ -15,7 +15,7 @@ def test_shipping_integration():
     print("⏳ Waiting for service to be ready...")
     for i in range(6):  # Try for 3 minutes
         try:
-            response = requests.get("https://entstores.onrender.com/api/health/", timeout=10)
+            response = requests.get("https://entstores-production.up.railway.app/api/health/", timeout=10)
             if response.status_code == 200:
                 print("✅ Service is ready!")
                 break
@@ -29,7 +29,7 @@ def test_shipping_integration():
     # Test products API
     try:
         print("\n📦 Testing products API...")
-        response = requests.get("https://entstores.onrender.com/api/shop/products/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/", timeout=30)
         
         if response.status_code == 200:
             products = response.json()

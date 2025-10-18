@@ -58,7 +58,7 @@ def deploy_shipping_integration():
     try:
         # Test 1: Check if products API includes shipping_cost
         print("Testing products API...")
-        response = requests.get("https://entstores.onrender.com/api/shop/products/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/", timeout=30)
         if response.status_code == 200:
             products = response.json()
             if products and len(products) > 0:
@@ -74,7 +74,7 @@ def deploy_shipping_integration():
     
         # Test 2: Check admin interface
         print("\nTesting admin interface...")
-        response = requests.get("https://entstores.onrender.com/admin/shop/product/add/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/admin/shop/product/add/", timeout=30)
         if response.status_code in [200, 302]:
             print("✅ Admin interface is accessible")
         else:
@@ -82,7 +82,7 @@ def deploy_shipping_integration():
     
         # Test 3: Check payment endpoints
         print("\nTesting payment endpoints...")
-        response = requests.get("https://entstores.onrender.com/api/payments/test/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/payments/test/", timeout=30)
         if response.status_code == 200:
             print("✅ Payment endpoints are accessible")
         else:
@@ -101,7 +101,7 @@ def deploy_shipping_integration():
     print("✅ Updated admin interface to manage shipping costs")
     
     print("\n🎯 Next Steps:")
-    print("1. Go to https://entstores.onrender.com/admin/shop/product/")
+    print("1. Go to https://entstores-production.up.railway.app/admin/shop/product/")
     print("2. Edit existing products to set their shipping costs")
     print("3. Test the checkout flow to verify shipping calculations")
     print("4. Check cart page to see product-based shipping totals")

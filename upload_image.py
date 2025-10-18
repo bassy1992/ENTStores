@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple script to upload local images to Render via admin interface
+Simple script to upload local images to Railway via admin interface
 """
 import os
 import shutil
@@ -15,7 +15,7 @@ def copy_local_image():
         # Convert JPG to PNG filename (you'll need to upload via admin)
         print(f"Found local image: {local_image}")
         print(f"You need to upload this as: code_extra.png")
-        print(f"Go to: https://entstores.onrender.com/admin/shop/product/")
+        print(f"Go to: https://entstores-production.up.railway.app/admin/shop/product/")
         print(f"Edit the 'jhj' product and upload the image: {local_image.absolute()}")
         return True
     else:

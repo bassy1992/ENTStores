@@ -19,7 +19,7 @@
 ### 1.3 Set up Live Webhook
 1. Go to **Developers > Webhooks**
 2. Click **Add endpoint**
-3. **Endpoint URL**: `https://entstores.onrender.com/api/payments/stripe/webhook/`
+3. **Endpoint URL**: `https://entstores-production.up.railway.app/api/payments/stripe/webhook/`
 4. **Events to send**:
    - `checkout.session.completed`
    - `payment_intent.succeeded`
@@ -41,8 +41,8 @@ STRIPE_ENDPOINT_SECRET=whsec_YOUR_ACTUAL_LIVE_WEBHOOK_SECRET
 STRIPE_API_VERSION=2023-10-16
 ```
 
-### 2.2 Set Environment Variables in Render
-1. Go to your **Render Dashboard**
+### 2.2 Set Environment Variables in Railway
+1. Go to your **Railway Dashboard**
 2. Select your **backend service**
 3. Go to **Environment** tab
 4. Add/Update these variables:

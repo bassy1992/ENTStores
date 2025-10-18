@@ -57,7 +57,7 @@ def fix_shipping_display():
     try:
         # Test products API
         print("Testing products API...")
-        response = requests.get("https://entstores.onrender.com/api/shop/products/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/shop/products/", timeout=30)
         if response.status_code == 200:
             products = response.json()
             if products and len(products) > 0:

@@ -57,7 +57,7 @@ def deploy_email_fix():
     
     try:
         response = requests.post(
-            "https://entstores.onrender.com/api/payments/create-order/",
+            "https://entstores-production.up.railway.app/api/payments/create-order/",
             json=order_data,
             timeout=30
         )
@@ -87,7 +87,7 @@ def deploy_email_fix():
     # Check email configuration
     print("\n🔧 Checking current email configuration...")
     try:
-        response = requests.get("https://entstores.onrender.com/api/debug-env/", timeout=30)
+        response = requests.get("https://entstores-production.up.railway.app/api/debug-env/", timeout=30)
         if response.status_code == 200:
             data = response.json()
             django_settings = data.get('django_settings', {})
