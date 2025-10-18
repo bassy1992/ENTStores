@@ -34,12 +34,10 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'alt_text', 'is_primary', 'order']
     
     def get_image(self, obj):
-        if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
-        return None
+        try:
+            return obj.get_image_url()
+        except Exception:
+            return None
 
 
 class ProductSizeSerializer(serializers.ModelSerializer):

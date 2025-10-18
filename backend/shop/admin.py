@@ -25,9 +25,10 @@ class CategoryForm(forms.ModelForm):
         if 'image_url' in self.fields:
             self.fields['image_url'].help_text = (
                 'Paste an image URL here for the category. '
-                'This will be used instead of uploading a file. '
-                'Recommended size: 400x400 pixels'
+                'Recommended size: 400x400 pixels. '
+                'Example: https://images.unsplash.com/photo-123?w=400&h=400&fit=crop'
             )
+            self.fields['image_url'].label = 'Category Image URL'
 
 
 @admin.register(Category)
@@ -43,8 +44,8 @@ class CategoryAdmin(admin.ModelAdmin):
             'fields': ('key', 'label', 'description')
         }),
         ('Display', {
-            'fields': ('image', 'image_url', 'featured'),
-            'description': 'Upload an image file OR provide an image URL. URL images are recommended for better performance.'
+            'fields': ('image_url', 'featured'),
+            'description': 'Provide an image URL for this category. Recommended size: 400x400 pixels.'
         }),
         ('Statistics', {
             'fields': ('product_count',),
@@ -79,13 +80,13 @@ class ProductForm(forms.ModelForm):
             self.fields['category'].queryset = Category.objects.all()
             self.fields['category'].empty_label = "Select a category"
         
-        # Add help text for image fields
+        # Add help text for image URL field
         if 'image_url' in self.fields:
             self.fields['image_url'].help_text = (
-                'Paste an image URL here for faster loading. '
-                'Recommended: Use Unsplash, Cloudinary, or other CDN services. '
-                'Format: https://images.unsplash.com/photo-123?w=400&h=400&fit=crop'
+                'Paste an image URL here. Use CDN services like Unsplash for best performance. '
+                'Example: https://images.unsplash.com/photo-123?w=400&h=400&fit=crop'
             )
+            self.fields['image_url'].label = 'Product Image URL'
 
 
 class ProductTagAssignmentInline(admin.TabularInline):
@@ -97,10 +98,10 @@ class ProductTagAssignmentInline(admin.TabularInline):
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 3  # Show 3 empty forms for adding images
-    fields = ['image', 'alt_text', 'is_primary', 'order']
+    fields = ['image_url', 'image', 'alt_text', 'is_primary', 'order']
     readonly_fields = ['created_at']
     verbose_name = "Product Image"
-    verbose_name_plural = "Product Images"
+    verbose_name_plural = "Product Images (Use Image URL for better performance)"
 
 
 class ProductVariantInline(admin.TabularInline):
@@ -126,7 +127,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['title', 'id', 'description']
     readonly_fields = ['created_at', 'updated_at']
     prepopulated_fields = {'slug': ('title',)}
-    inlines = [ProductTagAssignmentInline, ProductImageInline, ProductVariantInline]
+    inlines = [ProductTagAssignmentInline, ProductVariantInline]
     
     class Media:
         css = {
@@ -141,9 +142,9 @@ class ProductAdmin(admin.ModelAdmin):
         ('Pricing & Category', {
             'fields': ('price', 'shipping_cost', 'category')
         }),
-        ('Images', {
-            'fields': ('image', 'image_url'),
-            'description': 'Upload a main product image OR provide an image URL. URL images load faster and don\'t use server storage. You can add more images in the "Product Images" section below.'
+        ('Image', {
+            'fields': ('image_url',),
+            'description': 'Provide an image URL for this product. Recommended format: https://images.unsplash.com/photo-123?w=400&h=400&fit=crop'
         }),
         ('Inventory & Settings', {
             'fields': ('stock_quantity', 'is_active', 'is_featured')
@@ -164,12 +165,10 @@ class ProductAdmin(admin.ModelAdmin):
     
     def image_source(self, obj):
         if obj.image_url:
-            return format_html('<span style="color: #10b981;">🌐 URL</span>')
-        elif obj.image:
-            return format_html('<span style="color: #3b82f6;">📁 File</span>')
+            return format_html('<span style="color: #10b981;">✅ URL Set</span>')
         else:
-            return format_html('<span style="color: #6b7280;">❌ None</span>')
-    image_source.short_description = 'Image'
+            return format_html('<span style="color: #ef4444;">❌ No URL</span>')
+    image_source.short_description = 'Image URL'
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('category')
@@ -465,10 +464,20 @@ admin.site.index_title = "Welcome to ENNC Shop Administration"
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
-    list_display = ['product', 'alt_text', 'is_primary', 'order', 'created_at']
+    list_display = ['product', 'image_source', 'alt_text', 'is_primary', 'order', 'created_at']
     list_filter = ['is_primary', 'created_at']
     search_fields = ['product__title', 'alt_text']
     list_editable = ['is_primary', 'order']
+    fields = ['product', 'image_url', 'image', 'alt_text', 'is_primary', 'order']
+    
+    def image_source(self, obj):
+        if obj.image_url:
+            return format_html('<span style="color: #10b981;">🌐 URL</span>')
+        elif obj.image:
+            return format_html('<span style="color: #3b82f6;">📁 File</span>')
+        else:
+            return format_html('<span style="color: #6b7280;">❌ None</span>')
+    image_source.short_description = 'Source'
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('product')

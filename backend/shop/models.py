@@ -529,7 +529,14 @@ class ProductImage(models.Model):
     )
     image = models.ImageField(
         upload_to='products/',
+        blank=True,
+        null=True,
         help_text="Product image file"
+    )
+    image_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Product image URL (alternative to uploading files)"
     )
     alt_text = models.CharField(
         max_length=200,
@@ -551,6 +558,15 @@ class ProductImage(models.Model):
         
     def __str__(self):
         return f"{self.product.title} - Image {self.order}"
+    
+    def get_image_url(self):
+        """Get the image URL, prioritizing uploaded file over URL field"""
+        if self.image:
+            return self.image.url
+        elif self.image_url:
+            return self.image_url
+        else:
+            return "https://via.placeholder.com/400x400/e5e7eb/6b7280?text=No+Image"
 
 
 class ProductSize(models.Model):
