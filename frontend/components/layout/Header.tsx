@@ -117,9 +117,7 @@ export default function Header() {
         <div className="bg-gray-900 text-white py-2 px-4">
           <div className="max-w-7xl mx-auto flex justify-between items-center text-sm">
             <div className="flex items-center gap-4">
-              <span>Free shipping on orders over $75</span>
-              <span className="hidden md:inline">•</span>
-              <span className="hidden md:inline">30-day returns</span>
+              {/* Shipping info removed */}
             </div>
             <div className="flex items-center gap-4">
               <Link to="/contact" className="hover:text-gray-300 transition-colors">

@@ -63,7 +63,7 @@ export default function Checkout() {
   // Show payment options only for countries that require payment
   const available = { 
     stripe: countryRequiresPayment, 
-    momo: countryRequiresPayment && form.country === 'GH' // MoMo only for Ghana
+    momo: false // MoMo payment disabled
   };
 
   // Calculate totals with product-based shipping
@@ -97,7 +97,7 @@ export default function Checkout() {
 
     // Validate payment method selection for countries that require payment
     if (countryRequiresPayment && !paymentMethod) {
-      alert('Please select a payment method (Credit Card or MTN MoMo)');
+      alert('Please select a payment method');
       return;
     }
 
