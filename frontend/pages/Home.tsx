@@ -32,7 +32,7 @@ export default function Home() {
   }, []);
 
   const sliderImages = [
-    'https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2F65c976a3ea2e4593b4d1a27829d0f390?format=webp&width=1200',
+    'https://tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com/ENNC/IMG_1173.jpg',
     'https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2F7e980c238ab54fb5893ffdd1999f2c37?format=webp&width=1200',
     'https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2Fa03929e1731e4efcadc34cef66af98ba?format=webp&width=1200',
   ];
